@@ -931,6 +931,7 @@ export class GameService {
       personality: dbPet.personality,
       conditions: [],
       equipment: {},
+      imageUrl: dbPet.image_url,
       isAlive: dbPet.is_alive,
       hatchTime: dbPet.hatch_time ? new Date(dbPet.hatch_time) : undefined,
       deathDate: dbPet.death_date ? new Date(dbPet.death_date) : undefined,
