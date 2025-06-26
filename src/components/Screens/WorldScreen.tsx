@@ -137,28 +137,35 @@ export const WorldScreen: React.FC = () => {
   const INTERACTION_DISTANCE = 80;
 
   // Calculate distance between player and a point
-  const calculateDistance = useCallback((point: InteractivePoint) => {
-    // Player is always at the center of the visible area
-    const playerX = 400; // Center of the 800px wide map
-    const playerY = 400; // Center of the 800px tall map
+  const calculateDistance = useCallback(
+    (point: InteractivePoint) => {
+      // Player is always at the center of the visible area
+      const playerX = 400; // Center of the 800px wide map
+      const playerY = 400; // Center of the 800px tall map
 
-    // Point position on the map
-    const pointX = (point.x * 800) / 100;
-    const pointY = (point.y * 800) / 100;
+      // Point position on the map
+      const pointX = (point.x * 800) / 100;
+      const pointY = (point.y * 800) / 100;
 
-    // Account for map offset
-    const adjustedPointX = pointX + mapPosition.x;
-    const adjustedPointY = pointY + mapPosition.y;
+      // Account for map offset
+      const adjustedPointX = pointX + mapPosition.x;
+      const adjustedPointY = pointY + mapPosition.y;
 
-    return Math.sqrt(
-      Math.pow(playerX - adjustedPointX, 2) + Math.pow(playerY - adjustedPointY, 2)
-    );
-  }, [mapPosition]);
+      return Math.sqrt(
+        Math.pow(playerX - adjustedPointX, 2) +
+          Math.pow(playerY - adjustedPointY, 2),
+      );
+    },
+    [mapPosition],
+  );
 
   // Check if a point is within interaction range
-  const isPointInRange = useCallback((point: InteractivePoint) => {
-    return calculateDistance(point) <= INTERACTION_DISTANCE;
-  }, [calculateDistance, INTERACTION_DISTANCE]);
+  const isPointInRange = useCallback(
+    (point: InteractivePoint) => {
+      return calculateDistance(point) <= INTERACTION_DISTANCE;
+    },
+    [calculateDistance, INTERACTION_DISTANCE],
+  );
 
   // Get points that are currently in range
   const pointsInRange = useMemo(() => {
@@ -426,7 +433,9 @@ export const WorldScreen: React.FC = () => {
               {/* Proximity-based aura effect */}
               <motion.div
                 className={`absolute inset-0 rounded-full border-2 ${
-                  isPlayerNearAnyPoint ? 'border-green-400' : 'border-purple-400'
+                  isPlayerNearAnyPoint
+                    ? "border-green-400"
+                    : "border-purple-400"
                 }`}
                 animate={{
                   scale: [1, 1.5, 1],
@@ -480,8 +489,8 @@ export const WorldScreen: React.FC = () => {
                   onClick={() => handlePointClick(point)}
                   className={`absolute transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full backdrop-blur-sm shadow-lg transition-all duration-300 border group ${
                     pointInRange
-                      ? 'bg-white/90 border-gray-300 hover:bg-white hover:scale-150 cursor-pointer'
-                      : 'bg-gray-500/60 border-gray-500 cursor-not-allowed'
+                      ? "bg-white/90 border-gray-300 hover:bg-white hover:scale-150 cursor-pointer"
+                      : "bg-gray-500/60 border-gray-500 cursor-not-allowed"
                   }`}
                   style={{
                     left: `${(point.x * 800) / 100}px`,
@@ -490,36 +499,41 @@ export const WorldScreen: React.FC = () => {
                   initial={{ scale: 0, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ delay: index * 0.1 + 0.5 }}
-                  whileHover={pointInRange ? {
-                    scale: 1.5,
-                  } : {}}
+                  whileHover={
+                    pointInRange
+                      ? {
+                          scale: 1.5,
+                        }
+                      : {}
+                  }
                   whileTap={pointInRange ? { scale: 0.8 } : {}}
                   disabled={!pointInRange}
                 >
-                {/* Subtle Pulsing Ring Animation */}
-                <motion.div
-                  className="absolute inset-0 rounded-full border border-white/60"
-                  animate={{
-                    scale: [1, 2, 1],
-                    opacity: [0.6, 0.1, 0.6],
-                  }}
-                  transition={{
-                    duration: 3,
-                    repeat: Infinity,
-                    delay: index * 0.5,
-                    ease: "easeInOut",
-                  }}
-                />
+                  {/* Subtle Pulsing Ring Animation */}
+                  <motion.div
+                    className="absolute inset-0 rounded-full border border-white/60"
+                    animate={{
+                      scale: [1, 2, 1],
+                      opacity: [0.6, 0.1, 0.6],
+                    }}
+                    transition={{
+                      duration: 3,
+                      repeat: Infinity,
+                      delay: index * 0.5,
+                      ease: "easeInOut",
+                    }}
+                  />
 
-                {/* Point Name Label on Hover */}
-                <motion.div
-                  className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black/80 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
-                  initial={{ opacity: 0, y: 5 }}
-                >
-                  {point.name}
-                </motion.div>
-              </motion.button>
-            ))}
+                  {/* Point Name Label on Hover */}
+                  <motion.div
+                    className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black/80 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
+                    initial={{ opacity: 0, y: 5 }}
+                  >
+                    {point.name}
+                  </motion.div>
+                </motion.button>
+              );
+            })}
           </motion.div>
         </motion.div>
 
