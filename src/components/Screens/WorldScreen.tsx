@@ -299,6 +299,8 @@ export const WorldScreen: React.FC = () => {
 
   const handleTouchEnd = useCallback(() => {
     setIsDragging(false);
+    // Clear trail gradually
+    setTimeout(() => setTrailPoints([]), 1000);
   }, []);
 
   const handlePointClick = (point: InteractivePoint) => {
