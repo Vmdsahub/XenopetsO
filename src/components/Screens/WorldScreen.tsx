@@ -182,6 +182,7 @@ export const WorldScreen: React.FC = () => {
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
+      e.preventDefault();
       setIsDragging(true);
       setDragStart({
         x: e.clientX - mapPosition.x,
@@ -194,6 +195,7 @@ export const WorldScreen: React.FC = () => {
   const handleMouseMove = useCallback(
     (e: React.MouseEvent) => {
       if (!isDragging) return;
+      e.preventDefault();
 
       const newX = e.clientX - dragStart.x;
       const newY = e.clientY - dragStart.y;
@@ -213,6 +215,47 @@ export const WorldScreen: React.FC = () => {
   );
 
   const handleMouseUp = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
+  // Touch event handlers for mobile devices
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      setIsDragging(true);
+      setDragStart({
+        x: touch.clientX - mapPosition.x,
+        y: touch.clientY - mapPosition.y,
+      });
+    },
+    [mapPosition],
+  );
+
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      if (!isDragging) return;
+      e.preventDefault();
+
+      const touch = e.touches[0];
+      const newX = touch.clientX - dragStart.x;
+      const newY = touch.clientY - dragStart.y;
+
+      // Limit dragging to canvas bounds
+      const maxX = 200;
+      const minX = -(800 - 400);
+      const maxY = 200;
+      const minY = -(800 - 448);
+
+      setMapPosition({
+        x: Math.max(minX, Math.min(maxX, newX)),
+        y: Math.max(minY, Math.min(maxY, newY)),
+      });
+    },
+    [isDragging, dragStart],
+  );
+
+  const handleTouchEnd = useCallback(() => {
     setIsDragging(false);
   }, []);
 
