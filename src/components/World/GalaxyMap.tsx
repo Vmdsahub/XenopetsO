@@ -78,10 +78,6 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
   const mapY = useMotionValue(0);
   const shipRotation = useMotionValue(0);
 
-  // Transform values for smooth ship movement
-  const shipX = useTransform(shipPosition.x, [0, 100], [0, 100]);
-  const shipY = useTransform(shipPosition.y, [0, 100], [0, 100]);
-
   // Check proximity to points
   const checkProximity = useCallback(() => {
     const threshold = 8; // Distance threshold for proximity
