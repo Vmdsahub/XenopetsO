@@ -245,15 +245,15 @@ export const WorldScreen: React.FC = () => {
           ))}
         </div>
 
-        {/* Draggable Map Container */}
+        {/* Optimized Draggable Map Container */}
         <motion.div
           className="absolute inset-0"
           style={{
             transform: `translate(${mapPosition.x}px, ${mapPosition.y}px)`,
-            width: "2560px",
-            height: "2560px",
-            left: "-133px",
-            top: "-62px",
+            width: "800px",
+            height: "800px",
+            left: "-200px",
+            top: "-200px",
           }}
         >
           {/* Interactive Points */}
