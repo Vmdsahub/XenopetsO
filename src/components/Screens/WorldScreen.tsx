@@ -277,33 +277,6 @@ export const WorldScreen: React.FC = () => {
             </motion.button>
           ))}
         </motion.div>
-
-        {/* Drag Instructions */}
-        <motion.div
-          className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm text-white text-xs px-3 py-2 rounded-lg border border-white/20"
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 1 }}
-        >
-          <div className="flex items-center space-x-2">
-            <motion.div
-              className="w-2 h-2 bg-cyan-400 rounded-full"
-              animate={{ scale: [1, 1.2, 1] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
-            />
-            <span>Arraste para explorar</span>
-          </div>
-        </motion.div>
-
-        {/* Points Counter */}
-        <motion.div
-          className="absolute bottom-4 right-4 bg-black/60 backdrop-blur-sm text-white text-xs px-3 py-2 rounded-lg border border-white/20"
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 1 }}
-        >
-          {interactivePoints.length} regiões descobertas
-        </motion.div>
       </motion.div>
 
       {/* Points List */}
