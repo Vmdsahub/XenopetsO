@@ -491,21 +491,6 @@ export const WorldScreen: React.FC = () => {
                   whileTap={pointInRange ? { scale: 0.8 } : {}}
                   disabled={!pointInRange}
                 >
-                  {/* Subtle Pulsing Ring Animation */}
-                  <motion.div
-                    className="absolute inset-0 rounded-full border border-white/60"
-                    animate={{
-                      scale: [1, 2, 1],
-                      opacity: [0.6, 0.1, 0.6],
-                    }}
-                    transition={{
-                      duration: 3,
-                      repeat: Infinity,
-                      delay: index * 0.5,
-                      ease: "easeInOut",
-                    }}
-                  />
-
                   {/* Point Name Label on Hover */}
                   <motion.div
                     className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black/80 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
