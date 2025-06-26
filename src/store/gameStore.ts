@@ -357,10 +357,7 @@ const mockStores: Store[] = [
       "https://images.pexels.com/photos/1040880/pexels-photo-1040880.jpeg?auto=compress&cs=tinysrgb&w=200",
     npcDialogue:
       "Welcome to my forge! These mountains provide the finest materials for crafting. Your pets deserve the best protection and weapons!",
-    location: {
-      continent: "Crystal Mountains",
-      coordinates: { x: 20, y: 80 },
-    },
+
     inventory: [
       {
         id: "si6",
