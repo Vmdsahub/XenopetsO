@@ -263,8 +263,8 @@ export const WorldScreen: React.FC = () => {
               onClick={() => handlePointClick(point)}
               className={`absolute transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center text-white shadow-lg ${point.glowColor} transition-all duration-300 hover:scale-110 border-2 border-white/30`}
               style={{
-                left: `${(point.x * 2560) / 100}px`,
-                top: `${(point.y * 2560) / 100}px`,
+                left: `${(point.x * 800) / 100}px`,
+                top: `${(point.y * 800) / 100}px`,
               }}
               initial={{ scale: 0, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
