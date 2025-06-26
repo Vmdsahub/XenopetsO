@@ -68,65 +68,17 @@ export const PlayerShip: React.FC<PlayerShipProps> = ({
         </>
       )}
 
-      {/* Spaceship SVG */}
-      <motion.svg
-        viewBox="0 0 32 32"
-        className="w-full h-full drop-shadow-lg"
+      {/* Spaceship Image */}
+      <motion.img
+        src="https://cdn.builder.io/api/v1/image/assets%2F9f875574753c430c92586f7b0edc1f21%2Facc507d5cb7a48c1bebc0cdc1bb911ff?format=webp&width=800"
+        alt="Spaceship"
+        className="w-full h-full object-contain drop-shadow-lg"
         animate={{
           filter: isNearPoint
-            ? "drop-shadow(0 0 8px rgb(34, 197, 94))"
+            ? "drop-shadow(0 0 8px rgb(34, 197, 94)) brightness(1.1)"
             : "drop-shadow(0 0 4px rgba(59, 130, 246, 0.5))",
         }}
-      >
-        {/* Ship body */}
-        <path
-          d="M16 2 L28 12 L24 16 L28 20 L16 30 L4 20 L8 16 L4 12 Z"
-          fill="url(#shipGradient)"
-          stroke="#1e40af"
-          strokeWidth="0.5"
-        />
-
-        {/* Cockpit */}
-        <circle
-          cx="16"
-          cy="12"
-          r="3"
-          fill="url(#cockpitGradient)"
-          stroke="#3b82f6"
-          strokeWidth="0.5"
-        />
-
-        {/* Engine glow */}
-        <circle
-          cx="16"
-          cy="24"
-          r="2"
-          fill={isDragging ? "#22d3ee" : "#60a5fa"}
-          opacity={isDragging ? "0.8" : "0.6"}
-        >
-          {isDragging && (
-            <animate
-              attributeName="r"
-              values="2;3;2"
-              dur="0.5s"
-              repeatCount="indefinite"
-            />
-          )}
-        </circle>
-
-        {/* Gradients */}
-        <defs>
-          <linearGradient id="shipGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#3b82f6" />
-            <stop offset="50%" stopColor="#1d4ed8" />
-            <stop offset="100%" stopColor="#1e3a8a" />
-          </linearGradient>
-          <radialGradient id="cockpitGradient">
-            <stop offset="0%" stopColor="#60a5fa" />
-            <stop offset="100%" stopColor="#1e40af" />
-          </radialGradient>
-        </defs>
-      </motion.svg>
+      />
 
       {/* Wing lights */}
       <div className="absolute top-1/2 -left-1 w-1 h-1 bg-red-400 rounded-full transform -translate-y-1/2 animate-pulse" />

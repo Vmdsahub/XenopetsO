@@ -67,15 +67,19 @@ const GALAXY_POINTS: MapPointData[] = [
 ];
 
 export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
-  const [shipPosition, setShipPosition] = useState({ x: 50, y: 50 });
+  // Load saved position or default to center
+  const [shipPosition] = useState(() => {
+    const saved = localStorage.getItem("xenopets-player-position");
+    return saved ? JSON.parse(saved) : { x: 50, y: 50 };
+  });
   const [nearbyPoint, setNearbyPoint] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
   const mapRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const mapX = useMotionValue(0);
-  const mapY = useMotionValue(0);
+  const mapX = useMotionValue((shipPosition.x - 50) * -8); // Initialize based on saved position
+  const mapY = useMotionValue((shipPosition.y - 50) * -8);
   const shipRotation = useMotionValue(0);
 
   // Check proximity to points
@@ -130,6 +134,15 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
     setIsDragging(false);
     // Reset ship rotation gradually
     animate(shipRotation, 0, { duration: 0.5 });
+
+    // Save current map position as player position
+    const currentMapX = mapX.get();
+    const currentMapY = mapY.get();
+    const playerPos = {
+      x: 50 + currentMapX / 8, // Convert map offset to position
+      y: 50 + currentMapY / 8,
+    };
+    localStorage.setItem("xenopets-player-position", JSON.stringify(playerPos));
   };
 
   const handlePointClick = (pointId: string) => {
@@ -142,7 +155,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-96 bg-gradient-to-br from-indigo-900 via-purple-900 to-black rounded-2xl overflow-hidden cursor-grab active:cursor-grabbing"
+      className="relative w-full h-96 bg-gradient-to-br from-indigo-950 via-purple-950 to-gray-900 rounded-2xl overflow-hidden cursor-grab active:cursor-grabbing"
     >
       {/* Stars background */}
       <div className="absolute inset-0 opacity-60">
