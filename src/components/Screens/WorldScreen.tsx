@@ -238,6 +238,8 @@ export const WorldScreen: React.FC = () => {
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
+    // Clear trail gradually
+    setTimeout(() => setTrailPoints([]), 1000);
   }, []);
 
   // Touch event handlers for mobile devices
