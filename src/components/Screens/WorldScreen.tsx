@@ -227,6 +227,18 @@ export const WorldScreen: React.FC = () => {
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
+    // Gradually reset spaceship rotation when not dragging
+    const resetInterval = setInterval(() => {
+      setDragDirection((prev) => {
+        const target = 0;
+        const diff = target - prev;
+        if (Math.abs(diff) < 1) {
+          clearInterval(resetInterval);
+          return target;
+        }
+        return prev + diff * 0.1;
+      });
+    }, 16);
   }, []);
 
   // Touch event handlers for mobile devices
