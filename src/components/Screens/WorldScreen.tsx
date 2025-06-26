@@ -136,6 +136,45 @@ export const WorldScreen: React.FC = () => {
   // Distance threshold for point interaction (in pixels)
   const INTERACTION_DISTANCE = 80;
 
+  // Calculate distance between player and a point
+  const calculateDistance = useCallback(
+    (point: InteractivePoint) => {
+      // Player is always at the center of the visible area
+      const playerX = 400; // Center of the 800px wide map
+      const playerY = 400; // Center of the 800px tall map
+
+      // Point position on the map
+      const pointX = (point.x * 800) / 100;
+      const pointY = (point.y * 800) / 100;
+
+      // Account for map offset
+      const adjustedPointX = pointX + mapPosition.x;
+      const adjustedPointY = pointY + mapPosition.y;
+
+      return Math.sqrt(
+        Math.pow(playerX - adjustedPointX, 2) +
+          Math.pow(playerY - adjustedPointY, 2),
+      );
+    },
+    [mapPosition],
+  );
+
+  // Check if a point is within interaction range
+  const isPointInRange = useCallback(
+    (point: InteractivePoint) => {
+      return calculateDistance(point) <= INTERACTION_DISTANCE;
+    },
+    [calculateDistance, INTERACTION_DISTANCE],
+  );
+
+  // Get points that are currently in range
+  const pointsInRange = useMemo(() => {
+    return interactivePoints.filter(isPointInRange);
+  }, [isPointInRange]);
+
+  // Check if player is near any point (for aura effect)
+  const isPlayerNearAnyPoint = pointsInRange.length > 0;
+
   // Center the map (player position)
   const centerMap = useCallback(() => {
     setMapPosition({ x: 0, y: 0 });
