@@ -402,23 +402,23 @@ export const WorldScreen: React.FC = () => {
 
                 {/* Description */}
                 <div className="p-6">
-                  <p className="text-gray-300 leading-relaxed mb-4">
+                  <p className="text-gray-700 leading-relaxed mb-4">
                     {selectedPoint.description}
                   </p>
 
                   <motion.div
-                    className="bg-gradient-to-r from-purple-600/20 to-blue-600/20 rounded-2xl p-4 border border-purple-500/30"
+                    className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-2xl p-4 border border-purple-200"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
                   >
-                    <div className="flex items-center space-x-2 text-purple-300">
+                    <div className="flex items-center space-x-2 text-purple-600">
                       <Sparkles className="w-4 h-4" />
                       <span className="text-sm font-medium">
                         Região Mística
                       </span>
                     </div>
-                    <p className="text-gray-400 text-xs mt-1">
+                    <p className="text-gray-600 text-xs mt-1">
                       Esta região contém energias especiais que podem ser
                       exploradas no futuro.
                     </p>
