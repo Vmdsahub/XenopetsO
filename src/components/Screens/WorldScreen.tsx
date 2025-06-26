@@ -26,8 +26,8 @@ const interactivePoints: InteractivePoint[] = [
   {
     id: "nebula_1",
     name: "Nebulosa Cristalina",
-    x: 48,
-    y: 45,
+    x: 42,
+    y: 38,
     imageUrl:
       "https://images.pexels.com/photos/32657005/pexels-photo-32657005.jpeg",
     description:
@@ -38,8 +38,8 @@ const interactivePoints: InteractivePoint[] = [
   {
     id: "galaxy_core",
     name: "Núcleo Galáctico",
-    x: 52,
-    y: 48,
+    x: 58,
+    y: 42,
     imageUrl:
       "https://images.pexels.com/photos/17505898/pexels-photo-17505898.jpeg",
     description:
@@ -50,8 +50,8 @@ const interactivePoints: InteractivePoint[] = [
   {
     id: "cosmic_forest",
     name: "Floresta Cósmica",
-    x: 50,
-    y: 52,
+    x: 45,
+    y: 60,
     imageUrl:
       "https://images.pexels.com/photos/8344071/pexels-photo-8344071.jpeg",
     description:
@@ -62,8 +62,8 @@ const interactivePoints: InteractivePoint[] = [
   {
     id: "stargate",
     name: "Portal Estelar",
-    x: 46,
-    y: 50,
+    x: 35,
+    y: 48,
     imageUrl:
       "https://images.pexels.com/photos/1169754/pexels-photo-1169754.jpeg",
     description:
@@ -74,8 +74,8 @@ const interactivePoints: InteractivePoint[] = [
   {
     id: "energy_field",
     name: "Campo de Energia",
-    x: 54,
-    y: 46,
+    x: 62,
+    y: 55,
     imageUrl:
       "https://images.pexels.com/photos/1169754/pexels-photo-1169754.jpeg",
     description:
@@ -86,8 +86,8 @@ const interactivePoints: InteractivePoint[] = [
   {
     id: "void_station",
     name: "Estação do Vazio",
-    x: 48,
-    y: 54,
+    x: 55,
+    y: 65,
     imageUrl:
       "https://images.pexels.com/photos/586415/pexels-photo-586415.jpeg",
     description:
