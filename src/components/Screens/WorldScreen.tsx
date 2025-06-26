@@ -287,7 +287,7 @@ export const WorldScreen: React.FC = () => {
 
         {/* Interactive Map */}
         <motion.div
-          className="relative h-96 overflow-hidden bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 cursor-grab active:cursor-grabbing"
+          className="relative h-[28rem] overflow-hidden bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 cursor-grab active:cursor-grabbing"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
