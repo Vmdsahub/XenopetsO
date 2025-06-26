@@ -436,6 +436,54 @@ export const WorldScreen: React.FC = () => {
             ))}
           </div>
 
+          {/* Trail Line Effect */}
+          {trailPoints.length > 1 && (
+            <svg
+              className="absolute inset-0 pointer-events-none"
+              style={{ zIndex: 5 }}
+            >
+              <defs>
+                <linearGradient
+                  id="trailGradient"
+                  x1="0%"
+                  y1="0%"
+                  x2="100%"
+                  y2="0%"
+                >
+                  <stop offset="0%" stopColor="rgba(255, 193, 7, 0)" />
+                  <stop offset="50%" stopColor="rgba(255, 193, 7, 0.6)" />
+                  <stop offset="100%" stopColor="rgba(255, 193, 7, 0.9)" />
+                </linearGradient>
+              </defs>
+              <motion.polyline
+                points={trailPoints
+                  .map((point) => `${point.x},${point.y}`)
+                  .join(" ")}
+                fill="none"
+                stroke="url(#trailGradient)"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{ duration: 0.5 }}
+              />
+              <motion.polyline
+                points={trailPoints
+                  .map((point) => `${point.x},${point.y}`)
+                  .join(" ")}
+                fill="none"
+                stroke="rgba(255, 235, 59, 0.4)"
+                strokeWidth="1"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{ duration: 0.5 }}
+              />
+            </svg>
+          )}
+
           {/* Player Position Indicator - Spaceship */}
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
             <motion.div
@@ -449,24 +497,6 @@ export const WorldScreen: React.FC = () => {
                 ease: "easeInOut",
               }}
             >
-              {/* Yellow Trail Effect */}
-              {isDragging && (
-                <motion.div
-                  className="absolute w-10 h-10 -top-1 -left-1"
-                  animate={{
-                    rotate: dragDirection,
-                  }}
-                  transition={{
-                    type: "spring",
-                    stiffness: 150,
-                    damping: 25,
-                  }}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-t from-yellow-400/60 via-yellow-300/40 to-transparent rounded-full blur-sm transform scale-75 translate-y-2" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-orange-400/40 via-yellow-200/30 to-transparent rounded-full blur-md transform scale-50 translate-y-3" />
-                </motion.div>
-              )}
-
               <motion.div
                 className="w-10 h-10 flex items-center justify-center relative z-10"
                 animate={{
