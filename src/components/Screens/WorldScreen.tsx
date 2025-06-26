@@ -112,9 +112,18 @@ export const WorldScreen: React.FC = () => {
     (e: React.MouseEvent) => {
       if (!isDragging) return;
 
+      const newX = e.clientX - dragStart.x;
+      const newY = e.clientY - dragStart.y;
+
+      // Limit dragging to canvas bounds (2560x2560)
+      const maxX = 133; // Allow some padding
+      const minX = -(2560 - 400); // Canvas width minus viewport width
+      const maxY = 62; // Allow some padding
+      const minY = -(2560 - 384); // Canvas height minus viewport height
+
       setMapPosition({
-        x: e.clientX - dragStart.x,
-        y: e.clientY - dragStart.y,
+        x: Math.max(minX, Math.min(maxX, newX)),
+        y: Math.max(minY, Math.min(maxY, newY)),
       });
     },
     [isDragging, dragStart],
