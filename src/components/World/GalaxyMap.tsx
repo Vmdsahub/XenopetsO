@@ -232,17 +232,17 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
       {/* Galaxy background nebulae */}
       <div className="absolute inset-0">
         <div
-          className="absolute w-64 h-64 rounded-full opacity-20 blur-3xl"
+          className="absolute w-64 h-64 rounded-full opacity-10 blur-3xl"
           style={{
-            background: "radial-gradient(circle, #ec4899, #8b5cf6)",
+            background: "radial-gradient(circle, #374151, #1f2937)",
             left: "20%",
             top: "30%",
           }}
         />
         <div
-          className="absolute w-48 h-48 rounded-full opacity-15 blur-2xl"
+          className="absolute w-48 h-48 rounded-full opacity-8 blur-2xl"
           style={{
-            background: "radial-gradient(circle, #06b6d4, #3b82f6)",
+            background: "radial-gradient(circle, #1f2937, #111827)",
             right: "25%",
             bottom: "20%",
           }}
