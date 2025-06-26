@@ -211,13 +211,13 @@ export const WorldScreen: React.FC = () => {
       >
         {/* Subtle Parallax Stars Background */}
         <div
-          className="absolute inset-0"
+          className="absolute"
           style={{
-            transform: `translate(${mapPosition.x * 2}px, ${mapPosition.y * 2}px)`,
-            width: "115%",
-            height: "115%",
-            left: "-7.5%",
-            top: "-7.5%",
+            transform: `translate(${mapPosition.x * 1.5}px, ${mapPosition.y * 1.5}px)`,
+            width: "200%",
+            height: "200%",
+            left: "-50%",
+            top: "-50%",
           }}
         >
           {stars.map((star) => (
