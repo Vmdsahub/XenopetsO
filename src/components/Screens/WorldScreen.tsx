@@ -122,23 +122,10 @@ const interactivePoints: InteractivePoint[] = [
   },
 ];
 
-const mapTabs = [
-  { id: "all", name: "All", icon: MapPin, color: "text-gray-600" },
-  { id: "discovered", name: "Discovered", icon: Star, color: "text-green-600" },
-  {
-    id: "mystical",
-    name: "Mystical",
-    icon: Sparkles,
-    color: "text-purple-600",
-  },
-  { id: "ancient", name: "Ancient", icon: Compass, color: "text-amber-600" },
-];
-
 export const WorldScreen: React.FC = () => {
   const [selectedPoint, setSelectedPoint] = useState<InteractivePoint | null>(
     null,
   );
-  const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [mapPosition, setMapPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
