@@ -213,7 +213,7 @@ export const WorldScreen: React.FC = () => {
         <div
           className="absolute inset-0"
           style={{
-            transform: `translate(${mapPosition.x * 0.03}px, ${mapPosition.y * 0.03}px)`,
+            transform: `translate(${mapPosition.x * 0.1}px, ${mapPosition.y * 0.1}px)`,
             width: "115%",
             height: "115%",
             left: "-7.5%",
