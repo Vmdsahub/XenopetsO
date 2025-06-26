@@ -212,6 +212,14 @@ export const WorldScreen: React.FC = () => {
         // Calculate angle in degrees - subtract 90 to align with spaceship pointing up by default
         const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI) - 90;
         setDragDirection(angle);
+
+        // Add trail point (center of screen where spaceship is)
+        setTrailPoints((prev) => {
+          const newPoint = { x: 400, y: 400, id: Date.now() };
+          const updated = [...prev, newPoint];
+          // Keep only last 8 points for a short trail
+          return updated.slice(-8);
+        });
       }
 
       // Limit dragging to canvas bounds - increased for larger navigable area
