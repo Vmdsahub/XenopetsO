@@ -208,7 +208,9 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
       className="relative w-full h-[500px] bg-gradient-to-br from-gray-950 via-slate-900 to-black rounded-2xl overflow-hidden cursor-grab active:cursor-grabbing"
     >
       {/* Stars background */}
-      <div className="absolute inset-0 opacity-80">
+      <div
+        className={`absolute inset-0 opacity-80 ${isDragging ? "pointer-events-none" : ""}`}
+      >
         {stars.map((star) => (
           <div
             key={star.id}
@@ -223,7 +225,9 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
       </div>
 
       {/* Galaxy background nebulae */}
-      <div className="absolute inset-0">
+      <div
+        className={`absolute inset-0 ${isDragging ? "pointer-events-none" : ""}`}
+      >
         <div
           className="absolute w-64 h-64 rounded-full opacity-10 blur-3xl"
           style={{
