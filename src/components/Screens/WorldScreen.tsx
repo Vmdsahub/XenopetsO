@@ -217,7 +217,7 @@ export const WorldScreen: React.FC = () => {
   }, []);
 
   const handlePointClick = (point: InteractivePoint) => {
-    if (!isDragging) {
+    if (!isDragging && isPointInRange(point)) {
       setSelectedPoint(point);
     }
   };
@@ -225,6 +225,15 @@ export const WorldScreen: React.FC = () => {
   const closeModal = () => {
     setSelectedPoint(null);
   };
+
+  // Hide welcome message after 4 seconds
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowWelcomeMessage(false);
+    }, 4000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const getTypeColor = (type: string) => {
     const colors = {
