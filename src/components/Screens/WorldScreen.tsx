@@ -145,13 +145,13 @@ export const WorldScreen: React.FC = () => {
 
   // Generate stars for background - optimized and cached
   const stars = useMemo(() => {
-    return Array.from({ length: 50 }, (_, i) => ({
+    return Array.from({ length: 400 }, (_, i) => ({
       id: i,
-      x: Math.random() * 120, // Reduced range for better performance
-      y: Math.random() * 120,
+      x: Math.random() * 200, // Full map coverage
+      y: Math.random() * 200,
       size: Math.random() * 2 + 1,
       opacity: Math.random() * 0.6 + 0.4,
-      animationDelay: Math.random() * 2,
+      animationDelay: Math.random() * 4,
     }));
   }, []); // Empty dependency array means this only runs once
 
@@ -164,36 +164,11 @@ export const WorldScreen: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
       >
         <div className="text-center">
-          <motion.div
-            className="inline-flex items-center space-x-2 mb-2"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.2 }}
-          >
-            <Globe className="w-6 h-6 text-cyan-400" />
-            <h1 className="text-2xl font-bold">Universo Xenopets</h1>
-            <Globe className="w-6 h-6 text-cyan-400" />
-          </motion.div>
+          <div className="text-2xl font-bold mb-2 pl-2">Xenoverse</div>
           <p className="text-purple-200 text-sm">
             Explore o cosmos e descubra regiões místicas
           </p>
-          <div className="flex justify-center space-x-1 mt-3">
-            {[...Array(5)].map((_, i) => (
-              <motion.div
-                key={i}
-                className="w-1 h-1 bg-cyan-400 rounded-full"
-                animate={{
-                  scale: [1, 1.5, 1],
-                  opacity: [0.5, 1, 0.5],
-                }}
-                transition={{
-                  duration: 2,
-                  delay: i * 0.2,
-                  repeat: Infinity,
-                }}
-              />
-            ))}
-          </div>
+          <div className="flex justify-center space-x-1 mt-3" />
         </div>
       </motion.div>
 
@@ -211,13 +186,13 @@ export const WorldScreen: React.FC = () => {
       >
         {/* Subtle Parallax Stars Background */}
         <div
-          className="absolute inset-0"
+          className="absolute"
           style={{
-            transform: `translate(${mapPosition.x * 0.03}px, ${mapPosition.y * 0.03}px)`,
-            width: "115%",
-            height: "115%",
-            left: "-7.5%",
-            top: "-7.5%",
+            transform: `translate(${mapPosition.x * 1.5}px, ${mapPosition.y * 1.5}px)`,
+            width: "200%",
+            height: "200%",
+            left: "-50%",
+            top: "-50%",
           }}
         >
           {stars.map((star) => (
@@ -232,10 +207,11 @@ export const WorldScreen: React.FC = () => {
                 opacity: star.opacity,
               }}
               animate={{
-                opacity: [star.opacity * 0.6, star.opacity, star.opacity * 0.6],
+                opacity: [star.opacity * 0.3, star.opacity, star.opacity * 0.3],
+                scale: [1, 1.1, 1],
               }}
               transition={{
-                duration: 4 + star.animationDelay,
+                duration: 3 + star.animationDelay,
                 repeat: Infinity,
                 ease: "easeInOut",
               }}
@@ -301,33 +277,6 @@ export const WorldScreen: React.FC = () => {
             </motion.button>
           ))}
         </motion.div>
-
-        {/* Drag Instructions */}
-        <motion.div
-          className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm text-white text-xs px-3 py-2 rounded-lg border border-white/20"
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 1 }}
-        >
-          <div className="flex items-center space-x-2">
-            <motion.div
-              className="w-2 h-2 bg-cyan-400 rounded-full"
-              animate={{ scale: [1, 1.2, 1] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
-            />
-            <span>Arraste para explorar</span>
-          </div>
-        </motion.div>
-
-        {/* Points Counter */}
-        <motion.div
-          className="absolute bottom-4 right-4 bg-black/60 backdrop-blur-sm text-white text-xs px-3 py-2 rounded-lg border border-white/20"
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 1 }}
-        >
-          {interactivePoints.length} regiões descobertas
-        </motion.div>
       </motion.div>
 
       {/* Points List */}
@@ -337,35 +286,8 @@ export const WorldScreen: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
       >
-        <h2 className="text-lg font-bold mb-4 flex items-center">
-          <Star className="w-5 h-5 mr-2 text-amber-400" />
-          Regiões Descobertas
-        </h2>
-        <div className="grid grid-cols-2 gap-3">
-          {interactivePoints.map((point, index) => (
-            <motion.button
-              key={point.id}
-              onClick={() => setSelectedPoint(point)}
-              className="bg-gray-800/50 border border-gray-700 rounded-xl p-3 text-left hover:bg-gray-700/50 transition-all duration-300 hover:border-purple-500"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 + 0.6 }}
-              whileHover={{ scale: 1.02, y: -2 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <div className="flex items-center space-x-2 mb-2">
-                <div className="w-6 h-6 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center">
-                  {React.cloneElement(point.icon as React.ReactElement, {
-                    className: "w-3 h-3",
-                  })}
-                </div>
-                <span className="text-sm font-medium text-gray-200">
-                  {point.name}
-                </span>
-              </div>
-            </motion.button>
-          ))}
-        </div>
+        <h2 className="text-lg font-bold mb-4 flex items-center" />
+        <div className="grid grid-cols-2 gap-3" />
       </motion.div>
 
       {/* Location Page Modal */}
