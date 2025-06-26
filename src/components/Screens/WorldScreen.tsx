@@ -97,22 +97,28 @@ export const WorldScreen: React.FC = () => {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const mapRef = useRef<HTMLDivElement>(null);
 
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    setIsDragging(true);
-    setDragStart({
-      x: e.clientX - mapPosition.x,
-      y: e.clientY - mapPosition.y,
-    });
-  }, [mapPosition]);
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      setIsDragging(true);
+      setDragStart({
+        x: e.clientX - mapPosition.x,
+        y: e.clientY - mapPosition.y,
+      });
+    },
+    [mapPosition],
+  );
 
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!isDragging) return;
-    
-    setMapPosition({
-      x: e.clientX - dragStart.x,
-      y: e.clientY - dragStart.y,
-    });
-  }, [isDragging, dragStart]);
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent) => {
+      if (!isDragging) return;
+
+      setMapPosition({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y,
+      });
+    },
+    [isDragging, dragStart],
+  );
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
@@ -197,14 +203,14 @@ export const WorldScreen: React.FC = () => {
         onMouseLeave={handleMouseUp}
       >
         {/* Infinite Stars Background */}
-        <div 
+        <div
           className="absolute inset-0"
           style={{
             transform: `translate(${mapPosition.x * 0.1}px, ${mapPosition.y * 0.1}px)`,
-            width: '200%',
-            height: '200%',
-            left: '-50%',
-            top: '-50%',
+            width: "200%",
+            height: "200%",
+            left: "-50%",
+            top: "-50%",
           }}
         >
           {stars.map((star) => (
@@ -236,110 +242,12 @@ export const WorldScreen: React.FC = () => {
           className="absolute inset-0"
           style={{
             transform: `translate(${mapPosition.x}px, ${mapPosition.y}px)`,
-            width: '200%',
-            height: '200%',
-            left: '-50%',
-            top: '-50%',
+            width: "200%",
+            height: "200%",
+            left: "-133px",
+            top: "-62px",
           }}
-        >
-          {/* Cosmic Background Elements */}
-          <motion.div
-            className="absolute inset-0"
-            style={{
-              backgroundImage: `
-                radial-gradient(circle at 20% 30%, rgba(147, 51, 234, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 75% 25%, rgba(59, 130, 246, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 45% 60%, rgba(236, 72, 153, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 85% 50%, rgba(34, 197, 94, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 30% 80%, rgba(251, 191, 36, 0.3) 0%, transparent 50%)
-              `,
-            }}
-          >
-            {/* Flowing Energy Lines */}
-            <svg className="absolute inset-0 w-full h-full opacity-20">
-              <defs>
-                <linearGradient
-                  id="energyGradient"
-                  x1="0%"
-                  y1="0%"
-                  x2="100%"
-                  y2="100%"
-                >
-                  <stop offset="0%" stopColor="#8B5CF6" />
-                  <stop offset="50%" stopColor="#3B82F6" />
-                  <stop offset="100%" stopColor="#EC4899" />
-                </linearGradient>
-              </defs>
-              {interactivePoints.map((point, index) => {
-                const nextPoint =
-                  interactivePoints[(index + 1) % interactivePoints.length];
-                return (
-                  <motion.path
-                    key={`line-${point.id}`}
-                    d={`M ${point.x * 8} ${point.y * 7.68} Q ${(point.x + nextPoint.x) * 4} ${(point.y + nextPoint.y) * 3.84} ${nextPoint.x * 8} ${nextPoint.y * 7.68}`}
-                    stroke="url(#energyGradient)"
-                    strokeWidth="2"
-                    fill="none"
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
-                    transition={{
-                      duration: 3,
-                      delay: index * 0.5,
-                      repeat: Infinity,
-                      repeatType: "reverse",
-                    }}
-                  />
-                );
-              })}
-            </svg>
-
-            {/* Interactive Points */}
-            {interactivePoints.map((point, index) => (
-              <motion.button
-                key={point.id}
-                onClick={() => handlePointClick(point)}
-                className={`absolute transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center text-white shadow-lg ${point.glowColor} transition-all duration-300 hover:scale-110 border-2 border-white/30`}
-                style={{
-                  left: `${point.x}%`,
-                  top: `${point.y}%`,
-                }}
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: index * 0.2 + 0.5 }}
-                whileHover={{
-                  scale: 1.2,
-                  boxShadow: "0 0 30px rgba(147, 51, 234, 0.8)",
-                }}
-                whileTap={{ scale: 0.9 }}
-              >
-                {point.icon}
-
-                {/* Pulsing Ring Animation */}
-                <motion.div
-                  className="absolute inset-0 rounded-full border-2 border-white/50"
-                  animate={{
-                    scale: [1, 1.5, 1],
-                    opacity: [1, 0, 1],
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    delay: index * 0.3,
-                  }}
-                />
-
-                {/* Point Name Label */}
-                <motion.div
-                  className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black/80 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
-                  initial={{ opacity: 0, y: 10 }}
-                  whileHover={{ opacity: 1, y: 0 }}
-                >
-                  {point.name}
-                </motion.div>
-              </motion.button>
-            ))}
-          </motion.div>
-        </motion.div>
+        />
 
         {/* Drag Instructions */}
         <motion.div
