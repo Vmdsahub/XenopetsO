@@ -329,7 +329,7 @@ export const WorldScreen: React.FC = () => {
 
         {/* Interactive Map */}
         <motion.div
-          className="relative h-[28rem] overflow-hidden bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 cursor-grab active:cursor-grabbing"
+          className="relative h-[28rem] overflow-hidden bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 cursor-grab active:cursor-grabbing touch-none"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
@@ -338,6 +338,10 @@ export const WorldScreen: React.FC = () => {
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          style={{ touchAction: "none" }}
         >
           {/* Center Button inside map */}
           <motion.button
