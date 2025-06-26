@@ -103,7 +103,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
 
   const mapX = useMotionValue(savedMapPosition.current().x);
   const mapY = useMotionValue(savedMapPosition.current().y);
-  const shipRotation = useMotionValue(0);
+  const shipRotation = useMotionValue(0); // Always start neutral
 
   // Check proximity to points
   const checkProximity = useCallback(() => {
@@ -163,8 +163,11 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
       const deltaX = info.delta.x;
       const deltaY = info.delta.y;
 
-      // Calculate ship rotation based on drag direction
-      const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+      // Calculate ship rotation based on movement direction
+      // Ship should point OPPOSITE to drag direction (like pushing the map)
+      // When dragging up, ship points down; when dragging right, ship points left, etc.
+      // Invert both deltaX and deltaY to get opposite direction
+      const angle = Math.atan2(deltaY, -deltaX) * (180 / Math.PI) + 90;
       animate(shipRotation, angle, { duration: 0.2 });
 
       // Update map position
@@ -176,10 +179,9 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
 
   const handleDragEnd = () => {
     setIsDragging(false);
-    // Reset ship rotation gradually
-    animate(shipRotation, 0, { duration: 0.5 });
+    // Keep current rotation - ship maintains the direction it was moving
 
-    // Save current map position immediately
+    // Save current map position
     const mapPos = { x: mapX.get(), y: mapY.get() };
     localStorage.setItem("xenopets-map-position", JSON.stringify(mapPos));
   };
@@ -194,38 +196,55 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-96 bg-gradient-to-br from-indigo-950 via-purple-950 to-gray-900 rounded-2xl overflow-hidden cursor-grab active:cursor-grabbing"
+      className="relative w-full h-[500px] bg-gradient-to-br from-gray-950 via-slate-900 to-black rounded-2xl overflow-hidden cursor-grab active:cursor-grabbing"
     >
       {/* Stars background */}
-      <div className="absolute inset-0 opacity-60">
+      <div className="absolute inset-0 opacity-80">
         {stars.map((star) => (
           <div
             key={star.id}
-            className="absolute w-1 h-1 bg-white rounded-full animate-pulse"
+            className="absolute w-1 h-1 bg-white rounded-full"
             style={{
               left: `${star.x}%`,
               top: `${star.y}%`,
-              animationDelay: `${star.animationDelay}s`,
-              animationDuration: `${star.animationDuration}s`,
+              animation: `twinkle ${star.animationDuration}s ease-in-out ${star.animationDelay}s infinite alternate`,
             }}
           />
         ))}
       </div>
 
+      {/* Custom CSS for subtle star twinkling */}
+      <style jsx>{`
+        @keyframes twinkle {
+          0% {
+            opacity: 0.3;
+            transform: scale(0.8);
+          }
+          50% {
+            opacity: 0.8;
+            transform: scale(1);
+          }
+          100% {
+            opacity: 0.4;
+            transform: scale(0.9);
+          }
+        }
+      `}</style>
+
       {/* Galaxy background nebulae */}
       <div className="absolute inset-0">
         <div
-          className="absolute w-64 h-64 rounded-full opacity-20 blur-3xl"
+          className="absolute w-64 h-64 rounded-full opacity-10 blur-3xl"
           style={{
-            background: "radial-gradient(circle, #ec4899, #8b5cf6)",
+            background: "radial-gradient(circle, #374151, #1f2937)",
             left: "20%",
             top: "30%",
           }}
         />
         <div
-          className="absolute w-48 h-48 rounded-full opacity-15 blur-2xl"
+          className="absolute w-48 h-48 rounded-full opacity-8 blur-2xl"
           style={{
-            background: "radial-gradient(circle, #06b6d4, #3b82f6)",
+            background: "radial-gradient(circle, #1f2937, #111827)",
             right: "25%",
             bottom: "20%",
           }}

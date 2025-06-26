@@ -37,37 +37,6 @@ export const PlayerShip: React.FC<PlayerShipProps> = ({
         />
       )}
 
-      {/* Ship trails */}
-      {isDragging && (
-        <>
-          <motion.div
-            className="absolute -left-6 top-1/2 w-4 h-0.5 bg-gradient-to-r from-transparent to-blue-400 transform -translate-y-1/2"
-            animate={{
-              opacity: [0.3, 0.8, 0.3],
-              scaleX: [0.5, 1, 0.5],
-            }}
-            transition={{
-              duration: 0.5,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          />
-          <motion.div
-            className="absolute -left-5 top-1/2 w-3 h-0.5 bg-gradient-to-r from-transparent to-cyan-300 transform -translate-y-1/2"
-            animate={{
-              opacity: [0.2, 0.6, 0.2],
-              scaleX: [0.3, 1, 0.3],
-            }}
-            transition={{
-              duration: 0.3,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 0.1,
-            }}
-          />
-        </>
-      )}
-
       {/* Spaceship Image */}
       <motion.img
         src="https://cdn.builder.io/api/v1/image/assets%2F9f875574753c430c92586f7b0edc1f21%2Facc507d5cb7a48c1bebc0cdc1bb911ff?format=webp&width=800"
@@ -80,9 +49,36 @@ export const PlayerShip: React.FC<PlayerShipProps> = ({
         }}
       />
 
-      {/* Wing lights */}
-      <div className="absolute top-1/2 -left-1 w-1 h-1 bg-red-400 rounded-full transform -translate-y-1/2 animate-pulse" />
-      <div className="absolute top-1/2 -right-1 w-1 h-1 bg-green-400 rounded-full transform -translate-y-1/2 animate-pulse" />
+      {/* Ship trails - positioned at the back of the ship */}
+      {isDragging && (
+        <>
+          <motion.div
+            className="absolute top-full left-1/2 w-0.5 h-4 bg-gradient-to-t from-transparent to-blue-400 transform -translate-x-1/2"
+            animate={{
+              opacity: [0.3, 0.8, 0.3],
+              scaleY: [0.5, 1, 0.5],
+            }}
+            transition={{
+              duration: 0.5,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+          <motion.div
+            className="absolute top-full left-1/2 w-0.5 h-3 bg-gradient-to-t from-transparent to-cyan-300 transform -translate-x-1/2 translate-y-1"
+            animate={{
+              opacity: [0.2, 0.6, 0.2],
+              scaleY: [0.3, 1, 0.3],
+            }}
+            transition={{
+              duration: 0.3,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 0.1,
+            }}
+          />
+        </>
+      )}
     </motion.div>
   );
 };
