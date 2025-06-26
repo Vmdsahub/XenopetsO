@@ -130,7 +130,7 @@ export const WorldScreen: React.FC = () => {
   const [mapPosition, setMapPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [showWelcomeMessage, setShowWelcomeMessage] = useState(true);
+
   const mapRef = useRef<HTMLDivElement>(null);
 
   // Distance threshold for point interaction (in pixels)
