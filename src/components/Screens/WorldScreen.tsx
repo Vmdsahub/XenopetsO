@@ -173,16 +173,17 @@ export const WorldScreen: React.FC = () => {
     <div className="max-w-md mx-auto">
       {/* Header */}
       <motion.div
-        className="bg-gradient-to-r from-indigo-900 via-purple-900 to-pink-900 text-white p-6 rounded-t-3xl border-t border-x border-gray-700"
+        className="bg-white/95 backdrop-blur-md text-gray-900 p-6 rounded-t-3xl border-t border-x border-gray-100 shadow-sm"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
       >
         <div className="text-center">
-          <div className="text-2xl font-bold mb-2 pl-2">Xenoverse</div>
-          <p className="text-purple-200 text-sm">
+          <div className="text-2xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+            Xenoverse
+          </div>
+          <p className="text-gray-600 text-sm">
             Explore o cosmos e descubra regiões místicas
           </p>
-          <div className="flex justify-center space-x-1 mt-3" />
         </div>
       </motion.div>
 
