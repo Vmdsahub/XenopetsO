@@ -470,10 +470,10 @@ export const WorldScreen: React.FC = () => {
             className="absolute inset-0"
             style={{
               transform: `translate(${mapPosition.x}px, ${mapPosition.y}px)`,
-              width: "800px",
-              height: "800px",
-              left: "-200px",
-              top: "-200px",
+              width: "1600px",
+              height: "1600px",
+              left: "-600px",
+              top: "-600px",
             }}
           >
             {/* Interactive Points */}
