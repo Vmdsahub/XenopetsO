@@ -234,13 +234,12 @@ export const WorldScreen: React.FC = () => {
                 opacity: star.opacity,
               }}
               animate={{
-                opacity: [star.opacity * 0.3, star.opacity, star.opacity * 0.3],
-                scale: [0.5, 1, 0.5],
+                opacity: [star.opacity * 0.6, star.opacity, star.opacity * 0.6],
               }}
               transition={{
-                duration: Math.random() * 3 + 2,
+                duration: 4 + star.animationDelay,
                 repeat: Infinity,
-                delay: star.animationDelay,
+                ease: "easeInOut",
               }}
             />
           ))}
