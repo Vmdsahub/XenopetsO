@@ -124,7 +124,7 @@ export const TopBar: React.FC = () => {
               whileTap={{ scale: 0.95 }}
             >
               <img
-                src="https://cdn.builder.io/api/v1/image/assets%2Ff481900009a94cda953c032479392a30%2F8bb45b10e920461dae796f0f945a1b33?format=webp&width=800"
+                src="https://cdn.builder.io/api/v1/image/assets%2Fc30afbb5d9ef451b8b61af828c843451%2Fcc2df505223546958ac8cd396cf7ecd8?format=webp&width=800"
                 alt="Xenocash"
                 className="w-6 h-6"
               />
