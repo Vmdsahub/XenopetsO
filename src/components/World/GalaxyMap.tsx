@@ -78,8 +78,14 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const mapX = useMotionValue((shipPosition.x - 50) * -8); // Initialize based on saved position
-  const mapY = useMotionValue((shipPosition.y - 50) * -8);
+  // Load saved map position
+  const savedMapPosition = useRef(() => {
+    const saved = localStorage.getItem("xenopets-map-position");
+    return saved ? JSON.parse(saved) : { x: 0, y: 0 };
+  });
+
+  const mapX = useMotionValue(savedMapPosition.current().x);
+  const mapY = useMotionValue(savedMapPosition.current().y);
   const shipRotation = useMotionValue(0);
 
   // Check proximity to points
@@ -106,6 +112,27 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
   useEffect(() => {
     checkProximity();
   }, [checkProximity]);
+
+  // Save position continuously and on unmount
+  useEffect(() => {
+    const savePosition = () => {
+      const mapPos = { x: mapX.get(), y: mapY.get() };
+      localStorage.setItem("xenopets-map-position", JSON.stringify(mapPos));
+    };
+
+    // Save position every 2 seconds when not dragging
+    const interval = setInterval(() => {
+      if (!isDragging) {
+        savePosition();
+      }
+    }, 2000);
+
+    // Save position on unmount
+    return () => {
+      clearInterval(interval);
+      savePosition();
+    };
+  }, [mapX, mapY, isDragging]);
 
   const handleDragStart = () => {
     setIsDragging(true);
@@ -135,14 +162,9 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
     // Reset ship rotation gradually
     animate(shipRotation, 0, { duration: 0.5 });
 
-    // Save current map position as player position
-    const currentMapX = mapX.get();
-    const currentMapY = mapY.get();
-    const playerPos = {
-      x: 50 + currentMapX / 8, // Convert map offset to position
-      y: 50 + currentMapY / 8,
-    };
-    localStorage.setItem("xenopets-player-position", JSON.stringify(playerPos));
+    // Save current map position immediately
+    const mapPos = { x: mapX.get(), y: mapY.get() };
+    localStorage.setItem("xenopets-map-position", JSON.stringify(mapPos));
   };
 
   const handlePointClick = (pointId: string) => {
