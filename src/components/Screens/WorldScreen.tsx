@@ -202,17 +202,11 @@ export const WorldScreen: React.FC = () => {
   };
 
   const filteredPoints = interactivePoints.filter((point) => {
-    const matchesTab =
-      activeTab === "all" ||
-      (activeTab === "discovered" && point.discovered) ||
-      (activeTab === "mystical" && point.type === "Mystical") ||
-      (activeTab === "ancient" && point.type === "Ancient");
-
     const matchesSearch =
       point.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       point.description.toLowerCase().includes(searchQuery.toLowerCase());
 
-    return matchesTab && matchesSearch;
+    return matchesSearch;
   });
 
   // Generate stars for background - optimized and cached
