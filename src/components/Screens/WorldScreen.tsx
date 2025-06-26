@@ -211,11 +211,11 @@ export const WorldScreen: React.FC = () => {
         setDragDirection(angle);
       }
 
-      // Limit dragging to canvas bounds
-      const maxX = 200;
-      const minX = -(800 - 400);
-      const maxY = 200;
-      const minY = -(800 - 448);
+      // Limit dragging to canvas bounds - increased for larger navigable area
+      const maxX = 600;
+      const minX = -1200;
+      const maxY = 600;
+      const minY = -1200;
 
       setMapPosition({
         x: Math.max(minX, Math.min(maxX, newX)),
