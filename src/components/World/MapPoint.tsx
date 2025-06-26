@@ -16,6 +16,7 @@ interface MapPointProps {
   point: MapPointData;
   isNearby: boolean;
   onClick: () => void;
+  isDragging?: boolean;
   style?: React.CSSProperties;
 }
 
@@ -73,6 +74,7 @@ export const MapPoint: React.FC<MapPointProps> = ({
   point,
   isNearby,
   onClick,
+  isDragging = false,
   style,
 }) => {
   const Icon = getPointIcon(point.type);
@@ -80,11 +82,11 @@ export const MapPoint: React.FC<MapPointProps> = ({
 
   return (
     <motion.div
-      className="absolute cursor-pointer z-10"
+      className={`absolute z-10 ${isDragging ? "pointer-events-none" : "cursor-pointer"}`}
       style={style}
       onClick={onClick}
-      whileHover={{ scale: 1.2 }}
-      whileTap={{ scale: 0.9 }}
+      whileHover={!isDragging ? { scale: 1.2 } : {}}
+      whileTap={!isDragging ? { scale: 0.9 } : {}}
       initial={{ opacity: 0, scale: 0 }}
       animate={{
         opacity: 1,

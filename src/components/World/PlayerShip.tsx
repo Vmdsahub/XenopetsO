@@ -14,7 +14,7 @@ export const PlayerShip: React.FC<PlayerShipProps> = ({
 }) => {
   return (
     <motion.div
-      className="relative w-8 h-8 z-20"
+      className={`relative w-9 h-9 z-20 ${isDragging ? "pointer-events-none" : ""}`}
       style={{ rotate: rotation }}
       animate={{
         scale: isDragging ? 1.1 : 1,
