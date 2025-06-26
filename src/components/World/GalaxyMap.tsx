@@ -267,6 +267,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
             point={point}
             isNearby={nearbyPoint === point.id}
             onClick={() => handlePointClick(point.id)}
+            isDragging={isDragging}
             style={{
               left: `${point.x}%`,
               top: `${point.y}%`,
