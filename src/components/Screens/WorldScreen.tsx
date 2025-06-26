@@ -164,36 +164,11 @@ export const WorldScreen: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
       >
         <div className="text-center">
-          <motion.div
-            className="inline-flex items-center space-x-2 mb-2"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.2 }}
-          >
-            <Globe className="w-6 h-6 text-cyan-400" />
-            <h1 className="text-2xl font-bold">Universo Xenopets</h1>
-            <Globe className="w-6 h-6 text-cyan-400" />
-          </motion.div>
+          <div className="text-2xl font-bold mb-2 pl-2">Xenoverse</div>
           <p className="text-purple-200 text-sm">
             Explore o cosmos e descubra regiões místicas
           </p>
-          <div className="flex justify-center space-x-1 mt-3">
-            {[...Array(5)].map((_, i) => (
-              <motion.div
-                key={i}
-                className="w-1 h-1 bg-cyan-400 rounded-full"
-                animate={{
-                  scale: [1, 1.5, 1],
-                  opacity: [0.5, 1, 0.5],
-                }}
-                transition={{
-                  duration: 2,
-                  delay: i * 0.2,
-                  repeat: Infinity,
-                }}
-              />
-            ))}
-          </div>
+          <div className="flex justify-center space-x-1 mt-3" />
         </div>
       </motion.div>
 
