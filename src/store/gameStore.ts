@@ -211,10 +211,7 @@ const mockStores: Store[] = [
       "https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=200",
     npcDialogue:
       "Welcome to my shop, traveler! I have the finest items for your pets. What can I help you find today?",
-    location: {
-      continent: "Mystic Forest",
-      coordinates: { x: 25, y: 60 },
-    },
+
     inventory: [
       {
         id: "si1",
