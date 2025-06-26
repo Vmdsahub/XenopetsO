@@ -159,7 +159,7 @@ export const WorldScreen: React.FC = () => {
       const maxX = 200;
       const minX = -(800 - 400);
       const maxY = 200;
-      const minY = -(800 - 384);
+      const minY = -(800 - 448);
 
       setMapPosition({
         x: Math.max(minX, Math.min(maxX, newX)),
