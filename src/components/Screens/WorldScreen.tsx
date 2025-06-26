@@ -182,6 +182,7 @@ export const WorldScreen: React.FC = () => {
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
+      e.preventDefault();
       setIsDragging(true);
       setDragStart({
         x: e.clientX - mapPosition.x,
@@ -194,6 +195,7 @@ export const WorldScreen: React.FC = () => {
   const handleMouseMove = useCallback(
     (e: React.MouseEvent) => {
       if (!isDragging) return;
+      e.preventDefault();
 
       const newX = e.clientX - dragStart.x;
       const newY = e.clientY - dragStart.y;
@@ -213,6 +215,47 @@ export const WorldScreen: React.FC = () => {
   );
 
   const handleMouseUp = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
+  // Touch event handlers for mobile devices
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      setIsDragging(true);
+      setDragStart({
+        x: touch.clientX - mapPosition.x,
+        y: touch.clientY - mapPosition.y,
+      });
+    },
+    [mapPosition],
+  );
+
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      if (!isDragging) return;
+      e.preventDefault();
+
+      const touch = e.touches[0];
+      const newX = touch.clientX - dragStart.x;
+      const newY = touch.clientY - dragStart.y;
+
+      // Limit dragging to canvas bounds
+      const maxX = 200;
+      const minX = -(800 - 400);
+      const maxY = 200;
+      const minY = -(800 - 448);
+
+      setMapPosition({
+        x: Math.max(minX, Math.min(maxX, newX)),
+        y: Math.max(minY, Math.min(maxY, newY)),
+      });
+    },
+    [isDragging, dragStart],
+  );
+
+  const handleTouchEnd = useCallback(() => {
     setIsDragging(false);
   }, []);
 
@@ -286,7 +329,7 @@ export const WorldScreen: React.FC = () => {
 
         {/* Interactive Map */}
         <motion.div
-          className="relative h-[28rem] overflow-hidden bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 cursor-grab active:cursor-grabbing"
+          className="relative h-[28rem] overflow-hidden bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 cursor-grab active:cursor-grabbing touch-none"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
@@ -295,6 +338,10 @@ export const WorldScreen: React.FC = () => {
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          style={{ touchAction: "none" }}
         >
           {/* Center Button inside map */}
           <motion.button
