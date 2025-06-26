@@ -130,6 +130,10 @@ export const WorldScreen: React.FC = () => {
   const [mapPosition, setMapPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [dragDirection, setDragDirection] = useState(0); // Ângulo de rotação da nave em graus
+  const [trailPoints, setTrailPoints] = useState<
+    Array<{ x: number; y: number; id: number }>
+  >([]);
 
   const mapRef = useRef<HTMLDivElement>(null);
 
@@ -140,14 +144,14 @@ export const WorldScreen: React.FC = () => {
   const calculateDistance = useCallback(
     (point: InteractivePoint) => {
       // Player is always at the center of the visible area
-      const playerX = 400; // Center of the 800px wide map
-      const playerY = 400; // Center of the 800px tall map
+      const playerX = 400; // Center of the visible area
+      const playerY = 400; // Center of the visible area
 
-      // Point position on the map
-      const pointX = (point.x * 800) / 100;
-      const pointY = (point.y * 800) / 100;
+      // Point position on the map - usando o sistema original de coordenadas
+      const pointX = (point.x * 1600) / 100;
+      const pointY = (point.y * 1600) / 100;
 
-      // Account for map offset
+      // Account for map offset - o container agora está posicionado com left: -600px, top: -600px
       const adjustedPointX = pointX + mapPosition.x;
       const adjustedPointY = pointY + mapPosition.y;
 
@@ -200,22 +204,42 @@ export const WorldScreen: React.FC = () => {
       const newX = e.clientX - dragStart.x;
       const newY = e.clientY - dragStart.y;
 
-      // Limit dragging to canvas bounds
-      const maxX = 200;
-      const minX = -(800 - 400);
-      const maxY = 200;
-      const minY = -(800 - 448);
+      // Calculate drag direction for spaceship rotation
+      const deltaX = e.clientX - (dragStart.x + mapPosition.x);
+      const deltaY = e.clientY - (dragStart.y + mapPosition.y);
+
+      if (Math.abs(deltaX) > 1 || Math.abs(deltaY) > 1) {
+        // Calculate angle in degrees - subtract 90 to align with spaceship pointing up by default
+        const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI) - 90;
+        setDragDirection(angle);
+
+        // Add trail point (center of screen where spaceship is)
+        setTrailPoints((prev) => {
+          const newPoint = { x: 400, y: 400, id: Date.now() };
+          const updated = [...prev, newPoint];
+          // Keep only last 8 points for a short trail
+          return updated.slice(-8);
+        });
+      }
+
+      // Limit dragging to canvas bounds - increased for larger navigable area
+      const maxX = 600;
+      const minX = -1200;
+      const maxY = 600;
+      const minY = -1200;
 
       setMapPosition({
         x: Math.max(minX, Math.min(maxX, newX)),
         y: Math.max(minY, Math.min(maxY, newY)),
       });
     },
-    [isDragging, dragStart],
+    [isDragging, dragStart, mapPosition],
   );
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
+    // Clear trail gradually
+    setTimeout(() => setTrailPoints([]), 1000);
   }, []);
 
   // Touch event handlers for mobile devices
@@ -241,22 +265,42 @@ export const WorldScreen: React.FC = () => {
       const newX = touch.clientX - dragStart.x;
       const newY = touch.clientY - dragStart.y;
 
-      // Limit dragging to canvas bounds
-      const maxX = 200;
-      const minX = -(800 - 400);
-      const maxY = 200;
-      const minY = -(800 - 448);
+      // Calculate drag direction for spaceship rotation
+      const deltaX = touch.clientX - (dragStart.x + mapPosition.x);
+      const deltaY = touch.clientY - (dragStart.y + mapPosition.y);
+
+      if (Math.abs(deltaX) > 1 || Math.abs(deltaY) > 1) {
+        // Calculate angle in degrees - subtract 90 to align with spaceship pointing up by default
+        const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI) - 90;
+        setDragDirection(angle);
+
+        // Add trail point (center of screen where spaceship is)
+        setTrailPoints((prev) => {
+          const newPoint = { x: 400, y: 400, id: Date.now() };
+          const updated = [...prev, newPoint];
+          // Keep only last 8 points for a short trail
+          return updated.slice(-8);
+        });
+      }
+
+      // Limit dragging to canvas bounds - increased for larger navigable area
+      const maxX = 600;
+      const minX = -1200;
+      const maxY = 600;
+      const minY = -1200;
 
       setMapPosition({
         x: Math.max(minX, Math.min(maxX, newX)),
         y: Math.max(minY, Math.min(maxY, newY)),
       });
     },
-    [isDragging, dragStart],
+    [isDragging, dragStart, mapPosition],
   );
 
   const handleTouchEnd = useCallback(() => {
     setIsDragging(false);
+    // Clear trail gradually
+    setTimeout(() => setTrailPoints([]), 1000);
   }, []);
 
   const handlePointClick = (point: InteractivePoint) => {
@@ -392,12 +436,60 @@ export const WorldScreen: React.FC = () => {
             ))}
           </div>
 
-          {/* Player Position Indicator */}
+          {/* Trail Line Effect */}
+          {trailPoints.length > 1 && (
+            <svg
+              className="absolute inset-0 pointer-events-none"
+              style={{ zIndex: 5 }}
+            >
+              <defs>
+                <linearGradient
+                  id="trailGradient"
+                  x1="0%"
+                  y1="0%"
+                  x2="100%"
+                  y2="0%"
+                >
+                  <stop offset="0%" stopColor="rgba(255, 193, 7, 0)" />
+                  <stop offset="50%" stopColor="rgba(255, 193, 7, 0.6)" />
+                  <stop offset="100%" stopColor="rgba(255, 193, 7, 0.9)" />
+                </linearGradient>
+              </defs>
+              <motion.polyline
+                points={trailPoints
+                  .map((point) => `${point.x},${point.y}`)
+                  .join(" ")}
+                fill="none"
+                stroke="url(#trailGradient)"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{ duration: 0.5 }}
+              />
+              <motion.polyline
+                points={trailPoints
+                  .map((point) => `${point.x},${point.y}`)
+                  .join(" ")}
+                fill="none"
+                stroke="rgba(255, 235, 59, 0.4)"
+                strokeWidth="1"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{ duration: 0.5 }}
+              />
+            </svg>
+          )}
+
+          {/* Player Position Indicator - Spaceship */}
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
             <motion.div
               className="relative"
               animate={{
-                scale: [1, 1.1, 1],
+                scale: [1, 1.03, 1],
               }}
               transition={{
                 duration: 2,
@@ -405,9 +497,23 @@ export const WorldScreen: React.FC = () => {
                 ease: "easeInOut",
               }}
             >
-              <div className="w-6 h-6 bg-white rounded-full border-2 border-gray-300 shadow-lg flex items-center justify-center">
-                <Navigation className="w-3 h-3 text-gray-700" />
-              </div>
+              <motion.div
+                className="w-10 h-10 flex items-center justify-center relative z-10"
+                animate={{
+                  rotate: dragDirection,
+                }}
+                transition={{
+                  type: "spring",
+                  stiffness: 150,
+                  damping: 25,
+                }}
+              >
+                <img
+                  src="https://cdn.builder.io/api/v1/image/assets%2F10ecfb5da47f4e839c19217692c6bd08%2F2966df92fa1d4cf0b029c1c2617c247a?format=webp&width=800"
+                  alt="Nave Espacial"
+                  className="w-full h-full object-contain drop-shadow-lg"
+                />
+              </motion.div>
 
               {/* Subtle green aura when near points */}
               {isPlayerNearAnyPoint && (
@@ -435,10 +541,10 @@ export const WorldScreen: React.FC = () => {
             className="absolute inset-0"
             style={{
               transform: `translate(${mapPosition.x}px, ${mapPosition.y}px)`,
-              width: "800px",
-              height: "800px",
-              left: "-200px",
-              top: "-200px",
+              width: "1600px",
+              height: "1600px",
+              left: "-600px",
+              top: "-600px",
             }}
           >
             {/* Interactive Points */}
@@ -454,8 +560,8 @@ export const WorldScreen: React.FC = () => {
                       : "bg-gray-500/60 border-gray-500 cursor-not-allowed"
                   }`}
                   style={{
-                    left: `${(point.x * 800) / 100}px`,
-                    top: `${(point.y * 800) / 100}px`,
+                    left: `${(point.x * 1600) / 100}px`,
+                    top: `${(point.y * 1600) / 100}px`,
                   }}
                   initial={{ scale: 0, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
