@@ -252,6 +252,16 @@ export const WorldScreen: React.FC = () => {
       const newX = touch.clientX - dragStart.x;
       const newY = touch.clientY - dragStart.y;
 
+      // Calculate drag direction for spaceship rotation
+      const deltaX = touch.clientX - (dragStart.x + mapPosition.x);
+      const deltaY = touch.clientY - (dragStart.y + mapPosition.y);
+
+      if (Math.abs(deltaX) > 1 || Math.abs(deltaY) > 1) {
+        // Calculate angle in degrees (0 degrees = pointing right, 90 = down, etc.)
+        const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+        setDragDirection(angle);
+      }
+
       // Limit dragging to canvas bounds
       const maxX = 200;
       const minX = -(800 - 400);
@@ -263,7 +273,7 @@ export const WorldScreen: React.FC = () => {
         y: Math.max(minY, Math.min(maxY, newY)),
       });
     },
-    [isDragging, dragStart],
+    [isDragging, dragStart, mapPosition],
   );
 
   const handleTouchEnd = useCallback(() => {
