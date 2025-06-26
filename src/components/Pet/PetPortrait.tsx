@@ -55,7 +55,7 @@ export const PetPortrait: React.FC<PetPortraitProps> = ({ pet }) => {
       case "blessed":
         return "✨";
       case "sick":
-        return "🤒";
+        return "��";
       case "cold":
         return "🥶";
       case "hot":
@@ -89,7 +89,6 @@ export const PetPortrait: React.FC<PetPortraitProps> = ({ pet }) => {
           {pet.name}
         </motion.h2>
         <div className="flex items-center justify-center space-x-2">
-          <span className="text-2xl">{getSpeciesEmoji(pet.species)}</span>
           <p className="text-gray-600 font-medium">{pet.species}</p>
           <div className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
             {pet.style}
