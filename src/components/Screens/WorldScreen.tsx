@@ -211,15 +211,15 @@ export const WorldScreen: React.FC = () => {
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
       >
-        {/* Infinite Stars Background */}
+        {/* Optimized Stars Background */}
         <div
           className="absolute inset-0"
           style={{
-            transform: `translate(${mapPosition.x * 0.1}px, ${mapPosition.y * 0.1}px)`,
-            width: "200%",
-            height: "200%",
-            left: "-50%",
-            top: "-50%",
+            transform: `translate(${mapPosition.x * 0.05}px, ${mapPosition.y * 0.05}px)`,
+            width: "120%",
+            height: "120%",
+            left: "-10%",
+            top: "-10%",
           }}
         >
           {stars.map((star) => (
