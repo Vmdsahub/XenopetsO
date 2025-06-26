@@ -277,7 +277,9 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
       </motion.div>
 
       {/* Player ship - fixed position in center */}
-      <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20">
+      <div
+        className={`absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 ${isDragging ? "pointer-events-none" : ""}`}
+      >
         <PlayerShip
           rotation={shipRotation}
           isNearPoint={nearbyPoint !== null}
@@ -291,7 +293,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 20 }}
-          className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/80 text-white px-4 py-2 rounded-lg text-sm backdrop-blur-sm border border-green-400/30"
+          className={`absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/80 text-white px-4 py-2 rounded-lg text-sm backdrop-blur-sm border border-green-400/30 ${isDragging ? "pointer-events-none" : ""}`}
         >
           <div className="text-green-400 font-medium">
             {GALAXY_POINTS.find((p) => p.id === nearbyPoint)?.name}
@@ -301,7 +303,9 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
       )}
 
       {/* Navigation hint */}
-      <div className="absolute top-4 right-4 text-white/60 text-xs bg-black/40 px-3 py-2 rounded-lg backdrop-blur-sm">
+      <div
+        className={`absolute top-4 right-4 text-white/60 text-xs bg-black/40 px-3 py-2 rounded-lg backdrop-blur-sm ${isDragging ? "pointer-events-none" : ""}`}
+      >
         Arraste para navegar
       </div>
     </div>
