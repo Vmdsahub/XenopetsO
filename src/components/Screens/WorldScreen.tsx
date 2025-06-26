@@ -106,6 +106,11 @@ export const WorldScreen: React.FC = () => {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const mapRef = useRef<HTMLDivElement>(null);
 
+  // Center the map (player position)
+  const centerMap = useCallback(() => {
+    setMapPosition({ x: 0, y: 0 });
+  }, []);
+
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
       setIsDragging(true);
