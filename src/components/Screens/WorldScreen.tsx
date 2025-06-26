@@ -426,8 +426,8 @@ export const WorldScreen: React.FC = () => {
                 ease: "easeInOut",
               }}
             >
-              <div className="w-8 h-8 bg-white rounded-full border-3 border-gray-300 shadow-lg flex items-center justify-center">
-                <Navigation className="w-4 h-4 text-gray-700" />
+              <div className="w-6 h-6 bg-white rounded-full border-2 border-gray-300 shadow-lg flex items-center justify-center">
+                <Navigation className="w-3 h-3 text-gray-700" />
               </div>
 
               {/* Subtle green aura when near points */}
