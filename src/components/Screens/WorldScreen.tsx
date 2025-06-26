@@ -130,7 +130,7 @@ export const WorldScreen: React.FC = () => {
   const [mapPosition, setMapPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [showWelcomeMessage, setShowWelcomeMessage] = useState(true);
+
   const mapRef = useRef<HTMLDivElement>(null);
 
   // Distance threshold for point interaction (in pixels)
@@ -226,15 +226,6 @@ export const WorldScreen: React.FC = () => {
     setSelectedPoint(null);
   };
 
-  // Hide welcome message after 4 seconds
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowWelcomeMessage(false);
-    }, 4000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
   const getTypeColor = (type: string) => {
     const colors = {
       Mystical: "border-purple-300 bg-purple-50 text-purple-700",
@@ -297,21 +288,6 @@ export const WorldScreen: React.FC = () => {
             </div>
           </div>
         </div>
-
-        {/* Welcome Message */}
-        <AnimatePresence>
-          {showWelcomeMessage && (
-            <motion.div
-              className="absolute top-4 left-1/2 transform -translate-x-1/2 z-30 bg-black/80 backdrop-blur-sm text-white text-sm px-4 py-2 rounded-lg border border-white/20"
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              Arraste o mapa para se aproximar dos pontos de interesse
-            </motion.div>
-          )}
-        </AnimatePresence>
 
         {/* Interactive Map */}
         <motion.div
