@@ -429,8 +429,14 @@ export const WorldScreen: React.FC = () => {
               <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full border-3 border-white shadow-lg flex items-center justify-center">
                 <Navigation className="w-4 h-4 text-white" />
               </div>
+
+              {/* Proximity-based aura effect */}
               <motion.div
-                className="absolute inset-0 rounded-full border-2 border-purple-400"
+                className={`absolute inset-0 rounded-full border-2 ${
+                  isPlayerNearAnyPoint
+                    ? "border-green-400"
+                    : "border-purple-400"
+                }`}
                 animate={{
                   scale: [1, 1.5, 1],
                   opacity: [0.8, 0.2, 0.8],
@@ -441,6 +447,22 @@ export const WorldScreen: React.FC = () => {
                   ease: "easeInOut",
                 }}
               />
+
+              {/* Green interaction aura when near points */}
+              {isPlayerNearAnyPoint && (
+                <motion.div
+                  className="absolute inset-0 rounded-full border-2 border-green-400 bg-green-400/10"
+                  animate={{
+                    scale: [1, 2, 1],
+                    opacity: [0.4, 0.1, 0.4],
+                  }}
+                  transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                />
+              )}
             </motion.div>
             <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 text-xs font-medium text-white bg-black/70 px-2 py-1 rounded-lg">
               Você
