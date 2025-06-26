@@ -277,17 +277,18 @@ export const WorldScreen: React.FC = () => {
             >
               {point.icon}
 
-              {/* Pulsing Ring Animation */}
+              {/* Simplified Pulsing Ring Animation */}
               <motion.div
-                className="absolute inset-0 rounded-full border-2 border-white/50"
+                className="absolute inset-0 rounded-full border-2 border-white/30"
                 animate={{
-                  scale: [1, 1.5, 1],
-                  opacity: [1, 0, 1],
+                  scale: [1, 1.3, 1],
+                  opacity: [0.8, 0.2, 0.8],
                 }}
                 transition={{
-                  duration: 2,
+                  duration: 3,
                   repeat: Infinity,
-                  delay: index * 0.3,
+                  delay: index * 0.5,
+                  ease: "easeInOut",
                 }}
               />
 
