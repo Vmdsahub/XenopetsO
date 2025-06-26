@@ -418,7 +418,7 @@ export const WorldScreen: React.FC = () => {
             <motion.div
               className="relative"
               animate={{
-                scale: [1, 1.05, 1],
+                scale: [1, 1.03, 1],
               }}
               transition={{
                 duration: 2,
@@ -426,15 +426,33 @@ export const WorldScreen: React.FC = () => {
                 ease: "easeInOut",
               }}
             >
+              {/* Yellow Trail Effect */}
+              {isDragging && (
+                <motion.div
+                  className="absolute w-10 h-10 -top-1 -left-1"
+                  animate={{
+                    rotate: dragDirection,
+                  }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 150,
+                    damping: 25,
+                  }}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-t from-yellow-400/60 via-yellow-300/40 to-transparent rounded-full blur-sm transform scale-75 translate-y-2" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-orange-400/40 via-yellow-200/30 to-transparent rounded-full blur-md transform scale-50 translate-y-3" />
+                </motion.div>
+              )}
+
               <motion.div
-                className="w-12 h-12 flex items-center justify-center"
+                className="w-10 h-10 flex items-center justify-center relative z-10"
                 animate={{
                   rotate: dragDirection,
                 }}
                 transition={{
                   type: "spring",
-                  stiffness: 300,
-                  damping: 30,
+                  stiffness: 150,
+                  damping: 25,
                 }}
               >
                 <img
