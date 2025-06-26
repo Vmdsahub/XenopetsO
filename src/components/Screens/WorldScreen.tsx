@@ -144,13 +144,13 @@ export const WorldScreen: React.FC = () => {
       const playerX = 400; // Center of the visible area
       const playerY = 400; // Center of the visible area
 
-      // Point position on the map (adjusted for larger container)
+      // Point position on the map - usando o sistema original de coordenadas
       const pointX = (point.x * 1600) / 100;
       const pointY = (point.y * 1600) / 100;
 
-      // Account for map offset (adjusted for larger container positioning)
-      const adjustedPointX = pointX + mapPosition.x + 600;
-      const adjustedPointY = pointY + mapPosition.y + 600;
+      // Account for map offset - o container agora está posicionado com left: -600px, top: -600px
+      const adjustedPointX = pointX + mapPosition.x;
+      const adjustedPointY = pointY + mapPosition.y;
 
       return Math.sqrt(
         Math.pow(playerX - adjustedPointX, 2) +
