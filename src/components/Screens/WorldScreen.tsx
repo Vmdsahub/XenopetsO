@@ -130,6 +130,7 @@ export const WorldScreen: React.FC = () => {
   const [mapPosition, setMapPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [dragDirection, setDragDirection] = useState(0); // Ângulo de rotação da nave em graus
 
   const mapRef = useRef<HTMLDivElement>(null);
 
