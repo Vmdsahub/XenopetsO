@@ -396,59 +396,25 @@ export const WorldScreen: React.FC = () => {
               <motion.button
                 key={point.id}
                 onClick={() => handlePointClick(point)}
-                className={`absolute transform -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-2xl bg-white/95 backdrop-blur-md flex items-center justify-center shadow-xl transition-all duration-300 hover:scale-110 border-2 ${getTypeColor(point.type)} hover:shadow-2xl`}
+                className="absolute transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white/90 backdrop-blur-sm shadow-lg transition-all duration-300 hover:scale-150 border border-gray-300 hover:bg-white group"
                 style={{
                   left: `${(point.x * 800) / 100}px`,
                   top: `${(point.y * 800) / 100}px`,
                 }}
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: index * 0.2 + 0.5 }}
+                transition={{ delay: index * 0.1 + 0.5 }}
                 whileHover={{
-                  scale: 1.2,
-                  y: -5,
+                  scale: 1.5,
                 }}
-                whileTap={{ scale: 0.9 }}
+                whileTap={{ scale: 0.8 }}
               >
-                {point.icon}
-
-                {/* Level Indicator */}
-                <motion.span
-                  className={`absolute -top-2 -right-2 ${getLevelColor(point.level)} text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold shadow-lg`}
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 0.2 + index * 0.1 }}
-                >
-                  {point.level}
-                </motion.span>
-
-                {/* Discovery Status */}
-                {point.discovered ? (
-                  <motion.span
-                    className="absolute -bottom-2 -right-2 bg-green-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-lg"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 0.3 + index * 0.1 }}
-                  >
-                    ✓
-                  </motion.span>
-                ) : (
-                  <motion.span
-                    className="absolute -bottom-2 -right-2 bg-gray-400 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-lg"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 0.3 + index * 0.1 }}
-                  >
-                    ?
-                  </motion.span>
-                )}
-
-                {/* Pulsing Ring Animation */}
+                {/* Subtle Pulsing Ring Animation */}
                 <motion.div
-                  className={`absolute inset-0 rounded-2xl border-2 border-current opacity-20`}
+                  className="absolute inset-0 rounded-full border border-white/60"
                   animate={{
-                    scale: [1, 1.4, 1],
-                    opacity: [0.4, 0.1, 0.4],
+                    scale: [1, 2, 1],
+                    opacity: [0.6, 0.1, 0.6],
                   }}
                   transition={{
                     duration: 3,
@@ -458,16 +424,12 @@ export const WorldScreen: React.FC = () => {
                   }}
                 />
 
-                {/* Point Name Label */}
+                {/* Point Name Label on Hover */}
                 <motion.div
-                  className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 bg-white/95 backdrop-blur-md text-gray-800 text-xs px-3 py-2 rounded-xl whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-gray-200 shadow-lg"
-                  initial={{ opacity: 0, y: 10 }}
-                  whileHover={{ opacity: 1, y: 0 }}
+                  className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black/80 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
+                  initial={{ opacity: 0, y: 5 }}
                 >
-                  <div className="font-medium">{point.name}</div>
-                  <div className="text-gray-500 text-xs">
-                    {point.type} • Level {point.level}
-                  </div>
+                  {point.name}
                 </motion.div>
               </motion.button>
             ))}
@@ -494,7 +456,7 @@ export const WorldScreen: React.FC = () => {
             </div>
             <div className="flex items-center space-x-2">
               <Navigation className="w-4 h-4 text-purple-600" />
-              <span className="text-xs text-gray-600">Sua Posição</span>
+              <span className="text-xs text-gray-600">Sua Posi��ão</span>
             </div>
             <div className="flex items-center space-x-2">
               <Target className="w-4 h-4 text-purple-600" />
