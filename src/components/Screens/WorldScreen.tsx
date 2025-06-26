@@ -329,13 +329,21 @@ export const WorldScreen: React.FC = () => {
 
       {/* Points List */}
       <motion.div
-        className="bg-gradient-to-b from-gray-900 to-black text-white p-6 rounded-b-3xl border-b border-x border-gray-700"
+        className="bg-white/95 backdrop-blur-md text-gray-900 p-6 rounded-b-3xl border-b border-x border-gray-100 shadow-sm"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
       >
-        <h2 className="text-lg font-bold mb-4 flex items-center" />
-        <div className="grid grid-cols-2 gap-3" />
+        <div className="text-center">
+          <p className="text-gray-600 text-sm">
+            {interactivePoints.length} regiões místicas para explorar
+          </p>
+          <div className="flex justify-center items-center space-x-2 mt-2">
+            <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
+            <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse delay-75"></div>
+            <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse delay-150"></div>
+          </div>
+        </div>
       </motion.div>
 
       {/* Location Page Modal */}
