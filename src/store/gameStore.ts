@@ -295,10 +295,7 @@ const mockStores: Store[] = [
       "https://images.pexels.com/photos/1181690/pexels-photo-1181690.jpeg?auto=compress&cs=tinysrgb&w=200",
     npcDialogue:
       "Ah, a fellow traveler! The desert has been kind to me, and I have rare treasures to share. Perhaps something for your companions?",
-    location: {
-      continent: "Golden Desert",
-      coordinates: { x: 35, y: 70 },
-    },
+
     inventory: [
       {
         id: "si4",
