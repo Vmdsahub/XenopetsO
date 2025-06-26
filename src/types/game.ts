@@ -34,7 +34,7 @@ export interface UserPreferences {
   soundEffects: boolean;
   musicVolume: number;
   language: string;
-  theme: 'light' | 'dark' | 'auto';
+  theme: "light" | "dark" | "auto";
   privacy: {
     showOnline: boolean;
     allowDuels: boolean;
@@ -82,16 +82,16 @@ export interface User {
 export interface Pet {
   id: string;
   name: string;
-  species: 'Dragon' | 'Phoenix' | 'Griffin' | 'Unicorn';
-  style: 'normal' | 'fire' | 'ice' | 'shadow' | 'light' | 'king' | 'baby';
+  species: "Dragon" | "Phoenix" | "Griffin" | "Unicorn";
+  style: "normal" | "fire" | "ice" | "shadow" | "light" | "king" | "baby";
   level: number;
   ownerId: string;
-  
+
   // Primary attributes (0-10 scale)
   happiness: number;
   health: number;
   hunger: number;
-  
+
   // Secondary attributes (determine level)
   strength: number;
   dexterity: number;
@@ -102,24 +102,32 @@ export interface Pet {
   precision: number;
   evasion: number;
   luck: number;
-  
-  personality: 'Sanguine' | 'Choleric' | 'Melancholic' | 'Phlegmatic';
+
+  personality: "Sanguine" | "Choleric" | "Melancholic" | "Phlegmatic";
   conditions: PetCondition[];
   equipment: Equipment;
   weapon?: Weapon;
-  
+  imageUrl?: string;
+
   hatchTime?: Date;
   isAlive: boolean;
   deathDate?: Date;
   lastInteraction: Date;
-  
+
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface PetCondition {
   id: string;
-  type: 'sick' | 'cold' | 'hot' | 'frozen' | 'paralyzed' | 'poisoned' | 'blessed';
+  type:
+    | "sick"
+    | "cold"
+    | "hot"
+    | "frozen"
+    | "paralyzed"
+    | "poisoned"
+    | "blessed";
   name: string;
   description: string;
   effects: Record<string, number>;
@@ -138,10 +146,10 @@ export interface Equipment {
 export interface Weapon {
   id: string;
   name: string;
-  type: 'One-Handed Sword' | 'Dual Daggers' | 'Magic Wand';
+  type: "One-Handed Sword" | "Dual Daggers" | "Magic Wand";
   rarity: ItemRarity;
   stats: Record<string, number>;
-  scalingStat: 'strength' | 'dexterity' | 'intelligence';
+  scalingStat: "strength" | "dexterity" | "intelligence";
   visualEffect?: string;
 }
 
@@ -150,24 +158,38 @@ export interface Item {
   slug: string; // Human-readable string identifier, e.g., 'magic-apple-1'
   name: string;
   description: string;
-  type: 'Food' | 'Potion' | 'Equipment' | 'Special' | 'Collectible' | 'Theme' | 'Weapon' | 'Style';
+  type:
+    | "Food"
+    | "Potion"
+    | "Equipment"
+    | "Special"
+    | "Collectible"
+    | "Theme"
+    | "Weapon"
+    | "Style";
   rarity: ItemRarity;
   price?: number;
-  currency?: 'xenocoins' | 'cash';
+  currency?: "xenocoins" | "cash";
   effects?: Record<string, number>;
   dailyLimit?: number;
   decompositionTime?: number;
   isEquipped?: boolean;
   isActive?: boolean;
   quantity: number;
-  slot?: 'head' | 'torso' | 'legs' | 'gloves' | 'footwear';
+  slot?: "head" | "torso" | "legs" | "gloves" | "footwear";
   imageUrl?: string;
   createdAt: Date;
   inventoryId?: string;
   equippedPetId?: string;
 }
 
-export type ItemRarity = 'Common' | 'Uncommon' | 'Rare' | 'Epic' | 'Legendary' | 'Unique';
+export type ItemRarity =
+  | "Common"
+  | "Uncommon"
+  | "Rare"
+  | "Epic"
+  | "Legendary"
+  | "Unique";
 
 export interface GameState {
   user: User | null;
@@ -188,7 +210,7 @@ export interface GameState {
 
 export interface Notification {
   id: string;
-  type: 'info' | 'warning' | 'success' | 'error' | 'achievement';
+  type: "info" | "warning" | "success" | "error" | "achievement";
   title: string;
   message: string;
   isRead: boolean;
@@ -200,7 +222,7 @@ export interface Achievement {
   id: string;
   name: string;
   description: string;
-  category: 'exploration' | 'combat' | 'collection' | 'social' | 'special';
+  category: "exploration" | "combat" | "collection" | "social" | "special";
   requirements: Record<string, any>;
   rewards: Record<string, number>;
   isUnlocked: boolean;
@@ -212,7 +234,7 @@ export interface Achievement {
 export interface Collectible {
   id: string;
   name: string;
-  type: 'egg' | 'fish' | 'gem' | 'stamp';
+  type: "egg" | "fish" | "gem" | "stamp";
   rarity: ItemRarity;
   description: string;
   imageUrl?: string;
@@ -226,7 +248,7 @@ export interface Quest {
   id: string;
   name: string;
   description: string;
-  type: 'delivery' | 'minigame' | 'exploration' | 'combat' | 'riddle';
+  type: "delivery" | "minigame" | "exploration" | "combat" | "riddle";
   requirements: Record<string, any>;
   rewards: Record<string, number>;
   isActive: boolean;
@@ -260,7 +282,14 @@ export interface RedeemCode {
 export interface POI {
   id: string;
   name: string;
-  type: 'Shop' | 'Hospital' | 'Bank' | 'Quest' | 'Battle' | 'Dialogue' | 'Minigame';
+  type:
+    | "Shop"
+    | "Hospital"
+    | "Bank"
+    | "Quest"
+    | "Battle"
+    | "Dialogue"
+    | "Minigame";
   continentId: string;
   x: number;
   y: number;
@@ -309,7 +338,7 @@ export interface Continent {
 export interface Minigame {
   id: string;
   name: string;
-  type: 'roguelike' | 'puzzle' | 'arcade' | 'strategy';
+  type: "roguelike" | "puzzle" | "arcade" | "strategy";
   description: string;
   dailyRewardLimit: number;
   baseReward: number;
@@ -340,7 +369,7 @@ export interface SagaStep {
   stepNumber: number;
   name: string;
   description: string;
-  type: 'dialogue' | 'battle' | 'puzzle' | 'exploration' | 'item';
+  type: "dialogue" | "battle" | "puzzle" | "exploration" | "item";
   requirements: Record<string, any>;
   rewards?: Record<string, any>;
   isCompleted: boolean;
