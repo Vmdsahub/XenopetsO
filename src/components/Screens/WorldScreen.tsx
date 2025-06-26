@@ -143,9 +143,9 @@ export const WorldScreen: React.FC = () => {
     setSelectedPoint(null);
   };
 
-  // Generate stars for background - optimized
-  const generateStars = (count: number) => {
-    return Array.from({ length: count }, (_, i) => ({
+  // Generate stars for background - optimized and cached
+  const stars = useMemo(() => {
+    return Array.from({ length: 50 }, (_, i) => ({
       id: i,
       x: Math.random() * 120, // Reduced range for better performance
       y: Math.random() * 120,
@@ -153,9 +153,7 @@ export const WorldScreen: React.FC = () => {
       opacity: Math.random() * 0.6 + 0.4,
       animationDelay: Math.random() * 2,
     }));
-  };
-
-  const stars = generateStars(50); // Reduced from 200 to 50 stars
+  }, []); // Empty dependency array means this only runs once
 
   return (
     <div className="max-w-md mx-auto">
