@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Home, Sparkles, Globe, Star, Rocket, Zap } from "lucide-react";
 
@@ -17,8 +17,8 @@ const interactivePoints: InteractivePoint[] = [
   {
     id: "nebula_1",
     name: "Nebulosa Cristalina",
-    x: 20,
-    y: 30,
+    x: 48,
+    y: 45,
     imageUrl:
       "https://images.pexels.com/photos/32657005/pexels-photo-32657005.jpeg",
     description:
@@ -29,8 +29,8 @@ const interactivePoints: InteractivePoint[] = [
   {
     id: "galaxy_core",
     name: "Núcleo Galáctico",
-    x: 75,
-    y: 25,
+    x: 52,
+    y: 48,
     imageUrl:
       "https://images.pexels.com/photos/17505898/pexels-photo-17505898.jpeg",
     description:
@@ -41,8 +41,8 @@ const interactivePoints: InteractivePoint[] = [
   {
     id: "cosmic_forest",
     name: "Floresta Cósmica",
-    x: 45,
-    y: 60,
+    x: 50,
+    y: 52,
     imageUrl:
       "https://images.pexels.com/photos/8344071/pexels-photo-8344071.jpeg",
     description:
@@ -53,8 +53,8 @@ const interactivePoints: InteractivePoint[] = [
   {
     id: "stargate",
     name: "Portal Estelar",
-    x: 65,
-    y: 75,
+    x: 46,
+    y: 50,
     imageUrl:
       "https://images.pexels.com/photos/1169754/pexels-photo-1169754.jpeg",
     description:
@@ -65,8 +65,8 @@ const interactivePoints: InteractivePoint[] = [
   {
     id: "energy_field",
     name: "Campo de Energia",
-    x: 30,
-    y: 80,
+    x: 54,
+    y: 46,
     imageUrl:
       "https://images.pexels.com/photos/1169754/pexels-photo-1169754.jpeg",
     description:
@@ -77,8 +77,8 @@ const interactivePoints: InteractivePoint[] = [
   {
     id: "void_station",
     name: "Estação do Vazio",
-    x: 85,
-    y: 50,
+    x: 48,
+    y: 54,
     imageUrl:
       "https://images.pexels.com/photos/586415/pexels-photo-586415.jpeg",
     description:
@@ -115,11 +115,11 @@ export const WorldScreen: React.FC = () => {
       const newX = e.clientX - dragStart.x;
       const newY = e.clientY - dragStart.y;
 
-      // Limit dragging to canvas bounds (2560x2560)
-      const maxX = 133; // Allow some padding
-      const minX = -(2560 - 400); // Canvas width minus viewport width
-      const maxY = 62; // Allow some padding
-      const minY = -(2560 - 384); // Canvas height minus viewport height
+      // Limit dragging to canvas bounds (800x800 - optimized)
+      const maxX = 200; // Allow some padding
+      const minX = -(800 - 400); // Canvas width minus viewport width
+      const maxY = 200; // Allow some padding
+      const minY = -(800 - 384); // Canvas height minus viewport height
 
       setMapPosition({
         x: Math.max(minX, Math.min(maxX, newX)),
@@ -143,19 +143,17 @@ export const WorldScreen: React.FC = () => {
     setSelectedPoint(null);
   };
 
-  // Generate stars for background
-  const generateStars = (count: number) => {
-    return Array.from({ length: count }, (_, i) => ({
+  // Generate stars for background - optimized and cached
+  const stars = useMemo(() => {
+    return Array.from({ length: 50 }, (_, i) => ({
       id: i,
-      x: Math.random() * 200, // Extended range for infinite scroll
-      y: Math.random() * 200,
-      size: Math.random() * 3 + 1,
-      opacity: Math.random() * 0.8 + 0.2,
-      animationDelay: Math.random() * 3,
+      x: Math.random() * 120, // Reduced range for better performance
+      y: Math.random() * 120,
+      size: Math.random() * 2 + 1,
+      opacity: Math.random() * 0.6 + 0.4,
+      animationDelay: Math.random() * 2,
     }));
-  };
-
-  const stars = generateStars(200);
+  }, []); // Empty dependency array means this only runs once
 
   return (
     <div className="max-w-md mx-auto">
@@ -211,15 +209,15 @@ export const WorldScreen: React.FC = () => {
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
       >
-        {/* Infinite Stars Background */}
+        {/* Subtle Parallax Stars Background */}
         <div
           className="absolute inset-0"
           style={{
-            transform: `translate(${mapPosition.x * 0.1}px, ${mapPosition.y * 0.1}px)`,
-            width: "200%",
-            height: "200%",
-            left: "-50%",
-            top: "-50%",
+            transform: `translate(${mapPosition.x * 0.03}px, ${mapPosition.y * 0.03}px)`,
+            width: "115%",
+            height: "115%",
+            left: "-7.5%",
+            top: "-7.5%",
           }}
         >
           {stars.map((star) => (
@@ -234,27 +232,26 @@ export const WorldScreen: React.FC = () => {
                 opacity: star.opacity,
               }}
               animate={{
-                opacity: [star.opacity * 0.3, star.opacity, star.opacity * 0.3],
-                scale: [0.5, 1, 0.5],
+                opacity: [star.opacity * 0.6, star.opacity, star.opacity * 0.6],
               }}
               transition={{
-                duration: Math.random() * 3 + 2,
+                duration: 4 + star.animationDelay,
                 repeat: Infinity,
-                delay: star.animationDelay,
+                ease: "easeInOut",
               }}
             />
           ))}
         </div>
 
-        {/* Draggable Map Container */}
+        {/* Optimized Draggable Map Container */}
         <motion.div
           className="absolute inset-0"
           style={{
             transform: `translate(${mapPosition.x}px, ${mapPosition.y}px)`,
-            width: "2560px",
-            height: "2560px",
-            left: "-133px",
-            top: "-62px",
+            width: "800px",
+            height: "800px",
+            left: "-200px",
+            top: "-200px",
           }}
         >
           {/* Interactive Points */}
@@ -264,8 +261,8 @@ export const WorldScreen: React.FC = () => {
               onClick={() => handlePointClick(point)}
               className={`absolute transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center text-white shadow-lg ${point.glowColor} transition-all duration-300 hover:scale-110 border-2 border-white/30`}
               style={{
-                left: `${(point.x * 2560) / 100}px`,
-                top: `${(point.y * 2560) / 100}px`,
+                left: `${(point.x * 800) / 100}px`,
+                top: `${(point.y * 800) / 100}px`,
               }}
               initial={{ scale: 0, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -278,17 +275,18 @@ export const WorldScreen: React.FC = () => {
             >
               {point.icon}
 
-              {/* Pulsing Ring Animation */}
+              {/* Simplified Pulsing Ring Animation */}
               <motion.div
-                className="absolute inset-0 rounded-full border-2 border-white/50"
+                className="absolute inset-0 rounded-full border-2 border-white/30"
                 animate={{
-                  scale: [1, 1.5, 1],
-                  opacity: [1, 0, 1],
+                  scale: [1, 1.3, 1],
+                  opacity: [0.8, 0.2, 0.8],
                 }}
                 transition={{
-                  duration: 2,
+                  duration: 3,
                   repeat: Infinity,
-                  delay: index * 0.3,
+                  delay: index * 0.5,
+                  ease: "easeInOut",
                 }}
               />
 
