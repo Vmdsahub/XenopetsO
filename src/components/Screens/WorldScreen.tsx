@@ -232,10 +232,11 @@ export const WorldScreen: React.FC = () => {
                 opacity: star.opacity,
               }}
               animate={{
-                opacity: [star.opacity * 0.6, star.opacity, star.opacity * 0.6],
+                opacity: [star.opacity * 0.3, star.opacity, star.opacity * 0.3],
+                scale: [1, 1.1, 1],
               }}
               transition={{
-                duration: 4 + star.animationDelay,
+                duration: 3 + star.animationDelay,
                 repeat: Infinity,
                 ease: "easeInOut",
               }}
