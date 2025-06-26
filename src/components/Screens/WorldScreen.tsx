@@ -242,12 +242,58 @@ export const WorldScreen: React.FC = () => {
           className="absolute inset-0"
           style={{
             transform: `translate(${mapPosition.x}px, ${mapPosition.y}px)`,
-            width: "200%",
-            height: "200%",
+            width: "2560px",
+            height: "2560px",
             left: "-133px",
             top: "-62px",
           }}
-        />
+        >
+          {/* Interactive Points */}
+          {interactivePoints.map((point, index) => (
+            <motion.button
+              key={point.id}
+              onClick={() => handlePointClick(point)}
+              className={`absolute transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center text-white shadow-lg ${point.glowColor} transition-all duration-300 hover:scale-110 border-2 border-white/30`}
+              style={{
+                left: `${(point.x * 2560) / 100}px`,
+                top: `${(point.y * 2560) / 100}px`,
+              }}
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: index * 0.2 + 0.5 }}
+              whileHover={{
+                scale: 1.2,
+                boxShadow: "0 0 30px rgba(147, 51, 234, 0.8)",
+              }}
+              whileTap={{ scale: 0.9 }}
+            >
+              {point.icon}
+
+              {/* Pulsing Ring Animation */}
+              <motion.div
+                className="absolute inset-0 rounded-full border-2 border-white/50"
+                animate={{
+                  scale: [1, 1.5, 1],
+                  opacity: [1, 0, 1],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  delay: index * 0.3,
+                }}
+              />
+
+              {/* Point Name Label */}
+              <motion.div
+                className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black/80 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
+                initial={{ opacity: 0, y: 10 }}
+                whileHover={{ opacity: 1, y: 0 }}
+              >
+                {point.name}
+              </motion.div>
+            </motion.button>
+          ))}
+        </motion.div>
 
         {/* Drag Instructions */}
         <motion.div
