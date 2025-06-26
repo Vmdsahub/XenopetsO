@@ -547,7 +547,7 @@ const GalaxyDetailView: React.FC<GalaxyDetailViewProps> = ({
               <h3 className="font-bold text-lg text-gray-900">{point.name}</h3>
               <p className="text-gray-600 text-sm">Vista detalhada</p>
             </div>
-            <div className="w-9" /> {/* Spacer */}
+            <div className="w-9"></div>
           </div>
         </div>
 
