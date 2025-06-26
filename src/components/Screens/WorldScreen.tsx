@@ -189,7 +189,7 @@ export const WorldScreen: React.FC = () => {
 
       {/* Infinite Draggable Universe Map */}
       <motion.div
-        className="relative h-96 overflow-hidden bg-black border-x border-gray-700 cursor-grab active:cursor-grabbing"
+        className="relative h-96 overflow-hidden bg-gray-900 border-x border-gray-100 cursor-grab active:cursor-grabbing"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3 }}
@@ -199,6 +199,39 @@ export const WorldScreen: React.FC = () => {
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
       >
+        {/* Center Button */}
+        <motion.button
+          onClick={centerMap}
+          className="absolute top-4 right-4 z-10 p-3 bg-white/95 backdrop-blur-md rounded-full shadow-lg border border-gray-200 hover:bg-white transition-colors"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          title="Centralizar no jogador"
+        >
+          <Target className="w-5 h-5 text-gray-700" />
+        </motion.button>
+
+        {/* Player Position Indicator */}
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
+          <motion.div
+            className="w-6 h-6 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full border-3 border-white shadow-lg"
+            animate={{
+              scale: [1, 1.1, 1],
+              boxShadow: [
+                "0 0 10px rgba(147, 51, 234, 0.3)",
+                "0 0 20px rgba(147, 51, 234, 0.5)",
+                "0 0 10px rgba(147, 51, 234, 0.3)",
+              ],
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+          <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs font-medium text-white bg-black/70 px-2 py-1 rounded-lg">
+            Você
+          </div>
+        </div>
         {/* Subtle Parallax Stars Background */}
         <div
           className="absolute"
