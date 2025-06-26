@@ -143,19 +143,19 @@ export const WorldScreen: React.FC = () => {
     setSelectedPoint(null);
   };
 
-  // Generate stars for background
+  // Generate stars for background - optimized
   const generateStars = (count: number) => {
     return Array.from({ length: count }, (_, i) => ({
       id: i,
-      x: Math.random() * 200, // Extended range for infinite scroll
-      y: Math.random() * 200,
-      size: Math.random() * 3 + 1,
-      opacity: Math.random() * 0.8 + 0.2,
-      animationDelay: Math.random() * 3,
+      x: Math.random() * 120, // Reduced range for better performance
+      y: Math.random() * 120,
+      size: Math.random() * 2 + 1,
+      opacity: Math.random() * 0.6 + 0.4,
+      animationDelay: Math.random() * 2,
     }));
   };
 
-  const stars = generateStars(200);
+  const stars = generateStars(50); // Reduced from 200 to 50 stars
 
   return (
     <div className="max-w-md mx-auto">
