@@ -178,7 +178,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
 
   const handleDragEnd = () => {
     setIsDragging(false);
-    // Reset ship rotation gradually
+    // Reset ship rotation gradually to neutral position (pointing up)
     animate(shipRotation, 0, { duration: 0.5 });
 
     // Save current map position immediately
