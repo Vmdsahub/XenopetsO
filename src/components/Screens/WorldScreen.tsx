@@ -286,35 +286,8 @@ export const WorldScreen: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
       >
-        <h2 className="text-lg font-bold mb-4 flex items-center">
-          <Star className="w-5 h-5 mr-2 text-amber-400" />
-          Regiões Descobertas
-        </h2>
-        <div className="grid grid-cols-2 gap-3">
-          {interactivePoints.map((point, index) => (
-            <motion.button
-              key={point.id}
-              onClick={() => setSelectedPoint(point)}
-              className="bg-gray-800/50 border border-gray-700 rounded-xl p-3 text-left hover:bg-gray-700/50 transition-all duration-300 hover:border-purple-500"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 + 0.6 }}
-              whileHover={{ scale: 1.02, y: -2 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <div className="flex items-center space-x-2 mb-2">
-                <div className="w-6 h-6 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center">
-                  {React.cloneElement(point.icon as React.ReactElement, {
-                    className: "w-3 h-3",
-                  })}
-                </div>
-                <span className="text-sm font-medium text-gray-200">
-                  {point.name}
-                </span>
-              </div>
-            </motion.button>
-          ))}
-        </div>
+        <h2 className="text-lg font-bold mb-4 flex items-center" />
+        <div className="grid grid-cols-2 gap-3" />
       </motion.div>
 
       {/* Location Page Modal */}
