@@ -244,70 +244,43 @@ export const WorldScreen: React.FC = () => {
         </div>
       </motion.div>
 
-      {/* Map Tabs */}
+      {/* Map Container */}
       <motion.div
         className="bg-white rounded-2xl shadow-lg mb-6 overflow-hidden border border-gray-100"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
-        <div className="flex border-b border-gray-200">
-          {mapTabs.map(({ id, name, icon: Icon, color }) => (
-            <motion.button
-              key={id}
-              onClick={() => setActiveTab(id)}
-              className={`flex-1 flex items-center justify-center space-x-2 py-4 transition-all ${
-                activeTab === id
-                  ? "bg-purple-50 text-purple-600 border-b-2 border-purple-600"
-                  : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
-              }`}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <Icon className="w-5 h-5" />
-              <span className="font-medium text-sm">{name}</span>
-            </motion.button>
-          ))}
-        </div>
-
         {/* Map Header Info */}
         <div className="p-4 bg-gradient-to-r from-purple-50 to-blue-50 border-b border-gray-100">
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between">
             <div>
               <h3 className="font-bold text-xl bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
                 Xenoverse
               </h3>
               <p className="text-gray-600 text-sm">Mapa Galáctico Interativo</p>
             </div>
-            <motion.button
-              onClick={centerMap}
-              className="p-3 bg-white rounded-full shadow-lg border border-gray-200 hover:shadow-xl transition-all"
-              whileHover={{ scale: 1.1, rotate: 90 }}
-              whileTap={{ scale: 0.9 }}
-              title="Centralizar no jogador"
-            >
-              <Target className="w-5 h-5 text-purple-600" />
-            </motion.button>
-          </div>
-
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-600">
-              Regiões Descobertas: {discoveredCount}/{totalCount}
-            </span>
-            <div className="flex items-center space-x-2">
-              <div className="w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
-                <motion.div
-                  className="h-full bg-gradient-to-r from-purple-500 to-blue-500 rounded-full"
-                  initial={{ width: 0 }}
-                  animate={{
-                    width: `${(discoveredCount / totalCount) * 100}%`,
-                  }}
-                  transition={{ delay: 0.8, duration: 0.5 }}
-                />
+            <div className="flex items-center space-x-3">
+              <div className="text-right">
+                <div className="text-sm text-gray-600">
+                  Regiões: {discoveredCount}/{totalCount}
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-12 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                    <motion.div
+                      className="h-full bg-gradient-to-r from-purple-500 to-blue-500 rounded-full"
+                      initial={{ width: 0 }}
+                      animate={{
+                        width: `${(discoveredCount / totalCount) * 100}%`,
+                      }}
+                      transition={{ delay: 0.8, duration: 0.5 }}
+                    />
+                  </div>
+                  <span className="text-purple-600 font-medium text-xs">
+                    {Math.round((discoveredCount / totalCount) * 100)}%
+                  </span>
+                </div>
               </div>
-              <span className="text-purple-600 font-medium">
-                {Math.round((discoveredCount / totalCount) * 100)}%
-              </span>
             </div>
           </div>
         </div>
