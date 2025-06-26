@@ -188,9 +188,13 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
     // Keep current rotation - don't reset to 0°
     // The ship should maintain its last direction when stopped
 
-    // Save current map position immediately
+    // Save current map position and ship rotation immediately
     const mapPos = { x: mapX.get(), y: mapY.get() };
     localStorage.setItem("xenopets-map-position", JSON.stringify(mapPos));
+    localStorage.setItem(
+      "xenopets-ship-rotation",
+      shipRotation.get().toString(),
+    );
   };
 
   const handlePointClick = (pointId: string) => {
