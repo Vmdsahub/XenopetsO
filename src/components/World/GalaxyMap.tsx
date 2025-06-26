@@ -136,11 +136,15 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
     checkProximity();
   }, [checkProximity]);
 
-  // Save position continuously and on unmount
+  // Save position and rotation continuously and on unmount
   useEffect(() => {
     const savePosition = () => {
       const mapPos = { x: mapX.get(), y: mapY.get() };
       localStorage.setItem("xenopets-map-position", JSON.stringify(mapPos));
+      localStorage.setItem(
+        "xenopets-ship-rotation",
+        shipRotation.get().toString(),
+      );
     };
 
     // Save position every 2 seconds when not dragging
@@ -155,7 +159,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
       clearInterval(interval);
       savePosition();
     };
-  }, [mapX, mapY, isDragging]);
+  }, [mapX, mapY, shipRotation, isDragging]);
 
   const handleDragStart = () => {
     setIsDragging(true);
