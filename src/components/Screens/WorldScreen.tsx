@@ -283,7 +283,7 @@ export const WorldScreen: React.FC = () => {
             <motion.button
               key={point.id}
               onClick={() => handlePointClick(point)}
-              className={`absolute transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center text-white shadow-lg ${point.glowColor} transition-all duration-300 hover:scale-110 border-2 border-white/30`}
+              className="absolute transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/95 backdrop-blur-md flex items-center justify-center text-gray-700 shadow-lg transition-all duration-300 hover:scale-110 border-2 border-gray-200 hover:border-purple-300 hover:shadow-purple-200/50"
               style={{
                 left: `${(point.x * 800) / 100}px`,
                 top: `${(point.y * 800) / 100}px`,
@@ -293,7 +293,7 @@ export const WorldScreen: React.FC = () => {
               transition={{ delay: index * 0.2 + 0.5 }}
               whileHover={{
                 scale: 1.2,
-                boxShadow: "0 0 30px rgba(147, 51, 234, 0.8)",
+                boxShadow: "0 0 30px rgba(147, 51, 234, 0.3)",
               }}
               whileTap={{ scale: 0.9 }}
             >
@@ -301,10 +301,10 @@ export const WorldScreen: React.FC = () => {
 
               {/* Simplified Pulsing Ring Animation */}
               <motion.div
-                className="absolute inset-0 rounded-full border-2 border-white/30"
+                className="absolute inset-0 rounded-full border-2 border-purple-300/40"
                 animate={{
                   scale: [1, 1.3, 1],
-                  opacity: [0.8, 0.2, 0.8],
+                  opacity: [0.6, 0.1, 0.6],
                 }}
                 transition={{
                   duration: 3,
@@ -316,7 +316,7 @@ export const WorldScreen: React.FC = () => {
 
               {/* Point Name Label */}
               <motion.div
-                className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black/80 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
+                className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-white/95 backdrop-blur-md text-gray-800 text-xs px-2 py-1 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-gray-200 shadow-sm"
                 initial={{ opacity: 0, y: 10 }}
                 whileHover={{ opacity: 1, y: 0 }}
               >
