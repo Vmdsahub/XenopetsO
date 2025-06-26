@@ -295,26 +295,7 @@ export const WorldScreen: React.FC = () => {
               <p className="text-gray-600 text-sm">Mapa Galáctico Interativo</p>
             </div>
             <div className="flex items-center space-x-3">
-              <div className="text-right">
-                <div className="text-sm text-gray-600">
-                  Regiões: {discoveredCount}/{totalCount}
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-12 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                    <motion.div
-                      className="h-full bg-gradient-to-r from-purple-500 to-blue-500 rounded-full"
-                      initial={{ width: 0 }}
-                      animate={{
-                        width: `${(discoveredCount / totalCount) * 100}%`,
-                      }}
-                      transition={{ delay: 0.8, duration: 0.5 }}
-                    />
-                  </div>
-                  <span className="text-purple-600 font-medium text-xs">
-                    {Math.round((discoveredCount / totalCount) * 100)}%
-                  </span>
-                </div>
-              </div>
+              <div className="text-right"></div>
             </div>
           </div>
         </div>
