@@ -364,21 +364,21 @@ export const WorldScreen: React.FC = () => {
               exit={{ opacity: 0, scale: 0.8 }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
             >
-              <div className="bg-gradient-to-br from-gray-900 via-purple-900 to-black rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-purple-500/30 h-96">
+              <div className="bg-white/95 backdrop-blur-md rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-gray-200 h-96">
                 {/* Modal Header */}
-                <div className="relative p-6 bg-gradient-to-r from-purple-600/20 to-blue-600/20 border-b border-purple-500/30">
+                <div className="relative p-6 bg-gradient-to-r from-purple-50 to-blue-50 border-b border-gray-100">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center">
+                      <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center text-white">
                         {selectedPoint.icon}
                       </div>
-                      <h3 className="text-xl font-bold text-white">
+                      <h3 className="text-xl font-bold text-gray-900">
                         {selectedPoint.name}
                       </h3>
                     </div>
                     <motion.button
                       onClick={closeModal}
-                      className="p-2 hover:bg-white/10 rounded-full transition-colors text-white"
+                      className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-600"
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
                     >
