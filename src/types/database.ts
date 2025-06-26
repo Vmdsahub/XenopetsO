@@ -159,6 +159,7 @@ export interface Database {
           hatch_time?: string | null;
           death_date?: string | null;
           last_interaction?: string;
+          image_url?: string | null;
           created_at?: string;
           updated_at?: string;
         };
