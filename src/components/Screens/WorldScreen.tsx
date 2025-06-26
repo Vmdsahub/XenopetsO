@@ -145,13 +145,13 @@ export const WorldScreen: React.FC = () => {
 
   // Generate stars for background - optimized and cached
   const stars = useMemo(() => {
-    return Array.from({ length: 50 }, (_, i) => ({
+    return Array.from({ length: 100 }, (_, i) => ({
       id: i,
-      x: Math.random() * 120, // Reduced range for better performance
-      y: Math.random() * 120,
+      x: Math.random() * 200, // Full map coverage
+      y: Math.random() * 200,
       size: Math.random() * 2 + 1,
       opacity: Math.random() * 0.6 + 0.4,
-      animationDelay: Math.random() * 2,
+      animationDelay: Math.random() * 4,
     }));
   }, []); // Empty dependency array means this only runs once
 
