@@ -145,7 +145,7 @@ export const WorldScreen: React.FC = () => {
 
   // Generate stars for background - optimized and cached
   const stars = useMemo(() => {
-    return Array.from({ length: 200 }, (_, i) => ({
+    return Array.from({ length: 400 }, (_, i) => ({
       id: i,
       x: Math.random() * 200, // Full map coverage
       y: Math.random() * 200,
