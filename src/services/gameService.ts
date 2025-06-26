@@ -205,6 +205,12 @@ export class GameService {
     petData: Omit<Pet, "id" | "createdAt" | "updatedAt">,
   ): Promise<Pet | null> {
     try {
+      // Set default image for Griffin species
+      const defaultImageUrl =
+        petData.species === "Griffin"
+          ? "https://cdn.builder.io/api/v1/image/assets%2F00527235c81749aeadef448eefcc705e%2Ffe8040cedae642518cc8c46775fc3786?format=webp&width=800"
+          : petData.imageUrl;
+
       const { data, error } = await supabase
         .from("pets")
         .insert({
@@ -226,6 +232,7 @@ export class GameService {
           evasion: Math.max(0, petData.evasion),
           luck: Math.max(0, petData.luck),
           is_active: true, // Set as active by default
+          image_url: defaultImageUrl,
           hatch_time:
             petData.hatchTime?.toISOString() || new Date().toISOString(),
           last_interaction:
@@ -924,6 +931,7 @@ export class GameService {
       personality: dbPet.personality,
       conditions: [],
       equipment: {},
+      imageUrl: dbPet.image_url,
       isAlive: dbPet.is_alive,
       hatchTime: dbPet.hatch_time ? new Date(dbPet.hatch_time) : undefined,
       deathDate: dbPet.death_date ? new Date(dbPet.death_date) : undefined,

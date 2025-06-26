@@ -59,8 +59,15 @@ export interface Database {
           id: string;
           owner_id: string;
           name: string;
-          species: 'Dragon' | 'Phoenix' | 'Griffin' | 'Unicorn';
-          style: 'normal' | 'fire' | 'ice' | 'shadow' | 'light' | 'king' | 'baby';
+          species: "Dragon" | "Phoenix" | "Griffin" | "Unicorn";
+          style:
+            | "normal"
+            | "fire"
+            | "ice"
+            | "shadow"
+            | "light"
+            | "king"
+            | "baby";
           level: number;
           happiness: number;
           health: number;
@@ -74,12 +81,13 @@ export interface Database {
           precision: number;
           evasion: number;
           luck: number;
-          personality: 'Sanguine' | 'Choleric' | 'Melancholic' | 'Phlegmatic';
+          personality: "Sanguine" | "Choleric" | "Melancholic" | "Phlegmatic";
           is_alive: boolean;
           is_active: boolean;
           hatch_time: string | null;
           death_date: string | null;
           last_interaction: string;
+          image_url: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -87,8 +95,15 @@ export interface Database {
           id?: string;
           owner_id: string;
           name: string;
-          species: 'Dragon' | 'Phoenix' | 'Griffin' | 'Unicorn';
-          style?: 'normal' | 'fire' | 'ice' | 'shadow' | 'light' | 'king' | 'baby';
+          species: "Dragon" | "Phoenix" | "Griffin" | "Unicorn";
+          style?:
+            | "normal"
+            | "fire"
+            | "ice"
+            | "shadow"
+            | "light"
+            | "king"
+            | "baby";
           level?: number;
           happiness?: number;
           health?: number;
@@ -102,12 +117,13 @@ export interface Database {
           precision?: number;
           evasion?: number;
           luck?: number;
-          personality: 'Sanguine' | 'Choleric' | 'Melancholic' | 'Phlegmatic';
+          personality: "Sanguine" | "Choleric" | "Melancholic" | "Phlegmatic";
           is_alive?: boolean;
           is_active?: boolean;
           hatch_time?: string | null;
           death_date?: string | null;
           last_interaction?: string;
+          image_url?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -115,8 +131,15 @@ export interface Database {
           id?: string;
           owner_id?: string;
           name?: string;
-          species?: 'Dragon' | 'Phoenix' | 'Griffin' | 'Unicorn';
-          style?: 'normal' | 'fire' | 'ice' | 'shadow' | 'light' | 'king' | 'baby';
+          species?: "Dragon" | "Phoenix" | "Griffin" | "Unicorn";
+          style?:
+            | "normal"
+            | "fire"
+            | "ice"
+            | "shadow"
+            | "light"
+            | "king"
+            | "baby";
           level?: number;
           happiness?: number;
           health?: number;
@@ -130,12 +153,13 @@ export interface Database {
           precision?: number;
           evasion?: number;
           luck?: number;
-          personality?: 'Sanguine' | 'Choleric' | 'Melancholic' | 'Phlegmatic';
+          personality?: "Sanguine" | "Choleric" | "Melancholic" | "Phlegmatic";
           is_alive?: boolean;
           is_active?: boolean;
           hatch_time?: string | null;
           death_date?: string | null;
           last_interaction?: string;
+          image_url?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -145,14 +169,35 @@ export interface Database {
           id: string;
           name: string;
           description: string;
-          type: 'Food' | 'Potion' | 'Equipment' | 'Special' | 'Collectible' | 'Theme' | 'Weapon' | 'Style';
-          rarity: 'Common' | 'Uncommon' | 'Rare' | 'Epic' | 'Legendary' | 'Unique';
+          type:
+            | "Food"
+            | "Potion"
+            | "Equipment"
+            | "Special"
+            | "Collectible"
+            | "Theme"
+            | "Weapon"
+            | "Style";
+          rarity:
+            | "Common"
+            | "Uncommon"
+            | "Rare"
+            | "Epic"
+            | "Legendary"
+            | "Unique";
           price: number;
-          currency: 'xenocoins' | 'cash';
+          currency: "xenocoins" | "cash";
           effects: any;
           daily_limit: number | null;
           decomposition_hours: number;
-          slot: 'head' | 'torso' | 'legs' | 'gloves' | 'footwear' | 'weapon' | null;
+          slot:
+            | "head"
+            | "torso"
+            | "legs"
+            | "gloves"
+            | "footwear"
+            | "weapon"
+            | null;
           image_url: string | null;
           is_tradeable: boolean;
           created_at: string;
@@ -161,14 +206,35 @@ export interface Database {
           id?: string;
           name: string;
           description: string;
-          type: 'Food' | 'Potion' | 'Equipment' | 'Special' | 'Collectible' | 'Theme' | 'Weapon' | 'Style';
-          rarity: 'Common' | 'Uncommon' | 'Rare' | 'Epic' | 'Legendary' | 'Unique';
+          type:
+            | "Food"
+            | "Potion"
+            | "Equipment"
+            | "Special"
+            | "Collectible"
+            | "Theme"
+            | "Weapon"
+            | "Style";
+          rarity:
+            | "Common"
+            | "Uncommon"
+            | "Rare"
+            | "Epic"
+            | "Legendary"
+            | "Unique";
           price?: number;
-          currency?: 'xenocoins' | 'cash';
+          currency?: "xenocoins" | "cash";
           effects?: any;
           daily_limit?: number | null;
           decomposition_hours?: number;
-          slot?: 'head' | 'torso' | 'legs' | 'gloves' | 'footwear' | 'weapon' | null;
+          slot?:
+            | "head"
+            | "torso"
+            | "legs"
+            | "gloves"
+            | "footwear"
+            | "weapon"
+            | null;
           image_url?: string | null;
           is_tradeable?: boolean;
           created_at?: string;
@@ -177,14 +243,35 @@ export interface Database {
           id?: string;
           name?: string;
           description?: string;
-          type?: 'Food' | 'Potion' | 'Equipment' | 'Special' | 'Collectible' | 'Theme' | 'Weapon' | 'Style';
-          rarity?: 'Common' | 'Uncommon' | 'Rare' | 'Epic' | 'Legendary' | 'Unique';
+          type?:
+            | "Food"
+            | "Potion"
+            | "Equipment"
+            | "Special"
+            | "Collectible"
+            | "Theme"
+            | "Weapon"
+            | "Style";
+          rarity?:
+            | "Common"
+            | "Uncommon"
+            | "Rare"
+            | "Epic"
+            | "Legendary"
+            | "Unique";
           price?: number;
-          currency?: 'xenocoins' | 'cash';
+          currency?: "xenocoins" | "cash";
           effects?: any;
           daily_limit?: number | null;
           decomposition_hours?: number;
-          slot?: 'head' | 'torso' | 'legs' | 'gloves' | 'footwear' | 'weapon' | null;
+          slot?:
+            | "head"
+            | "torso"
+            | "legs"
+            | "gloves"
+            | "footwear"
+            | "weapon"
+            | null;
           image_url?: string | null;
           is_tradeable?: boolean;
           created_at?: string;
@@ -226,7 +313,7 @@ export interface Database {
         Row: {
           id: string;
           user_id: string;
-          type: 'info' | 'warning' | 'success' | 'error' | 'achievement';
+          type: "info" | "warning" | "success" | "error" | "achievement";
           title: string;
           message: string;
           is_read: boolean;
@@ -236,7 +323,7 @@ export interface Database {
         Insert: {
           id?: string;
           user_id: string;
-          type: 'info' | 'warning' | 'success' | 'error' | 'achievement';
+          type: "info" | "warning" | "success" | "error" | "achievement";
           title: string;
           message: string;
           is_read?: boolean;
@@ -246,7 +333,7 @@ export interface Database {
         Update: {
           id?: string;
           user_id?: string;
-          type?: 'info' | 'warning' | 'success' | 'error' | 'achievement';
+          type?: "info" | "warning" | "success" | "error" | "achievement";
           title?: string;
           message?: string;
           is_read?: boolean;

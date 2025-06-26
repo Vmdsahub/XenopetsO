@@ -278,14 +278,9 @@ export const WorldScreen: React.FC = () => {
       >
         {/* Map Header Info */}
         <div className="p-4 bg-gradient-to-r from-purple-50 to-blue-50 border-b border-gray-100">
-          <div className="flex items-center justify-between">
-            <div className="text-center">
-              <h3 className="font-bold text-xl text-black">Xenoverse</h3>
-              <p className="text-black text-sm">Mapa Galáctico Interativo</p>
-            </div>
-            <div className="flex items-center space-x-3">
-              <div className="text-right"></div>
-            </div>
+          <div className="text-center">
+            <h3 className="font-bold text-xl text-black">Xenoverse</h3>
+            <p className="text-black text-sm">Mapa Galáctico Interativo</p>
           </div>
         </div>
 
