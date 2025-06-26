@@ -209,15 +209,15 @@ export const WorldScreen: React.FC = () => {
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
       >
-        {/* Static Stars Background */}
+        {/* Subtle Parallax Stars Background */}
         <div
           className="absolute inset-0"
           style={{
-            transform: `translate(${mapPosition.x * 0.01}px, ${mapPosition.y * 0.01}px)`,
-            width: "110%",
-            height: "110%",
-            left: "-5%",
-            top: "-5%",
+            transform: `translate(${mapPosition.x * 0.03}px, ${mapPosition.y * 0.03}px)`,
+            width: "115%",
+            height: "115%",
+            left: "-7.5%",
+            top: "-7.5%",
           }}
         >
           {stars.map((star) => (
