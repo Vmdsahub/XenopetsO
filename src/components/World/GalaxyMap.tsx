@@ -103,7 +103,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
 
   const mapX = useMotionValue(savedMapPosition.current().x);
   const mapY = useMotionValue(savedMapPosition.current().y);
-  const shipRotation = useMotionValue(0); // Always start neutral
+  const shipRotation = useMotionValue(0); // Start pointing right (neutral)
 
   // Check proximity to points
   const checkProximity = useCallback(() => {
