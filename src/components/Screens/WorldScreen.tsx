@@ -413,12 +413,12 @@ export const WorldScreen: React.FC = () => {
             ))}
           </div>
 
-          {/* Player Position Indicator */}
+          {/* Player Position Indicator - Spaceship */}
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
             <motion.div
               className="relative"
               animate={{
-                scale: [1, 1.1, 1],
+                scale: [1, 1.05, 1],
               }}
               transition={{
                 duration: 2,
@@ -426,9 +426,23 @@ export const WorldScreen: React.FC = () => {
                 ease: "easeInOut",
               }}
             >
-              <div className="w-6 h-6 bg-white rounded-full border-2 border-gray-300 shadow-lg flex items-center justify-center">
-                <Navigation className="w-3 h-3 text-gray-700" />
-              </div>
+              <motion.div
+                className="w-8 h-8 flex items-center justify-center"
+                animate={{
+                  rotate: dragDirection,
+                }}
+                transition={{
+                  type: "spring",
+                  stiffness: 300,
+                  damping: 30,
+                }}
+              >
+                <img
+                  src="https://cdn.builder.io/api/v1/image/assets%2F10ecfb5da47f4e839c19217692c6bd08%2F2966df92fa1d4cf0b029c1c2617c247a?format=webp&width=800"
+                  alt="Nave Espacial"
+                  className="w-full h-full object-contain drop-shadow-lg"
+                />
+              </motion.div>
 
               {/* Subtle green aura when near points */}
               {isPlayerNearAnyPoint && (
