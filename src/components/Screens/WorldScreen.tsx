@@ -206,8 +206,8 @@ export const WorldScreen: React.FC = () => {
       const deltaY = e.clientY - (dragStart.y + mapPosition.y);
 
       if (Math.abs(deltaX) > 1 || Math.abs(deltaY) > 1) {
-        // Calculate angle in degrees (0 degrees = pointing right, 90 = down, etc.)
-        const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+        // Calculate angle in degrees - subtract 90 to align with spaceship pointing up by default
+        const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI) - 90;
         setDragDirection(angle);
       }
 
