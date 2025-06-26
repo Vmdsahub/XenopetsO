@@ -1,6 +1,15 @@
 import React, { useState, useRef, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Home, Sparkles, Globe, Star, Rocket, Zap } from "lucide-react";
+import {
+  X,
+  Home,
+  Sparkles,
+  Globe,
+  Star,
+  Rocket,
+  Zap,
+  Target,
+} from "lucide-react";
 
 interface InteractivePoint {
   id: string;
