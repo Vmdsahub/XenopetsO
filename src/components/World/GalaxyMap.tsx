@@ -222,24 +222,6 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         ))}
       </div>
 
-      {/* Custom CSS for subtle star twinkling */}
-      <style jsx>{`
-        @keyframes twinkle {
-          0% {
-            opacity: 0.3;
-            transform: scale(0.8);
-          }
-          50% {
-            opacity: 0.8;
-            transform: scale(1);
-          }
-          100% {
-            opacity: 0.4;
-            transform: scale(0.9);
-          }
-        }
-      `}</style>
-
       {/* Galaxy background nebulae */}
       <div className="absolute inset-0">
         <div
