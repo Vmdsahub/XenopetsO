@@ -178,8 +178,9 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
       // When dragging up (deltaY negative), ship points up
       // When dragging right (deltaX positive), ship points right, etc.
       // Note: We negate deltaY because in screen coordinates, positive Y is down
+      // Negate deltaX to fix left/right inversion
       // Add 90 degrees to correct the orientation (ship image seems to be rotated)
-      const angle = Math.atan2(-deltaY, deltaX) * (180 / Math.PI) + 90;
+      const angle = Math.atan2(-deltaY, -deltaX) * (180 / Math.PI) + 90;
       animate(shipRotation, angle, { duration: 0.2 });
 
       // Update map position
