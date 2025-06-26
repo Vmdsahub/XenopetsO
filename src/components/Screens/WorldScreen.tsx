@@ -115,11 +115,11 @@ export const WorldScreen: React.FC = () => {
       const newX = e.clientX - dragStart.x;
       const newY = e.clientY - dragStart.y;
 
-      // Limit dragging to canvas bounds (2560x2560)
-      const maxX = 133; // Allow some padding
-      const minX = -(2560 - 400); // Canvas width minus viewport width
-      const maxY = 62; // Allow some padding
-      const minY = -(2560 - 384); // Canvas height minus viewport height
+      // Limit dragging to canvas bounds (800x800 - optimized)
+      const maxX = 200; // Allow some padding
+      const minX = -(800 - 400); // Canvas width minus viewport width
+      const maxY = 200; // Allow some padding
+      const minY = -(800 - 384); // Canvas height minus viewport height
 
       setMapPosition({
         x: Math.max(minX, Math.min(maxX, newX)),
