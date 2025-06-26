@@ -130,7 +130,50 @@ export const WorldScreen: React.FC = () => {
   const [mapPosition, setMapPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [showWelcomeMessage, setShowWelcomeMessage] = useState(true);
   const mapRef = useRef<HTMLDivElement>(null);
+
+  // Distance threshold for point interaction (in pixels)
+  const INTERACTION_DISTANCE = 50;
+
+  // Calculate distance between player and a point
+  const calculateDistance = useCallback(
+    (point: InteractivePoint) => {
+      // Player is always at the center of the visible area
+      const playerX = 400; // Center of the 800px wide map
+      const playerY = 400; // Center of the 800px tall map
+
+      // Point position on the map
+      const pointX = (point.x * 800) / 100;
+      const pointY = (point.y * 800) / 100;
+
+      // Account for map offset
+      const adjustedPointX = pointX + mapPosition.x;
+      const adjustedPointY = pointY + mapPosition.y;
+
+      return Math.sqrt(
+        Math.pow(playerX - adjustedPointX, 2) +
+          Math.pow(playerY - adjustedPointY, 2),
+      );
+    },
+    [mapPosition],
+  );
+
+  // Check if a point is within interaction range
+  const isPointInRange = useCallback(
+    (point: InteractivePoint) => {
+      return calculateDistance(point) <= INTERACTION_DISTANCE;
+    },
+    [calculateDistance, INTERACTION_DISTANCE],
+  );
+
+  // Get points that are currently in range
+  const pointsInRange = useMemo(() => {
+    return interactivePoints.filter(isPointInRange);
+  }, [isPointInRange]);
+
+  // Check if player is near any point (for aura effect)
+  const isPlayerNearAnyPoint = pointsInRange.length > 0;
 
   // Center the map (player position)
   const centerMap = useCallback(() => {
@@ -159,7 +202,7 @@ export const WorldScreen: React.FC = () => {
       const maxX = 200;
       const minX = -(800 - 400);
       const maxY = 200;
-      const minY = -(800 - 384);
+      const minY = -(800 - 448);
 
       setMapPosition({
         x: Math.max(minX, Math.min(maxX, newX)),
@@ -174,7 +217,7 @@ export const WorldScreen: React.FC = () => {
   }, []);
 
   const handlePointClick = (point: InteractivePoint) => {
-    if (!isDragging) {
+    if (!isDragging && isPointInRange(point)) {
       setSelectedPoint(point);
     }
   };
@@ -182,6 +225,15 @@ export const WorldScreen: React.FC = () => {
   const closeModal = () => {
     setSelectedPoint(null);
   };
+
+  // Hide welcome message after 4 seconds
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowWelcomeMessage(false);
+    }, 4000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const getTypeColor = (type: string) => {
     const colors = {
@@ -226,24 +278,6 @@ export const WorldScreen: React.FC = () => {
 
   return (
     <div className="max-w-md mx-auto">
-      {/* Search Bar */}
-      <motion.div
-        className="bg-white rounded-2xl shadow-lg mb-4 p-4 border border-gray-100"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search cosmic regions..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-          />
-        </div>
-      </motion.div>
-
       {/* Map Container */}
       <motion.div
         className="bg-white rounded-2xl shadow-lg mb-6 overflow-hidden border border-gray-100"
@@ -254,40 +288,34 @@ export const WorldScreen: React.FC = () => {
         {/* Map Header Info */}
         <div className="p-4 bg-gradient-to-r from-purple-50 to-blue-50 border-b border-gray-100">
           <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-bold text-xl bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                Xenoverse
-              </h3>
-              <p className="text-gray-600 text-sm">Mapa Galáctico Interativo</p>
+            <div className="text-center">
+              <h3 className="font-bold text-xl text-black">Xenoverse</h3>
+              <p className="text-black text-sm">Mapa Galáctico Interativo</p>
             </div>
             <div className="flex items-center space-x-3">
-              <div className="text-right">
-                <div className="text-sm text-gray-600">
-                  Regiões: {discoveredCount}/{totalCount}
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-12 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                    <motion.div
-                      className="h-full bg-gradient-to-r from-purple-500 to-blue-500 rounded-full"
-                      initial={{ width: 0 }}
-                      animate={{
-                        width: `${(discoveredCount / totalCount) * 100}%`,
-                      }}
-                      transition={{ delay: 0.8, duration: 0.5 }}
-                    />
-                  </div>
-                  <span className="text-purple-600 font-medium text-xs">
-                    {Math.round((discoveredCount / totalCount) * 100)}%
-                  </span>
-                </div>
-              </div>
+              <div className="text-right"></div>
             </div>
           </div>
         </div>
 
+        {/* Welcome Message */}
+        <AnimatePresence>
+          {showWelcomeMessage && (
+            <motion.div
+              className="absolute top-4 left-1/2 transform -translate-x-1/2 z-30 bg-black/80 backdrop-blur-sm text-white text-sm px-4 py-2 rounded-lg border border-white/20"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              Arraste o mapa para se aproximar dos pontos de interesse
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Interactive Map */}
         <motion.div
-          className="relative h-80 overflow-hidden bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 cursor-grab active:cursor-grabbing"
+          className="relative h-[28rem] overflow-hidden bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 cursor-grab active:cursor-grabbing"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
@@ -359,21 +387,25 @@ export const WorldScreen: React.FC = () => {
                 ease: "easeInOut",
               }}
             >
-              <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full border-3 border-white shadow-lg flex items-center justify-center">
-                <Navigation className="w-4 h-4 text-white" />
+              <div className="w-6 h-6 bg-white rounded-full border-2 border-gray-300 shadow-lg flex items-center justify-center">
+                <Navigation className="w-3 h-3 text-gray-700" />
               </div>
-              <motion.div
-                className="absolute inset-0 rounded-full border-2 border-purple-400"
-                animate={{
-                  scale: [1, 1.5, 1],
-                  opacity: [0.8, 0.2, 0.8],
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              />
+
+              {/* Subtle green aura when near points */}
+              {isPlayerNearAnyPoint && (
+                <motion.div
+                  className="absolute inset-0 rounded-full border-2 border-green-400 bg-green-400/5"
+                  animate={{
+                    scale: [1, 1.3, 1],
+                    opacity: [0.6, 0.3, 0.6],
+                  }}
+                  transition={{
+                    duration: 3,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                />
+              )}
             </motion.div>
             <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 text-xs font-medium text-white bg-black/70 px-2 py-1 rounded-lg">
               Você
@@ -392,76 +424,58 @@ export const WorldScreen: React.FC = () => {
             }}
           >
             {/* Interactive Points */}
-            {filteredPoints.map((point, index) => (
-              <motion.button
-                key={point.id}
-                onClick={() => handlePointClick(point)}
-                className="absolute transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white/90 backdrop-blur-sm shadow-lg transition-all duration-300 hover:scale-150 border border-gray-300 hover:bg-white group"
-                style={{
-                  left: `${(point.x * 800) / 100}px`,
-                  top: `${(point.y * 800) / 100}px`,
-                }}
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: index * 0.1 + 0.5 }}
-                whileHover={{
-                  scale: 1.5,
-                }}
-                whileTap={{ scale: 0.8 }}
-              >
-                {/* Subtle Pulsing Ring Animation */}
-                <motion.div
-                  className="absolute inset-0 rounded-full border border-white/60"
-                  animate={{
-                    scale: [1, 2, 1],
-                    opacity: [0.6, 0.1, 0.6],
+            {filteredPoints.map((point, index) => {
+              const pointInRange = isPointInRange(point);
+              return (
+                <motion.button
+                  key={point.id}
+                  onClick={() => handlePointClick(point)}
+                  className={`absolute transform -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full backdrop-blur-sm shadow-lg transition-all duration-300 border group ${
+                    pointInRange
+                      ? "bg-white/90 border-gray-300 hover:bg-white hover:scale-150 cursor-pointer"
+                      : "bg-gray-500/60 border-gray-500 cursor-not-allowed"
+                  }`}
+                  style={{
+                    left: `${(point.x * 800) / 100}px`,
+                    top: `${(point.y * 800) / 100}px`,
                   }}
-                  transition={{
-                    duration: 3,
-                    repeat: Infinity,
-                    delay: index * 0.5,
-                    ease: "easeInOut",
-                  }}
-                />
-
-                {/* Point Name Label on Hover */}
-                <motion.div
-                  className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black/80 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
-                  initial={{ opacity: 0, y: 5 }}
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: index * 0.1 + 0.5 }}
+                  whileHover={
+                    pointInRange
+                      ? {
+                          scale: 1.5,
+                        }
+                      : {}
+                  }
+                  whileTap={pointInRange ? { scale: 0.8 } : {}}
+                  disabled={!pointInRange}
                 >
-                  {point.name}
-                </motion.div>
-              </motion.button>
-            ))}
+                  {/* Point Name Label on Hover */}
+                  <motion.div
+                    className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black/80 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
+                    initial={{ opacity: 0, y: 5 }}
+                  >
+                    {point.name}
+                  </motion.div>
+                </motion.button>
+              );
+            })}
           </motion.div>
         </motion.div>
 
         {/* Map Legend */}
         <div className="p-4 bg-gray-50 border-t border-gray-200">
           <div className="flex items-center justify-between text-sm mb-3">
-            <span className="font-medium text-gray-900">Legenda do Mapa</span>
-            <span className="text-gray-600">
-              Mostrando {filteredPoints.length} regiões
-            </span>
+            <span className="text-gray-600"></span>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 bg-green-500 rounded-full"></div>
-              <span className="text-xs text-gray-600">Descoberto</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 bg-gray-400 rounded-full"></div>
-              <span className="text-xs text-gray-600">Inexplorado</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Navigation className="w-4 h-4 text-purple-600" />
-              <span className="text-xs text-gray-600">Sua Posi��ão</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Target className="w-4 h-4 text-purple-600" />
-              <span className="text-xs text-gray-600">Centralizar</span>
-            </div>
+            <div className="flex items-center space-x-2"></div>
+            <div className="flex items-center space-x-2"></div>
+            <div className="flex items-center space-x-2"></div>
+            <div className="flex items-center space-x-2"></div>
           </div>
         </div>
       </motion.div>
