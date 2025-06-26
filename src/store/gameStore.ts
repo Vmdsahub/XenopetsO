@@ -124,10 +124,7 @@ export interface Store {
   npcName: string;
   npcImage: string;
   npcDialogue: string;
-  location: {
-    continent: string;
-    coordinates: { x: number; y: number };
-  };
+
   inventory: StoreItem[];
   restockSchedule: RestockSchedule;
   specialOffers: SpecialOffer[];
@@ -214,10 +211,7 @@ const mockStores: Store[] = [
       "https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=200",
     npcDialogue:
       "Welcome to my shop, traveler! I have the finest items for your pets. What can I help you find today?",
-    location: {
-      continent: "Mystic Forest",
-      coordinates: { x: 25, y: 60 },
-    },
+
     inventory: [
       {
         id: "si1",
@@ -301,10 +295,7 @@ const mockStores: Store[] = [
       "https://images.pexels.com/photos/1181690/pexels-photo-1181690.jpeg?auto=compress&cs=tinysrgb&w=200",
     npcDialogue:
       "Ah, a fellow traveler! The desert has been kind to me, and I have rare treasures to share. Perhaps something for your companions?",
-    location: {
-      continent: "Golden Desert",
-      coordinates: { x: 35, y: 70 },
-    },
+
     inventory: [
       {
         id: "si4",
@@ -366,10 +357,7 @@ const mockStores: Store[] = [
       "https://images.pexels.com/photos/1040880/pexels-photo-1040880.jpeg?auto=compress&cs=tinysrgb&w=200",
     npcDialogue:
       "Welcome to my forge! These mountains provide the finest materials for crafting. Your pets deserve the best protection and weapons!",
-    location: {
-      continent: "Crystal Mountains",
-      coordinates: { x: 20, y: 80 },
-    },
+
     inventory: [
       {
         id: "si6",
