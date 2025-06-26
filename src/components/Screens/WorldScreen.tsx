@@ -489,8 +489,8 @@ export const WorldScreen: React.FC = () => {
                       : "bg-gray-500/60 border-gray-500 cursor-not-allowed"
                   }`}
                   style={{
-                    left: `${(point.x * 800) / 100}px`,
-                    top: `${(point.y * 800) / 100}px`,
+                    left: `${(point.x * 1600) / 100}px`,
+                    top: `${(point.y * 1600) / 100}px`,
                   }}
                   initial={{ scale: 0, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
