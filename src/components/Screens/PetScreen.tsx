@@ -92,16 +92,36 @@ export const PetScreen: React.FC = () => {
                 className="w-full flex items-center space-x-3 p-3 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors"
                 whileHover={{ scale: 1.02 }}
               >
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-blue-500 rounded-full flex items-center justify-center">
-                  <span className="text-white font-bold">
-                    {pet.species === "Dragon"
-                      ? "🐉"
-                      : pet.species === "Phoenix"
-                        ? "🔥"
-                        : pet.species === "Griffin"
-                          ? "🦅"
-                          : "🦄"}
-                  </span>
+                <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-blue-500 rounded-full flex items-center justify-center overflow-hidden">
+                  {pet.imageUrl ? (
+                    <img
+                      src={pet.imageUrl}
+                      alt={pet.name}
+                      className="w-full h-full object-cover rounded-full"
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                        e.currentTarget.parentElement!.innerHTML = `<span class="text-white font-bold">${
+                          pet.species === "Dragon"
+                            ? "🐉"
+                            : pet.species === "Phoenix"
+                              ? "🔥"
+                              : pet.species === "Griffin"
+                                ? "🦅"
+                                : "🦄"
+                        }</span>`;
+                      }}
+                    />
+                  ) : (
+                    <span className="text-white font-bold">
+                      {pet.species === "Dragon"
+                        ? "🐉"
+                        : pet.species === "Phoenix"
+                          ? "🔥"
+                          : pet.species === "Griffin"
+                            ? "🦅"
+                            : "🦄"}
+                    </span>
+                  )}
                 </div>
                 <div className="text-left">
                   <p className="font-semibold text-gray-900">{pet.name}</p>
