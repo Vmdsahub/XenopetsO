@@ -134,7 +134,7 @@ export const WorldScreen: React.FC = () => {
   const mapRef = useRef<HTMLDivElement>(null);
 
   // Distance threshold for point interaction (in pixels)
-  const INTERACTION_DISTANCE = 80;
+  const INTERACTION_DISTANCE = 50;
 
   // Calculate distance between player and a point
   const calculateDistance = useCallback(
