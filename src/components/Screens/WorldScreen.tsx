@@ -297,6 +297,16 @@ export const WorldScreen: React.FC = () => {
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
         >
+          {/* Center Button inside map */}
+          <motion.button
+            onClick={centerMap}
+            className="absolute top-3 right-3 z-20 p-2 bg-white/90 backdrop-blur-sm rounded-lg shadow-md border border-white/20 hover:bg-white transition-all"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            title="Centralizar no jogador"
+          >
+            <Target className="w-4 h-4 text-gray-700" />
+          </motion.button>
           {/* Stars Background */}
           <div
             className="absolute"
