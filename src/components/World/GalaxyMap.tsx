@@ -205,7 +205,10 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-[500px] bg-gradient-to-br from-gray-950 via-slate-900 to-black rounded-2xl overflow-hidden cursor-grab active:cursor-grabbing"
+      className={`relative w-full h-[500px] bg-gradient-to-br from-gray-950 via-slate-900 to-black rounded-2xl overflow-hidden ${
+        isDragging ? "cursor-grabbing" : "cursor-grab"
+      }`}
+      style={{ userSelect: "none" }}
     >
       {/* Stars background */}
       <div
