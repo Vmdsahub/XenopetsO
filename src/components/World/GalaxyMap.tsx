@@ -164,7 +164,9 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
       const deltaY = info.delta.y;
 
       // Calculate ship rotation based on drag direction
-      const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+      // Adjust angle so that: right=0°, down=90°, left=180°, up=270°
+      // Adding 90° to correct the orientation since the ship image points right by default
+      const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI) + 90;
       animate(shipRotation, angle, { duration: 0.2 });
 
       // Update map position
