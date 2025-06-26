@@ -171,9 +171,10 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
 
       // Calculate ship rotation based on movement direction
       // The ship should point where it's going (direction of movement)
-      // deltaX > 0 = moving right, deltaX < 0 = moving left
-      // deltaY > 0 = moving down, deltaY < 0 = moving up
-      const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI) - 90;
+      // Convert movement to angle: up=0°, right=90°, down=180°, left=270°
+      let angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+      // Adjust so that right=0°, down=90°, left=180°, up=270°, then rotate 90° so up=0°
+      angle = angle + 90;
       animate(shipRotation, angle, { duration: 0.2 });
 
       // Update map position
