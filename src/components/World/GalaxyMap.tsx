@@ -164,10 +164,11 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
       const deltaY = info.delta.y;
 
       // Calculate ship rotation based on movement direction
-      // Ship should point OPPOSITE to drag direction (like pushing the map)
-      // When dragging up, ship points down; when dragging right, ship points left, etc.
-      // Invert both deltaX and deltaY to get opposite direction
-      const angle = Math.atan2(deltaY, -deltaX) * (180 / Math.PI) + 90;
+      // Ship should point in the direction it's moving
+      // When dragging up (deltaY negative), ship points up
+      // When dragging right (deltaX positive), ship points right, etc.
+      // Note: We negate deltaY because in screen coordinates, positive Y is down
+      const angle = Math.atan2(-deltaY, deltaX) * (180 / Math.PI);
       animate(shipRotation, angle, { duration: 0.2 });
 
       // Update map position
