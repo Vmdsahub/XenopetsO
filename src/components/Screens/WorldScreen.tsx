@@ -278,24 +278,6 @@ export const WorldScreen: React.FC = () => {
 
   return (
     <div className="max-w-md mx-auto">
-      {/* Search Bar */}
-      <motion.div
-        className="bg-white rounded-2xl shadow-lg mb-4 p-4 border border-gray-100"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search cosmic regions..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-          />
-        </div>
-      </motion.div>
-
       {/* Map Container */}
       <motion.div
         className="bg-white rounded-2xl shadow-lg mb-6 overflow-hidden border border-gray-100"
