@@ -131,6 +131,9 @@ export const WorldScreen: React.FC = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [dragDirection, setDragDirection] = useState(0); // Ângulo de rotação da nave em graus
+  const [trailPoints, setTrailPoints] = useState<
+    Array<{ x: number; y: number; id: number }>
+  >([]);
 
   const mapRef = useRef<HTMLDivElement>(null);
 
