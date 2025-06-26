@@ -103,7 +103,13 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
 
   const mapX = useMotionValue(savedMapPosition.current().x);
   const mapY = useMotionValue(savedMapPosition.current().y);
-  const shipRotation = useMotionValue(0);
+
+  // Load saved ship rotation or default to 0° (pointing up)
+  const savedRotation = (() => {
+    const saved = localStorage.getItem("xenopets-ship-rotation");
+    return saved ? parseFloat(saved) : 0;
+  })();
+  const shipRotation = useMotionValue(savedRotation);
 
   // Check proximity to points
   const checkProximity = useCallback(() => {
