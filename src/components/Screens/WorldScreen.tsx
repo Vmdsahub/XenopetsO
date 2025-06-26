@@ -470,29 +470,14 @@ export const WorldScreen: React.FC = () => {
         {/* Map Legend */}
         <div className="p-4 bg-gray-50 border-t border-gray-200">
           <div className="flex items-center justify-between text-sm mb-3">
-            <span className="font-medium text-gray-900">Legenda do Mapa</span>
-            <span className="text-gray-600">
-              Mostrando {filteredPoints.length} regiões
-            </span>
+            <span className="text-gray-600"></span>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 bg-green-500 rounded-full"></div>
-              <span className="text-xs text-gray-600">Descoberto</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-4 h-4 bg-gray-400 rounded-full"></div>
-              <span className="text-xs text-gray-600">Inexplorado</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Navigation className="w-4 h-4 text-purple-600" />
-              <span className="text-xs text-gray-600">Sua Posi��ão</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Target className="w-4 h-4 text-purple-600" />
-              <span className="text-xs text-gray-600">Centralizar</span>
-            </div>
+            <div className="flex items-center space-x-2"></div>
+            <div className="flex items-center space-x-2"></div>
+            <div className="flex items-center space-x-2"></div>
+            <div className="flex items-center space-x-2"></div>
           </div>
         </div>
       </motion.div>
