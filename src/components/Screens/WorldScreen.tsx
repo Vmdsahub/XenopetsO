@@ -226,15 +226,6 @@ export const WorldScreen: React.FC = () => {
     setSelectedPoint(null);
   };
 
-  // Hide welcome message after 4 seconds
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowWelcomeMessage(false);
-    }, 4000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
   const getTypeColor = (type: string) => {
     const colors = {
       Mystical: "border-purple-300 bg-purple-50 text-purple-700",
