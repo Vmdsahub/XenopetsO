@@ -124,10 +124,7 @@ export interface Store {
   npcName: string;
   npcImage: string;
   npcDialogue: string;
-  location: {
-    continent: string;
-    coordinates: { x: number; y: number };
-  };
+
   inventory: StoreItem[];
   restockSchedule: RestockSchedule;
   specialOffers: SpecialOffer[];
