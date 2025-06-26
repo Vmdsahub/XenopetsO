@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Planet, Building2, Sparkles, Mountain } from "lucide-react";
+import { Globe, Building2, Sparkles, Mountain } from "lucide-react";
 
 interface MapPointData {
   id: string;
@@ -22,7 +22,7 @@ interface MapPointProps {
 const getPointIcon = (type: string) => {
   switch (type) {
     case "planet":
-      return Planet;
+      return Globe;
     case "station":
       return Building2;
     case "nebula":
@@ -30,7 +30,7 @@ const getPointIcon = (type: string) => {
     case "asteroid":
       return Mountain;
     default:
-      return Planet;
+      return Globe;
   }
 };
 
