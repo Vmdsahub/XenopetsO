@@ -109,16 +109,9 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <div className="bg-white rounded-3xl shadow-2xl p-8 border border-gray-100">
+      <div className="bg-white rounded-3xl shadow-2xl pt-10 px-8 pb-8 border border-gray-100">
         {/* Header */}
         <div className="text-center mb-8">
-          <motion.div
-            className="w-20 h-20 bg-gradient-to-br from-green-600 via-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg"
-            whileHover={{ scale: 1.05, rotate: -5 }}
-            transition={{ type: "spring", stiffness: 300 }}
-          >
-            <span className="text-white text-3xl font-bold">X</span>
-          </motion.div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Junte-se aos Xenopets
           </h1>
