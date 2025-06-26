@@ -289,21 +289,6 @@ export const WorldScreen: React.FC = () => {
           </div>
         </div>
 
-        {/* Welcome Message */}
-        <AnimatePresence>
-          {showWelcomeMessage && (
-            <motion.div
-              className="absolute top-4 left-1/2 transform -translate-x-1/2 z-30 bg-black/80 backdrop-blur-sm text-white text-sm px-4 py-2 rounded-lg border border-white/20"
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              Arraste o mapa para se aproximar dos pontos de interesse
-            </motion.div>
-          )}
-        </AnimatePresence>
-
         {/* Interactive Map */}
         <motion.div
           className="relative h-[28rem] overflow-hidden bg-gradient-to-br from-gray-800 via-gray-700 to-gray-900 cursor-grab active:cursor-grabbing"
