@@ -161,15 +161,16 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
     };
   }, [mapX, mapY, shipRotation, isDragging]);
 
-  const handleDragStart = () => {
-    setIsDragging(true);
+  const handleDragEnd = () => {
+    setIsDragging(false);
+    // Return ship to neutral position (0 degrees) when stopped
+    animate(shipRotation, 0, { duration: 0.5 });
+
+    // Save current map position and reset ship rotation to neutral
+    const mapPos = { x: mapX.get(), y: mapY.get() };
+    localStorage.setItem("xenopets-map-position", JSON.stringify(mapPos));
+    localStorage.setItem("xenopets-ship-rotation", "0");
   };
-
-  const handleDrag = useCallback(
-    (event: any, info: any) => {
-      if (!containerRef.current) return;
-
-      const containerRect = containerRef.current.getBoundingClientRect();
       const deltaX = info.delta.x;
       const deltaY = info.delta.y;
 
