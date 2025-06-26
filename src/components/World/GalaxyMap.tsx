@@ -194,23 +194,40 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-96 bg-gradient-to-br from-indigo-950 via-purple-950 to-gray-900 rounded-2xl overflow-hidden cursor-grab active:cursor-grabbing"
+      className="relative w-full h-[500px] bg-gradient-to-br from-gray-950 via-slate-900 to-black rounded-2xl overflow-hidden cursor-grab active:cursor-grabbing"
     >
       {/* Stars background */}
-      <div className="absolute inset-0 opacity-60">
+      <div className="absolute inset-0 opacity-80">
         {stars.map((star) => (
           <div
             key={star.id}
-            className="absolute w-1 h-1 bg-white rounded-full animate-pulse"
+            className="absolute w-1 h-1 bg-white rounded-full"
             style={{
               left: `${star.x}%`,
               top: `${star.y}%`,
-              animationDelay: `${star.animationDelay}s`,
-              animationDuration: `${star.animationDuration}s`,
+              animation: `twinkle ${star.animationDuration}s ease-in-out ${star.animationDelay}s infinite alternate`,
             }}
           />
         ))}
       </div>
+
+      {/* Custom CSS for subtle star twinkling */}
+      <style jsx>{`
+        @keyframes twinkle {
+          0% {
+            opacity: 0.3;
+            transform: scale(0.8);
+          }
+          50% {
+            opacity: 0.8;
+            transform: scale(1);
+          }
+          100% {
+            opacity: 0.4;
+            transform: scale(0.9);
+          }
+        }
+      `}</style>
 
       {/* Galaxy background nebulae */}
       <div className="absolute inset-0">
