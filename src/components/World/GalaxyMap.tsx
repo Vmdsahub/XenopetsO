@@ -180,8 +180,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
 
   const handleDragEnd = () => {
     setIsDragging(false);
-    // Reset ship to neutral position (0°) when stopped
-    animate(shipRotation, 0, { duration: 0.5 });
+    // Keep current rotation - ship maintains the direction it was moving
 
     // Save current map position
     const mapPos = { x: mapX.get(), y: mapY.get() };
