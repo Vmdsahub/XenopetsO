@@ -91,8 +91,8 @@ const getUnifiedNavigationConfig = (
 const GALAXY_POINTS: MapPointData[] = [
   {
     id: "terra-nova",
-    x: 48,
-    y: 47,
+    x: 40,
+    y: 45,
     name: "Terra Nova",
     type: "planet",
     description: "Um planeta verdejante cheio de vida",
@@ -101,8 +101,8 @@ const GALAXY_POINTS: MapPointData[] = [
   },
   {
     id: "estacao-omega",
-    x: 52,
-    y: 48,
+    x: 60,
+    y: 35,
     name: "Estação Omega",
     type: "station",
     description: "Centro comercial da galáxia",
@@ -110,8 +110,8 @@ const GALAXY_POINTS: MapPointData[] = [
   },
   {
     id: "nebulosa-crimson",
-    x: 49,
-    y: 52,
+    x: 30,
+    y: 65,
     name: "Nebulosa Crimson",
     type: "nebula",
     description: "Uma nebulosa misteriosa com energia estranha",
@@ -119,8 +119,8 @@ const GALAXY_POINTS: MapPointData[] = [
   },
   {
     id: "campo-asteroides",
-    x: 51,
-    y: 53,
+    x: 70,
+    y: 55,
     name: "Campo de Asteroides",
     type: "asteroid",
     description: "Rico em recursos minerais raros",
@@ -129,7 +129,7 @@ const GALAXY_POINTS: MapPointData[] = [
   {
     id: "mundo-gelado",
     x: 50,
-    y: 49,
+    y: 25,
     name: "Mundo Gelado",
     type: "planet",
     description: "Planeta coberto de gelo eterno",
