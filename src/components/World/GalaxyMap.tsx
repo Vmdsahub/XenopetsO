@@ -270,6 +270,18 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
     localStorage.setItem("xenopets-map-position", JSON.stringify(mapPos));
   };
 
+  const resetShipPosition = () => {
+    // Reset map to center position
+    animate(mapX, 0, { duration: 0.5 });
+    animate(mapY, 0, { duration: 0.5 });
+    animate(shipRotation, 0, { duration: 0.5 });
+
+    // Clear saved position
+    localStorage.removeItem("xenopets-map-position");
+    setIsNearBoundary(false);
+    setIsDragging(false);
+  };
+
   const handlePointClick = (pointId: string) => {
     const point = GALAXY_POINTS.find((p) => p.id === pointId);
     if (point) {
