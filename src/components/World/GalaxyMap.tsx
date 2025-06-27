@@ -358,17 +358,47 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
       const newX = mapX.get() + deltaX;
       const newY = mapY.get() + deltaY;
 
-      // Unified circular boundary constraint with smooth edge handling
+      // Unified circular boundary constraint with smooth sliding along edge
       const distance = Math.sqrt(newX * newX + newY * newY);
 
       let clampedX = newX;
       let clampedY = newY;
 
-      // If outside unified boundary, clamp to circle edge but allow natural movement along edge
+      // If outside unified boundary, implement sliding along the edge
       if (distance > config.navigationRadius) {
-        const angle = Math.atan2(newY, newX);
-        clampedX = Math.cos(angle) * config.navigationRadius;
-        clampedY = Math.sin(angle) * config.navigationRadius;
+        const currentDistance = Math.sqrt(
+          mapX.get() * mapX.get() + mapY.get() * mapY.get(),
+        );
+
+        // If already at boundary, allow tangential movement (sliding along edge)
+        if (currentDistance >= config.navigationRadius - 5) {
+          // Project movement onto tangent of circle for smooth sliding
+          const angle = Math.atan2(mapY.get(), mapX.get());
+          const tangentX = -Math.sin(angle);
+          const tangentY = Math.cos(angle);
+
+          // Calculate tangential component of movement
+          const tangentialMovement = deltaX * tangentX + deltaY * tangentY;
+
+          // Apply only tangential movement
+          clampedX = mapX.get() + tangentialMovement * tangentX;
+          clampedY = mapY.get() + tangentialMovement * tangentY;
+
+          // Ensure result is still within boundary
+          const finalDistance = Math.sqrt(
+            clampedX * clampedX + clampedY * clampedY,
+          );
+          if (finalDistance > config.navigationRadius) {
+            const finalAngle = Math.atan2(clampedY, clampedX);
+            clampedX = Math.cos(finalAngle) * config.navigationRadius;
+            clampedY = Math.sin(finalAngle) * config.navigationRadius;
+          }
+        } else {
+          // Standard clamping for movements from inside to outside
+          const angle = Math.atan2(newY, newX);
+          clampedX = Math.cos(angle) * config.navigationRadius;
+          clampedY = Math.sin(angle) * config.navigationRadius;
+        }
       }
 
       // Check boundary proximity using unified threshold
