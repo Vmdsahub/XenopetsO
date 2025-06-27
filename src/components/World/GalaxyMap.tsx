@@ -174,22 +174,14 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
     }));
   }, []);
 
-  // Load saved map position with validation
+  // Load saved map position with validation - will be re-validated when container loads
   const savedMapPosition = useRef(() => {
     try {
       const saved = localStorage.getItem("xenopets-map-position");
       if (saved) {
         const parsed = JSON.parse(saved);
-        // Validate that saved position is within current limits
-        const validX = Math.max(
-          -NAVIGATION_LIMITS.horizontal,
-          Math.min(NAVIGATION_LIMITS.horizontal, parsed.x || 0),
-        );
-        const validY = Math.max(
-          -NAVIGATION_LIMITS.vertical,
-          Math.min(NAVIGATION_LIMITS.vertical, parsed.y || 0),
-        );
-        return { x: validX, y: validY };
+        // Return raw saved position, will be validated when container dimensions are available
+        return { x: parsed.x || 0, y: parsed.y || 0 };
       }
     } catch (error) {
       console.warn("Invalid saved map position, resetting to center");
