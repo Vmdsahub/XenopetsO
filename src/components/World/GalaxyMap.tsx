@@ -168,9 +168,9 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
       const newY = mapY.get() + deltaY;
 
       // Check boundary proximity
-      const boundaryThreshold = 50; // Distance from boundary to trigger warning
-      const isNearX = newX <= -174 || newX >= 174; // 224 - 50 = 174
-      const isNearY = newY <= -200 || newY >= 200; // 250 - 50 = 200
+      const boundaryThreshold = 20; // Distance from boundary to trigger warning
+      const isNearX = newX <= -204 || newX >= 204; // 224 - 20 = 204
+      const isNearY = newY <= -230 || newY >= 230; // 250 - 20 = 230
       setIsNearBoundary(isNearX || isNearY);
 
       // Only calculate rotation if there's significant movement
