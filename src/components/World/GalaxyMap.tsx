@@ -24,11 +24,42 @@ interface MapPointData {
 }
 
 // Navigation limits configuration - single source of truth
-const NAVIGATION_LIMITS = {
-  horizontal: 400, // pixels - valor aumentado mas seguro
-  vertical: 450, // pixels - valor aumentado mas seguro
+// Container-based navigation limits that scale with container size
+const NAVIGATION_CONFIG = {
+  // Navigation area as percentage of container size - unified values
+  horizontalRatio: 0.9, // 90% of container width for navigation
+  verticalRatio: 0.9, // 90% of container height for navigation
   boundaryThreshold: 5, // threshold for boundary proximity warning
+  minContainerSize: 500, // minimum container size for calculations
 } as const;
+
+// Calculate navigation limits based on container dimensions
+const getNavigationLimits = (
+  containerWidth: number,
+  containerHeight: number,
+) => {
+  // Ensure minimum sizes for calculations
+  const effectiveWidth = Math.max(
+    containerWidth,
+    NAVIGATION_CONFIG.minContainerSize,
+  );
+  const effectiveHeight = Math.max(
+    containerHeight,
+    NAVIGATION_CONFIG.minContainerSize,
+  );
+
+  // Calculate limits as percentage of container size - ensuring they're always equal for uniform navigation
+  const baseLimit = Math.min(
+    (effectiveWidth * NAVIGATION_CONFIG.horizontalRatio) / 2,
+    (effectiveHeight * NAVIGATION_CONFIG.verticalRatio) / 2,
+  );
+
+  return {
+    horizontal: baseLimit,
+    vertical: baseLimit, // Always equal to horizontal for uniform navigation
+    boundaryThreshold: NAVIGATION_CONFIG.boundaryThreshold,
+  };
+};
 // Calculate boundary rectangle dimensions based on map size and constraints
 // Map is 200% (2x) of container size, positioned at -50% offset
 const getBoundaryDimensions = (
