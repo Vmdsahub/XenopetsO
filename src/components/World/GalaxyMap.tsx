@@ -26,9 +26,9 @@ interface MapPointData {
 // Navigation limits configuration - single source of truth
 // Container-based navigation limits that scale with container size
 const NAVIGATION_CONFIG = {
-  // Navigation area as percentage of container size - unified values
-  horizontalRatio: 0.9, // 90% of container width for navigation
-  verticalRatio: 0.9, // 90% of container height for navigation
+  // Navigation area as percentage of container size - unified values (circular boundary)
+  horizontalRatio: 2.0, // 200% of container width for navigation (significantly increased)
+  verticalRatio: 2.0, // 200% of container height for navigation (significantly increased)
   boundaryThreshold: 5, // threshold for boundary proximity warning
   minContainerSize: 500, // minimum container size for calculations
 } as const;
@@ -60,8 +60,8 @@ const getNavigationLimits = (
     boundaryThreshold: NAVIGATION_CONFIG.boundaryThreshold,
   };
 };
-// Calculate boundary rectangle dimensions based on map size and constraints
-// Map is 200% (2x) of container size, positioned at -50% offset
+// Calculate boundary circle dimensions based on map size and constraints
+// Map is 200% (2x) of container size, positioned at -50% offset with circular boundary
 const getBoundaryDimensions = (
   containerWidth: number,
   containerHeight: number,
@@ -72,13 +72,13 @@ const getBoundaryDimensions = (
   const mapWidth = containerWidth * 2;
   const mapHeight = containerHeight * 2;
 
-  // Available movement range (constraint * 2) - now always uniform
-  const movementRangeX = limits.horizontal * 2;
-  const movementRangeY = limits.vertical * 2;
+  // Available movement range (constraint * 2) - circular boundary
+  const radius = Math.min(limits.horizontal, limits.vertical);
+  const circleDiameter = radius * 2;
 
-  // Calculate boundary rectangle as percentage of map - using uniform values
-  const boundaryWidthPercent = (movementRangeX / mapWidth) * 100;
-  const boundaryHeightPercent = (movementRangeY / mapHeight) * 100;
+  // Calculate boundary circle as percentage of map
+  const boundaryWidthPercent = (circleDiameter / mapWidth) * 100;
+  const boundaryHeightPercent = (circleDiameter / mapHeight) * 100;
 
   // Center the boundary in the map
   const boundaryLeftPercent = (100 - boundaryWidthPercent) / 2;
@@ -89,14 +89,15 @@ const getBoundaryDimensions = (
     top: `${boundaryTopPercent}%`,
     width: `${boundaryWidthPercent}%`,
     height: `${boundaryHeightPercent}%`,
+    radius: radius,
   };
 };
 
 const GALAXY_POINTS: MapPointData[] = [
   {
     id: "terra-nova",
-    x: 30,
-    y: 40,
+    x: 40,
+    y: 45,
     name: "Terra Nova",
     type: "planet",
     description: "Um planeta verdejante cheio de vida",
@@ -105,8 +106,8 @@ const GALAXY_POINTS: MapPointData[] = [
   },
   {
     id: "estacao-omega",
-    x: 70,
-    y: 25,
+    x: 60,
+    y: 35,
     name: "Estação Omega",
     type: "station",
     description: "Centro comercial da galáxia",
@@ -114,8 +115,8 @@ const GALAXY_POINTS: MapPointData[] = [
   },
   {
     id: "nebulosa-crimson",
-    x: 20,
-    y: 70,
+    x: 30,
+    y: 65,
     name: "Nebulosa Crimson",
     type: "nebula",
     description: "Uma nebulosa misteriosa com energia estranha",
@@ -123,8 +124,8 @@ const GALAXY_POINTS: MapPointData[] = [
   },
   {
     id: "campo-asteroides",
-    x: 85,
-    y: 60,
+    x: 70,
+    y: 55,
     name: "Campo de Asteroides",
     type: "asteroid",
     description: "Rico em recursos minerais raros",
@@ -132,8 +133,8 @@ const GALAXY_POINTS: MapPointData[] = [
   },
   {
     id: "mundo-gelado",
-    x: 45,
-    y: 15,
+    x: 50,
+    y: 25,
     name: "Mundo Gelado",
     type: "planet",
     description: "Planeta coberto de gelo eterno",
@@ -165,7 +166,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
 
   // Generate fixed star positions only once
   const stars = useMemo(() => {
-    return Array.from({ length: 100 }, (_, i) => ({
+    return Array.from({ length: 150 }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
       y: Math.random() * 100,
@@ -248,25 +249,28 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         containerDimensions.height,
       );
 
-      // Validate current position against new limits
+      // Validate current position against circular limits
       const currentX = mapX.get();
       const currentY = mapY.get();
+      const radius = Math.min(limits.horizontal, limits.vertical);
+      const distance = Math.sqrt(currentX * currentX + currentY * currentY);
 
-      const clampedX = Math.max(
-        -limits.horizontal,
-        Math.min(limits.horizontal, currentX),
-      );
-      const clampedY = Math.max(
-        -limits.vertical,
-        Math.min(limits.vertical, currentY),
-      );
+      let clampedX = currentX;
+      let clampedY = currentY;
+
+      // If outside circular boundary, clamp to circle edge
+      if (distance > radius) {
+        const angle = Math.atan2(currentY, currentX);
+        clampedX = Math.cos(angle) * radius;
+        clampedY = Math.sin(angle) * radius;
+      }
 
       // Only update if position needs adjustment
       if (clampedX !== currentX || clampedY !== currentY) {
         mapX.set(clampedX);
         mapY.set(clampedY);
         console.log(
-          `Map position adjusted to fit new limits: (${clampedX}, ${clampedY})`,
+          `Map position adjusted to fit circular limits: (${clampedX}, ${clampedY})`,
         );
       }
     }
@@ -312,23 +316,26 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
       const newX = mapX.get() + deltaX;
       const newY = mapY.get() + deltaY;
 
-      // Ensure we stay within bounds using dynamic limits
-      const clampedX = Math.max(
-        -limits.horizontal,
-        Math.min(limits.horizontal, newX),
-      );
-      const clampedY = Math.max(
-        -limits.vertical,
-        Math.min(limits.vertical, newY),
-      );
+      // Circular boundary constraint
+      const radius = Math.min(limits.horizontal, limits.vertical);
+      const distance = Math.sqrt(newX * newX + newY * newY);
 
-      // Check boundary proximity using dynamic limits
-      const horizontalLimit = limits.horizontal - limits.boundaryThreshold;
-      const verticalLimit = limits.vertical - limits.boundaryThreshold;
-      const isNearX =
-        clampedX <= -horizontalLimit || clampedX >= horizontalLimit;
-      const isNearY = clampedY <= -verticalLimit || clampedY >= verticalLimit;
-      setIsNearBoundary(isNearX || isNearY);
+      let clampedX = newX;
+      let clampedY = newY;
+
+      // If outside circular boundary, clamp to circle edge
+      if (distance > radius) {
+        const angle = Math.atan2(newY, newX);
+        clampedX = Math.cos(angle) * radius;
+        clampedY = Math.sin(angle) * radius;
+      }
+
+      // Check boundary proximity using circular distance
+      const proximityRadius = radius - limits.boundaryThreshold;
+      const currentDistance = Math.sqrt(
+        clampedX * clampedX + clampedY * clampedY,
+      );
+      setIsNearBoundary(currentDistance >= proximityRadius);
 
       // Only calculate rotation if there's significant movement
       const movementThreshold = 2;
@@ -348,7 +355,26 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
   const handleDragEnd = () => {
     setIsDragging(false);
     setIsNearBoundary(false); // Reset boundary warning when dragging stops
-    // Keep current rotation - ship maintains the direction it was moving
+
+    // Final validation to ensure position is within circular boundary
+    if (containerDimensions.width > 0) {
+      const limits = getNavigationLimits(
+        containerDimensions.width,
+        containerDimensions.height,
+      );
+      const currentX = mapX.get();
+      const currentY = mapY.get();
+      const radius = Math.min(limits.horizontal, limits.vertical);
+      const distance = Math.sqrt(currentX * currentX + currentY * currentY);
+
+      if (distance > radius) {
+        const angle = Math.atan2(currentY, currentX);
+        const clampedX = Math.cos(angle) * radius;
+        const clampedY = Math.sin(angle) * radius;
+        mapX.set(clampedX);
+        mapY.set(clampedY);
+      }
+    }
 
     // Save current map position
     const mapPos = { x: mapX.get(), y: mapY.get() };
@@ -377,7 +403,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
   return (
     <div
       ref={containerRef}
-      className={`relative w-full h-[600px] bg-gradient-to-br from-gray-950 via-slate-900 to-black rounded-2xl overflow-hidden ${
+      className={`relative w-full h-[750px] bg-gradient-to-br from-gray-950 via-slate-900 to-black rounded-2xl overflow-hidden ${
         isDragging ? "cursor-grabbing" : "cursor-grab"
       }`}
       style={{ userSelect: "none" }}
@@ -427,29 +453,14 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         className="absolute inset-0 w-[200%] h-[200%] -left-1/2 -top-1/2"
         style={{ x: mapX, y: mapY }}
         drag
-        dragConstraints={
-          containerDimensions.width > 0
-            ? (() => {
-                const limits = getNavigationLimits(
-                  containerDimensions.width,
-                  containerDimensions.height,
-                );
-                return {
-                  left: -limits.horizontal,
-                  right: limits.horizontal,
-                  top: -limits.vertical,
-                  bottom: limits.vertical,
-                };
-              })()
-            : { left: 0, right: 0, top: 0, bottom: 0 }
-        }
+        dragConstraints={false}
         dragElastic={0.1}
         onDragStart={handleDragStart}
         onDrag={handleDrag}
         onDragEnd={handleDragEnd}
         whileDrag={{ cursor: "grabbing" }}
       >
-        {/* Movement Boundary - represents where the ship can actually reach */}
+        {/* Movement Boundary - circular boundary where the ship can reach */}
         <motion.div
           className="absolute pointer-events-none z-10"
           style={getBoundaryDimensions(
@@ -460,9 +471,9 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5, duration: 1 }}
         >
-          {/* Boundary rectangle */}
+          {/* Circular boundary */}
           <motion.div
-            className={`absolute inset-0 border-2 rounded-lg transition-colors duration-300 ${
+            className={`absolute inset-0 border-2 rounded-full transition-colors duration-300 ${
               isNearBoundary
                 ? "border-red-400/60 shadow-lg shadow-red-400/20"
                 : "border-cyan-400/30"
@@ -472,48 +483,36 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
             }}
             transition={{ duration: 0.3 }}
           >
-            {/* Corner indicators */}
+            {/* Pulsing circular boundary effect */}
             <motion.div
-              className={`absolute -top-1 -left-1 w-4 h-4 border-l-2 border-t-2 transition-colors duration-300 ${
-                isNearBoundary ? "border-red-400" : "border-cyan-400"
-              }`}
-              animate={{
-                scale: isNearBoundary ? 1.2 : 1,
-              }}
-            />
-            <motion.div
-              className={`absolute -top-1 -right-1 w-4 h-4 border-r-2 border-t-2 transition-colors duration-300 ${
-                isNearBoundary ? "border-red-400" : "border-cyan-400"
-              }`}
-              animate={{
-                scale: isNearBoundary ? 1.2 : 1,
-              }}
-            />
-            <motion.div
-              className={`absolute -bottom-1 -left-1 w-4 h-4 border-l-2 border-b-2 transition-colors duration-300 ${
-                isNearBoundary ? "border-red-400" : "border-cyan-400"
-              }`}
-              animate={{
-                scale: isNearBoundary ? 1.2 : 1,
-              }}
-            />
-            <motion.div
-              className={`absolute -bottom-1 -right-1 w-4 h-4 border-r-2 border-b-2 transition-colors duration-300 ${
-                isNearBoundary ? "border-red-400" : "border-cyan-400"
-              }`}
-              animate={{
-                scale: isNearBoundary ? 1.2 : 1,
-              }}
-            />
-
-            {/* Pulsing boundary effect */}
-            <motion.div
-              className={`absolute inset-0 border-2 rounded-lg transition-colors duration-300 ${
+              className={`absolute inset-0 border-2 rounded-full transition-colors duration-300 ${
                 isNearBoundary ? "border-red-400/40" : "border-cyan-400/20"
               }`}
               animate={{
                 scale: [1, 1.01, 1],
                 opacity: isNearBoundary ? [0.6, 1, 0.6] : [0.3, 0.6, 0.3],
+              }}
+              transition={{
+                duration: isNearBoundary ? 1 : 3,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+
+            {/* Circular gradient overlay */}
+            <motion.div
+              className={`absolute inset-0 rounded-full transition-opacity duration-300 ${
+                isNearBoundary ? "opacity-20" : "opacity-10"
+              }`}
+              style={{
+                background: `radial-gradient(circle, transparent 70%, ${
+                  isNearBoundary
+                    ? "rgba(248, 113, 113, 0.3)"
+                    : "rgba(34, 211, 238, 0.2)"
+                } 100%)`,
+              }}
+              animate={{
+                opacity: isNearBoundary ? [0.2, 0.3, 0.2] : [0.1, 0.15, 0.1],
               }}
               transition={{
                 duration: isNearBoundary ? 1 : 3,
@@ -566,7 +565,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         }}
         transition={{ delay: 1, duration: 0.5 }}
       >
-        {isNearBoundary ? "Limite de Navegação!" : "Área de Navegação"}
+        {isNearBoundary ? "Limite de Navegação!" : "Área Circular de Navegação"}
       </motion.div>
 
       {/* Nearby point indicator */}
