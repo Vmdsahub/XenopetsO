@@ -228,13 +228,22 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5, duration: 1 }}
       >
-        {/* Boundary rectangle */}
+        {/* Boundary rectangle - represents actual drag constraints */}
         <motion.div
-          className={`absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 border-2 rounded-lg transition-colors duration-300 ${
+          className={`absolute border-2 rounded-lg transition-colors duration-300 ${
             isNearBoundary
               ? "border-red-400/60 shadow-lg shadow-red-400/20"
               : "border-cyan-400/30"
           }`}
+          style={{
+            // Position the boundary based on the drag constraints
+            // The ship is at center (50%, 50%), constraints are ±400px on a 200% sized map
+            // So the boundary should be offset by the map position and show the limits
+            left: "12.5%", // (50% - 400/1600) * 100% = 25% from container edge
+            top: "12.5%",
+            width: "75%", // 800px out of 1600px total width = 50%
+            height: "75%",
+          }}
           animate={{
             borderWidth: isNearBoundary ? 3 : 2,
           }}
