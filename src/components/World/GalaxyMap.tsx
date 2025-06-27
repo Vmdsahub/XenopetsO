@@ -282,15 +282,16 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         <motion.div
           className="absolute pointer-events-none z-10"
           style={{
-            // Container real: 448px width × 500px height
-            // Map: 896px width (448×2) × 1000px height (500×2)
+            // Map: 200% width × 200% height (double the container)
             // Constraints: ±224px horizontal, ±250px vertical
-            // Horizontal: 224px of 896px = 25%, so 25% to 75%
-            // Vertical: 250px of 1000px = 25%, so 25% to 75%
-            left: "25%", // 50% - 25% = 25%
-            top: "25%", // 50% - 25% = 25%
-            width: "50%", // 25% × 2 = 50%
-            height: "50%", // 25% × 2 = 50%
+            // For a map that's 200% of container, movement range should be:
+            // Horizontal: 224px of (container_width) = constraint/container ratio
+            // Vertical: 250px of 500px = 50%, so 25% to 75%
+            // Adjusting horizontal to match actual container proportions
+            left: "12.5%", // More narrow horizontal bounds
+            top: "25%",
+            width: "75%", // Wider area for horizontal movement
+            height: "50%",
           }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
