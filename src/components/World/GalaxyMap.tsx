@@ -392,30 +392,8 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
 
   const handleDragEnd = () => {
     setIsDragging(false);
-    setIsNearBoundary(false); // Reset boundary warning when dragging stops
-
-    // Final validation to ensure position is within unified boundary
-    if (containerDimensions.width > 0) {
-      const config = getUnifiedNavigationConfig(
-        containerDimensions.width,
-        containerDimensions.height,
-      );
-      const currentX = mapX.get();
-      const currentY = mapY.get();
-      const distance = Math.sqrt(currentX * currentX + currentY * currentY);
-
-      // Ensure strict adherence to unified boundary
-      if (distance > config.navigationRadius) {
-        const angle = Math.atan2(currentY, currentX);
-        const clampedX = Math.cos(angle) * config.navigationRadius;
-        const clampedY = Math.sin(angle) * config.navigationRadius;
-        mapX.set(clampedX);
-        mapY.set(clampedY);
-        console.log(
-          `Position clamped to unified boundary: (${clampedX.toFixed(1)}, ${clampedY.toFixed(1)})`,
-        );
-      }
-    }
+    // Note: boundary validation is now handled by continuous monitoring
+    // This allows momentum to work naturally while staying within limits
 
     // Save current map position
     const mapPos = { x: mapX.get(), y: mapY.get() };
