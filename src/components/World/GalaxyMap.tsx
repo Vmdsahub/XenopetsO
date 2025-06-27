@@ -228,36 +228,84 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         transition={{ delay: 0.5, duration: 1 }}
       >
         {/* Boundary rectangle */}
-        <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 border-2 border-cyan-400/30 rounded-lg">
+        <motion.div
+          className={`absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 border-2 rounded-lg transition-colors duration-300 ${
+            isNearBoundary
+              ? "border-red-400/60 shadow-lg shadow-red-400/20"
+              : "border-cyan-400/30"
+          }`}
+          animate={{
+            borderWidth: isNearBoundary ? 3 : 2,
+          }}
+          transition={{ duration: 0.3 }}
+        >
           {/* Corner indicators */}
-          <div className="absolute -top-1 -left-1 w-4 h-4 border-l-2 border-t-2 border-cyan-400"></div>
-          <div className="absolute -top-1 -right-1 w-4 h-4 border-r-2 border-t-2 border-cyan-400"></div>
-          <div className="absolute -bottom-1 -left-1 w-4 h-4 border-l-2 border-b-2 border-cyan-400"></div>
-          <div className="absolute -bottom-1 -right-1 w-4 h-4 border-r-2 border-b-2 border-cyan-400"></div>
+          <motion.div
+            className={`absolute -top-1 -left-1 w-4 h-4 border-l-2 border-t-2 transition-colors duration-300 ${
+              isNearBoundary ? "border-red-400" : "border-cyan-400"
+            }`}
+            animate={{
+              scale: isNearBoundary ? 1.2 : 1,
+            }}
+          />
+          <motion.div
+            className={`absolute -top-1 -right-1 w-4 h-4 border-r-2 border-t-2 transition-colors duration-300 ${
+              isNearBoundary ? "border-red-400" : "border-cyan-400"
+            }`}
+            animate={{
+              scale: isNearBoundary ? 1.2 : 1,
+            }}
+          />
+          <motion.div
+            className={`absolute -bottom-1 -left-1 w-4 h-4 border-l-2 border-b-2 transition-colors duration-300 ${
+              isNearBoundary ? "border-red-400" : "border-cyan-400"
+            }`}
+            animate={{
+              scale: isNearBoundary ? 1.2 : 1,
+            }}
+          />
+          <motion.div
+            className={`absolute -bottom-1 -right-1 w-4 h-4 border-r-2 border-b-2 transition-colors duration-300 ${
+              isNearBoundary ? "border-red-400" : "border-cyan-400"
+            }`}
+            animate={{
+              scale: isNearBoundary ? 1.2 : 1,
+            }}
+          />
 
           {/* Pulsing boundary effect */}
           <motion.div
-            className="absolute inset-0 border-2 border-cyan-400/20 rounded-lg"
+            className={`absolute inset-0 border-2 rounded-lg transition-colors duration-300 ${
+              isNearBoundary ? "border-red-400/40" : "border-cyan-400/20"
+            }`}
             animate={{
               scale: [1, 1.02, 1],
-              opacity: [0.3, 0.6, 0.3],
+              opacity: isNearBoundary ? [0.6, 1, 0.6] : [0.3, 0.6, 0.3],
             }}
             transition={{
-              duration: 3,
+              duration: isNearBoundary ? 1 : 3,
               repeat: Infinity,
               ease: "easeInOut",
             }}
           />
-        </div>
+        </motion.div>
 
         {/* Boundary label */}
         <motion.div
-          className="absolute top-4 left-4 bg-black/60 text-cyan-400 px-3 py-1 rounded-lg text-xs backdrop-blur-sm border border-cyan-400/30"
+          className={`absolute top-4 left-4 px-3 py-1 rounded-lg text-xs backdrop-blur-sm border transition-colors duration-300 ${
+            isNearBoundary
+              ? "bg-red-900/60 text-red-400 border-red-400/30"
+              : "bg-black/60 text-cyan-400 border-cyan-400/30"
+          }`}
           initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
+          animate={{
+            opacity: 1,
+            x: 0,
+            scale: isNearBoundary ? 1.05 : 1,
+          }}
           transition={{ delay: 1, duration: 0.5 }}
         >
-          Área de Navegação
+          {isNearBoundary ? "Limite de Navegação!" : "Área de Navegação"}
         </motion.div>
       </motion.div>
 
