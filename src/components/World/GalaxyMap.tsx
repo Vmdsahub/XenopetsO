@@ -163,6 +163,16 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
       const deltaX = info.delta.x;
       const deltaY = info.delta.y;
 
+      // Update map position
+      const newX = mapX.get() + deltaX;
+      const newY = mapY.get() + deltaY;
+
+      // Check boundary proximity
+      const boundaryThreshold = 50; // Distance from boundary to trigger warning
+      const isNearX = newX <= -350 || newX >= 350;
+      const isNearY = newY <= -350 || newY >= 350;
+      setIsNearBoundary(isNearX || isNearY);
+
       // Only calculate rotation if there's significant movement
       // This prevents erratic rotation when mouse is held but not moving
       const movementThreshold = 2;
@@ -180,9 +190,8 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         animate(shipRotation, angle, { duration: 0.2 });
       }
 
-      // Update map position
-      mapX.set(mapX.get() + deltaX);
-      mapY.set(mapY.get() + deltaY);
+      mapX.set(newX);
+      mapY.set(newY);
     },
     [mapX, mapY, shipRotation],
   );
