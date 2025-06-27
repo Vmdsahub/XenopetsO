@@ -282,13 +282,15 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         <motion.div
           className="absolute pointer-events-none z-10"
           style={{
-            // Ship is always at center of viewport, map moves ±400px
-            // Container is 500px, map is 200% = 1000px
-            // Ship can reach 400px in each direction from map center
-            // Map center is at 50%, so ship can reach from 10% to 90% of map
-            left: "10%", // 50% - 40% = 10%
+            // Container height: 500px, width: varies (responsive)
+            // Map is 200% of container = 1000px height, 2*containerWidth width
+            // Ship can move ±400px from map center
+            // Vertical: 400px of 1000px = 40%, so 10% to 90% ✓
+            // Horizontal: need to calculate based on actual container width
+            // For max-w-md (448px), map width = 896px, 400px = ~45%, so ~5% to 95%
+            left: "5%", // Adjusted for container aspect ratio
             top: "10%",
-            width: "80%", // 80% of map area is reachable
+            width: "90%", // Adjusted for container aspect ratio
             height: "80%",
           }}
           initial={{ opacity: 0 }}
