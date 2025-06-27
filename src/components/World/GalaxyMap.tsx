@@ -384,6 +384,24 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         />
       </div>
 
+      {/* Boundary label */}
+      <motion.div
+        className={`absolute top-4 left-4 px-3 py-1 rounded-lg text-xs backdrop-blur-sm border transition-colors duration-300 ${
+          isNearBoundary
+            ? "bg-red-900/60 text-red-400 border-red-400/30"
+            : "bg-black/60 text-cyan-400 border-cyan-400/30"
+        }`}
+        initial={{ opacity: 0, x: -20 }}
+        animate={{
+          opacity: 1,
+          x: 0,
+          scale: isNearBoundary ? 1.05 : 1,
+        }}
+        transition={{ delay: 1, duration: 0.5 }}
+      >
+        {isNearBoundary ? "Limite de Navegação!" : "Área de Navegação"}
+      </motion.div>
+
       {/* Nearby point indicator */}
       {nearbyPoint && (
         <motion.div
