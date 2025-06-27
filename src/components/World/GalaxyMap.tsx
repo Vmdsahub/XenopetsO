@@ -136,10 +136,28 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
     }));
   }, []);
 
-  // Load saved map position
+  // Load saved map position with validation
   const savedMapPosition = useRef(() => {
-    const saved = localStorage.getItem("xenopets-map-position");
-    return saved ? JSON.parse(saved) : { x: 0, y: 0 };
+    try {
+      const saved = localStorage.getItem("xenopets-map-position");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // Validate that saved position is within current limits
+        const validX = Math.max(
+          -NAVIGATION_LIMITS.horizontal,
+          Math.min(NAVIGATION_LIMITS.horizontal, parsed.x || 0),
+        );
+        const validY = Math.max(
+          -NAVIGATION_LIMITS.vertical,
+          Math.min(NAVIGATION_LIMITS.vertical, parsed.y || 0),
+        );
+        return { x: validX, y: validY };
+      }
+    } catch (error) {
+      console.warn("Invalid saved map position, resetting to center");
+      localStorage.removeItem("xenopets-map-position");
+    }
+    return { x: 0, y: 0 };
   });
 
   const mapX = useMotionValue(savedMapPosition.current().x);
