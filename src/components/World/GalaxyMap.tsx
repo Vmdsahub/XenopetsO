@@ -27,7 +27,7 @@ interface MapPointData {
 // All values calculated from this single configuration to prevent inconsistencies
 const NAVIGATION_CONFIG = {
   // Container size multiplier for navigation area (1.0 = container size, 0.8 = 80% of container)
-  navigationRatio: 0.8, // 80% of container size provides good navigation area with clear boundaries
+  navigationRatio: 4.8, // 80% of container size provides good navigation area with clear boundaries
   boundaryThreshold: 15, // pixels from boundary edge for proximity warning
   minContainerSize: 400, // minimum container size for calculations
   mapSizeMultiplier: 2.0, // map is 2x container size (200%)
