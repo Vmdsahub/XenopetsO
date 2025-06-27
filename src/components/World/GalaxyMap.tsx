@@ -284,13 +284,13 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
           style={{
             // Container real: 448px width × 500px height
             // Map: 896px width (448×2) × 1000px height (500×2)
-            // Constraints: ±400px both directions
-            // Vertical: 400px of 1000px = 40%, so 10% to 90% ✓
-            // Horizontal: 400px of 896px = 44.6%, so 5.4% to 94.6%
-            left: "5.4%", // 50% - 44.6% = 5.4%
-            top: "10%", // 50% - 40% = 10% ✓
-            width: "89.2%", // 44.6% × 2 = 89.2%
-            height: "80%", // 40% × 2 = 80% ✓
+            // Constraints: ±224px horizontal, ±250px vertical
+            // Horizontal: 224px of 896px = 25%, so 25% to 75%
+            // Vertical: 250px of 1000px = 25%, so 25% to 75%
+            left: "25%", // 50% - 25% = 25%
+            top: "25%", // 50% - 25% = 25%
+            width: "50%", // 25% × 2 = 50%
+            height: "50%", // 25% × 2 = 50%
           }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
