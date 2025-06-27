@@ -27,8 +27,8 @@ interface MapPointData {
 // Container-based navigation limits that scale with container size
 const NAVIGATION_CONFIG = {
   // Navigation area as percentage of container size - unified values (circular boundary)
-  horizontalRatio: 1.1, // 110% of container width for navigation (slight increase)
-  verticalRatio: 1.1, // 110% of container height for navigation (slight increase)
+  horizontalRatio: 2.0, // 200% of container width for navigation (significantly increased)
+  verticalRatio: 2.0, // 200% of container height for navigation (significantly increased)
   boundaryThreshold: 5, // threshold for boundary proximity warning
   minContainerSize: 500, // minimum container size for calculations
 } as const;
@@ -96,8 +96,8 @@ const getBoundaryDimensions = (
 const GALAXY_POINTS: MapPointData[] = [
   {
     id: "terra-nova",
-    x: 30,
-    y: 40,
+    x: 40,
+    y: 45,
     name: "Terra Nova",
     type: "planet",
     description: "Um planeta verdejante cheio de vida",
@@ -106,8 +106,8 @@ const GALAXY_POINTS: MapPointData[] = [
   },
   {
     id: "estacao-omega",
-    x: 70,
-    y: 25,
+    x: 60,
+    y: 35,
     name: "Estação Omega",
     type: "station",
     description: "Centro comercial da galáxia",
@@ -115,8 +115,8 @@ const GALAXY_POINTS: MapPointData[] = [
   },
   {
     id: "nebulosa-crimson",
-    x: 20,
-    y: 70,
+    x: 30,
+    y: 65,
     name: "Nebulosa Crimson",
     type: "nebula",
     description: "Uma nebulosa misteriosa com energia estranha",
@@ -124,8 +124,8 @@ const GALAXY_POINTS: MapPointData[] = [
   },
   {
     id: "campo-asteroides",
-    x: 85,
-    y: 60,
+    x: 70,
+    y: 55,
     name: "Campo de Asteroides",
     type: "asteroid",
     description: "Rico em recursos minerais raros",
@@ -133,12 +133,59 @@ const GALAXY_POINTS: MapPointData[] = [
   },
   {
     id: "mundo-gelado",
-    x: 45,
-    y: 15,
+    x: 50,
+    y: 25,
     name: "Mundo Gelado",
     type: "planet",
     description: "Planeta coberto de gelo eterno",
     image: "https://images.pexels.com/photos/220201/pexels-photo-220201.jpeg",
+  },
+  // Adicionar novos pontos distribuídos dentro da área circular expandida
+  {
+    id: "estacao-fronteira",
+    x: 25,
+    y: 40,
+    name: "Estação Fronteira",
+    type: "station",
+    description: "Posto avançado nas bordas da galáxia",
+    image: "https://images.pexels.com/photos/2156/sky-earth-space-working.jpg",
+  },
+  {
+    id: "planeta-desertico",
+    x: 75,
+    y: 35,
+    name: "Planeta Desértico",
+    type: "planet",
+    description: "Mundo árido com tempestades de areia",
+    image: "https://images.pexels.com/photos/220201/pexels-photo-220201.jpeg",
+  },
+  {
+    id: "nebulosa-azul",
+    x: 45,
+    y: 70,
+    name: "Nebulosa Azul",
+    type: "nebula",
+    description: "Formação cósmica de cores vibrantes",
+    image: "https://images.pexels.com/photos/1274260/pexels-photo-1274260.jpeg",
+  },
+  {
+    id: "asteroides-cristalinos",
+    x: 65,
+    y: 65,
+    name: "Asteroides Cristalinos",
+    type: "asteroid",
+    description: "Formações rochosas com cristais raros",
+    image: "https://images.pexels.com/photos/2159/flight-sky-earth-space.jpg",
+  },
+  {
+    id: "mundo-oceanico",
+    x: 55,
+    y: 60,
+    name: "Mundo Oceânico",
+    type: "planet",
+    description: "Planeta coberto por oceanos infinitos",
+    image:
+      "https://images.pexels.com/photos/87651/earth-blue-planet-globe-planet-87651.jpeg",
   },
 ];
 
@@ -164,9 +211,9 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Generate fixed star positions only once - moderately increased
+  // Generate fixed star positions only once - significantly increased for larger area
   const stars = useMemo(() => {
-    return Array.from({ length: 150 }, (_, i) => ({
+    return Array.from({ length: 300 }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
       y: Math.random() * 100,
@@ -249,28 +296,64 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         containerDimensions.height,
       );
 
-      // Validate current position against new limits
+      // Validate current position against circular limits
       const currentX = mapX.get();
       const currentY = mapY.get();
+      const radius = Math.min(limits.horizontal, limits.vertical);
+      const distance = Math.sqrt(currentX * currentX + currentY * currentY);
 
-      const clampedX = Math.max(
-        -limits.horizontal,
-        Math.min(limits.horizontal, currentX),
-      );
-      const clampedY = Math.max(
-        -limits.vertical,
-        Math.min(limits.vertical, currentY),
-      );
+      let clampedX = currentX;
+      let clampedY = currentY;
+
+      // If outside circular boundary, clamp to circle edge
+      if (distance > radius) {
+        const angle = Math.atan2(currentY, currentX);
+        clampedX = Math.cos(angle) * radius;
+        clampedY = Math.sin(angle) * radius;
+      }
 
       // Only update if position needs adjustment
       if (clampedX !== currentX || clampedY !== currentY) {
         mapX.set(clampedX);
         mapY.set(clampedY);
         console.log(
-          `Map position adjusted to fit new limits: (${clampedX}, ${clampedY})`,
+          `Map position adjusted to fit circular limits: (${clampedX}, ${clampedY})`,
         );
       }
     }
+  }, [containerDimensions, mapX, mapY]);
+
+  // Add continuous validation to prevent boundary violations
+  useEffect(() => {
+    if (containerDimensions.width === 0) return;
+
+    const validatePosition = () => {
+      const limits = getNavigationLimits(
+        containerDimensions.width,
+        containerDimensions.height,
+      );
+      const currentX = mapX.get();
+      const currentY = mapY.get();
+      const radius = Math.min(limits.horizontal, limits.vertical);
+      const distance = Math.sqrt(currentX * currentX + currentY * currentY);
+
+      if (distance > radius) {
+        const angle = Math.atan2(currentY, currentX);
+        const clampedX = Math.cos(angle) * radius;
+        const clampedY = Math.sin(angle) * radius;
+        mapX.set(clampedX);
+        mapY.set(clampedY);
+      }
+    };
+
+    // Monitor position changes and validate continuously
+    const unsubscribeX = mapX.on("change", validatePosition);
+    const unsubscribeY = mapY.on("change", validatePosition);
+
+    return () => {
+      unsubscribeX();
+      unsubscribeY();
+    };
   }, [containerDimensions, mapX, mapY]);
 
   // Save position continuously and on unmount
@@ -352,7 +435,26 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
   const handleDragEnd = () => {
     setIsDragging(false);
     setIsNearBoundary(false); // Reset boundary warning when dragging stops
-    // Keep current rotation - ship maintains the direction it was moving
+
+    // Final validation to ensure position is within circular boundary
+    if (containerDimensions.width > 0) {
+      const limits = getNavigationLimits(
+        containerDimensions.width,
+        containerDimensions.height,
+      );
+      const currentX = mapX.get();
+      const currentY = mapY.get();
+      const radius = Math.min(limits.horizontal, limits.vertical);
+      const distance = Math.sqrt(currentX * currentX + currentY * currentY);
+
+      if (distance > radius) {
+        const angle = Math.atan2(currentY, currentX);
+        const clampedX = Math.cos(angle) * radius;
+        const clampedY = Math.sin(angle) * radius;
+        mapX.set(clampedX);
+        mapY.set(clampedY);
+      }
+    }
 
     // Save current map position
     const mapPos = { x: mapX.get(), y: mapY.get() };
@@ -381,7 +483,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
   return (
     <div
       ref={containerRef}
-      className={`relative w-full h-[650px] bg-gradient-to-br from-gray-950 via-slate-900 to-black rounded-2xl overflow-hidden ${
+      className={`relative w-full h-[750px] bg-gradient-to-br from-gray-950 via-slate-900 to-black rounded-2xl overflow-hidden ${
         isDragging ? "cursor-grabbing" : "cursor-grab"
       }`}
       style={{ userSelect: "none" }}
@@ -403,7 +505,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         ))}
       </div>
 
-      {/* Galaxy background nebulae */}
+      {/* Galaxy background nebulae - enhanced for larger area */}
       <div
         className={`absolute inset-0 ${isDragging ? "pointer-events-none" : ""}`}
       >
@@ -421,6 +523,30 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
             background: "radial-gradient(circle, #1f2937, #111827)",
             right: "25%",
             bottom: "20%",
+          }}
+        />
+        <div
+          className="absolute w-56 h-56 rounded-full opacity-12 blur-3xl"
+          style={{
+            background: "radial-gradient(circle, #4c1d95, #312e81)",
+            left: "10%",
+            top: "65%",
+          }}
+        />
+        <div
+          className="absolute w-40 h-40 rounded-full opacity-9 blur-2xl"
+          style={{
+            background: "radial-gradient(circle, #be123c, #881337)",
+            right: "15%",
+            top: "15%",
+          }}
+        />
+        <div
+          className="absolute w-52 h-52 rounded-full opacity-11 blur-2xl"
+          style={{
+            background: "radial-gradient(circle, #065f46, #064e3b)",
+            left: "70%",
+            top: "60%",
           }}
         />
       </div>
