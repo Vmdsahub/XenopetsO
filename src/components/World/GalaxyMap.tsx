@@ -495,7 +495,8 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         style={{ x: mapX, y: mapY }}
         drag
         dragConstraints={false}
-        dragElastic={0.1}
+        dragElastic={0.05}
+        dragMomentum={true}
         onDragStart={handleDragStart}
         onDrag={handleDrag}
         onDragEnd={handleDragEnd}
