@@ -551,7 +551,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         />
       </div>
 
-      {/* Boundary label */}
+      {/* Unified boundary label */}
       <motion.div
         className={`absolute top-4 left-4 px-3 py-1 rounded-lg text-xs backdrop-blur-sm border transition-colors duration-300 ${
           isNearBoundary
@@ -566,7 +566,9 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         }}
         transition={{ delay: 1, duration: 0.5 }}
       >
-        {isNearBoundary ? "Limite de Navegação!" : "Área Circular de Navegação"}
+        {isNearBoundary
+          ? "Limite Unificado Atingido!"
+          : "Navegação Unificada Ativa"}
       </motion.div>
 
       {/* Nearby point indicator */}
