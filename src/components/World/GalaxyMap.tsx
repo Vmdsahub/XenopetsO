@@ -278,6 +278,85 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         onDragEnd={handleDragEnd}
         whileDrag={{ cursor: "grabbing" }}
       >
+        {/* Movement Boundary - positioned within the draggable map */}
+        <motion.div
+          className="absolute pointer-events-none z-10"
+          style={{
+            // Position boundary based on dragConstraints
+            // Map is 200% size, so 400px constraint = 20% of map
+            left: "30%", // 50% - 20% = 30%
+            top: "30%",
+            width: "40%", // 800px out of 2000px = 40%
+            height: "40%",
+          }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5, duration: 1 }}
+        >
+          {/* Boundary rectangle */}
+          <motion.div
+            className={`absolute inset-0 border-2 rounded-lg transition-colors duration-300 ${
+              isNearBoundary
+                ? "border-red-400/60 shadow-lg shadow-red-400/20"
+                : "border-cyan-400/30"
+            }`}
+            animate={{
+              borderWidth: isNearBoundary ? 3 : 2,
+            }}
+            transition={{ duration: 0.3 }}
+          >
+            {/* Corner indicators */}
+            <motion.div
+              className={`absolute -top-1 -left-1 w-4 h-4 border-l-2 border-t-2 transition-colors duration-300 ${
+                isNearBoundary ? "border-red-400" : "border-cyan-400"
+              }`}
+              animate={{
+                scale: isNearBoundary ? 1.2 : 1,
+              }}
+            />
+            <motion.div
+              className={`absolute -top-1 -right-1 w-4 h-4 border-r-2 border-t-2 transition-colors duration-300 ${
+                isNearBoundary ? "border-red-400" : "border-cyan-400"
+              }`}
+              animate={{
+                scale: isNearBoundary ? 1.2 : 1,
+              }}
+            />
+            <motion.div
+              className={`absolute -bottom-1 -left-1 w-4 h-4 border-l-2 border-b-2 transition-colors duration-300 ${
+                isNearBoundary ? "border-red-400" : "border-cyan-400"
+              }`}
+              animate={{
+                scale: isNearBoundary ? 1.2 : 1,
+              }}
+            />
+            <motion.div
+              className={`absolute -bottom-1 -right-1 w-4 h-4 border-r-2 border-b-2 transition-colors duration-300 ${
+                isNearBoundary ? "border-red-400" : "border-cyan-400"
+              }`}
+              animate={{
+                scale: isNearBoundary ? 1.2 : 1,
+              }}
+            />
+
+            {/* Pulsing boundary effect */}
+            <motion.div
+              className={`absolute inset-0 border-2 rounded-lg transition-colors duration-300 ${
+                isNearBoundary ? "border-red-400/40" : "border-cyan-400/20"
+              }`}
+              animate={{
+                scale: [1, 1.01, 1],
+                opacity: isNearBoundary ? [0.6, 1, 0.6] : [0.3, 0.6, 0.3],
+              }}
+              transition={{
+                duration: isNearBoundary ? 1 : 3,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+          </motion.div>
+        </motion.div>
+
         {/* Galaxy points */}
         {GALAXY_POINTS.map((point) => (
           <MapPoint
