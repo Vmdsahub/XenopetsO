@@ -23,18 +23,19 @@ interface MapPointData {
   image?: string;
 }
 
-// Navigation limits configuration - single source of truth
-// Container-based navigation limits that scale with container size
+// Unified navigation and boundary configuration - single source of truth
+// All values calculated from this single configuration to prevent inconsistencies
 const NAVIGATION_CONFIG = {
-  // Navigation area as percentage of container size - unified values (circular boundary)
-  horizontalRatio: 2.0, // 200% of container width for navigation (significantly increased)
-  verticalRatio: 2.0, // 200% of container height for navigation (significantly increased)
-  boundaryThreshold: 5, // threshold for boundary proximity warning
-  minContainerSize: 500, // minimum container size for calculations
+  // Container size multiplier for navigation area (1.0 = container size, 0.8 = 80% of container)
+  navigationRatio: 0.8, // 80% of container size provides good navigation area with clear boundaries
+  boundaryThreshold: 15, // pixels from boundary edge for proximity warning
+  minContainerSize: 400, // minimum container size for calculations
+  mapSizeMultiplier: 2.0, // map is 2x container size (200%)
 } as const;
 
-// Calculate navigation limits based on container dimensions
-const getNavigationLimits = (
+// Single function to calculate all navigation and boundary values uniformly
+// This ensures navigation limits and visual boundaries are ALWAYS identical
+const getUnifiedNavigationConfig = (
   containerWidth: number,
   containerHeight: number,
 ) => {
@@ -48,35 +49,18 @@ const getNavigationLimits = (
     NAVIGATION_CONFIG.minContainerSize,
   );
 
-  // Calculate limits as percentage of container size - ensuring they're always equal for uniform navigation
-  const baseLimit = Math.min(
-    (effectiveWidth * NAVIGATION_CONFIG.horizontalRatio) / 2,
-    (effectiveHeight * NAVIGATION_CONFIG.verticalRatio) / 2,
-  );
+  // Calculate navigation radius as percentage of smallest container dimension
+  // This ensures circular boundary that fits within container regardless of aspect ratio
+  const containerSize = Math.min(effectiveWidth, effectiveHeight);
+  const navigationRadius =
+    (containerSize * NAVIGATION_CONFIG.navigationRatio) / 2;
 
-  return {
-    horizontal: baseLimit,
-    vertical: baseLimit, // Always equal to horizontal for uniform navigation
-    boundaryThreshold: NAVIGATION_CONFIG.boundaryThreshold,
-  };
-};
-// Calculate boundary circle dimensions based on map size and constraints
-// Map is 200% (2x) of container size, positioned at -50% offset with circular boundary
-const getBoundaryDimensions = (
-  containerWidth: number,
-  containerHeight: number,
-) => {
-  const limits = getNavigationLimits(containerWidth, containerHeight);
+  // Map dimensions (always 2x container size)
+  const mapWidth = containerWidth * NAVIGATION_CONFIG.mapSizeMultiplier;
+  const mapHeight = containerHeight * NAVIGATION_CONFIG.mapSizeMultiplier;
 
-  // Map total dimensions
-  const mapWidth = containerWidth * 2;
-  const mapHeight = containerHeight * 2;
-
-  // Available movement range (constraint * 2) - circular boundary
-  const radius = Math.min(limits.horizontal, limits.vertical);
-  const circleDiameter = radius * 2;
-
-  // Calculate boundary circle as percentage of map
+  // Calculate boundary circle as percentage of map (for visual boundary)
+  const circleDiameter = navigationRadius * 2;
   const boundaryWidthPercent = (circleDiameter / mapWidth) * 100;
   const boundaryHeightPercent = (circleDiameter / mapHeight) * 100;
 
@@ -85,11 +69,22 @@ const getBoundaryDimensions = (
   const boundaryTopPercent = (100 - boundaryHeightPercent) / 2;
 
   return {
-    left: `${boundaryLeftPercent}%`,
-    top: `${boundaryTopPercent}%`,
-    width: `${boundaryWidthPercent}%`,
-    height: `${boundaryHeightPercent}%`,
-    radius: radius,
+    // Navigation limits (used for ship movement constraints)
+    navigationRadius,
+    boundaryThreshold: NAVIGATION_CONFIG.boundaryThreshold,
+
+    // Visual boundary dimensions (used for rendering boundary circle)
+    boundaryStyle: {
+      left: `${boundaryLeftPercent}%`,
+      top: `${boundaryTopPercent}%`,
+      width: `${boundaryWidthPercent}%`,
+      height: `${boundaryHeightPercent}%`,
+    },
+
+    // Debug info
+    containerSize,
+    mapWidth,
+    mapHeight,
   };
 };
 
@@ -244,25 +239,24 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
   // Validate and adjust map position when container dimensions change
   useEffect(() => {
     if (containerDimensions.width > 0 && containerDimensions.height > 0) {
-      const limits = getNavigationLimits(
+      const config = getUnifiedNavigationConfig(
         containerDimensions.width,
         containerDimensions.height,
       );
 
-      // Validate current position against circular limits
+      // Validate current position against unified circular limits
       const currentX = mapX.get();
       const currentY = mapY.get();
-      const radius = Math.min(limits.horizontal, limits.vertical);
       const distance = Math.sqrt(currentX * currentX + currentY * currentY);
 
       let clampedX = currentX;
       let clampedY = currentY;
 
-      // If outside circular boundary, clamp to circle edge
-      if (distance > radius) {
+      // If outside unified boundary, clamp to circle edge
+      if (distance > config.navigationRadius) {
         const angle = Math.atan2(currentY, currentX);
-        clampedX = Math.cos(angle) * radius;
-        clampedY = Math.sin(angle) * radius;
+        clampedX = Math.cos(angle) * config.navigationRadius;
+        clampedY = Math.sin(angle) * config.navigationRadius;
       }
 
       // Only update if position needs adjustment
@@ -270,11 +264,59 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         mapX.set(clampedX);
         mapY.set(clampedY);
         console.log(
-          `Map position adjusted to fit circular limits: (${clampedX}, ${clampedY})`,
+          `Map position adjusted to unified limits: (${clampedX.toFixed(1)}, ${clampedY.toFixed(1)}) - radius: ${config.navigationRadius.toFixed(1)}`,
         );
       }
     }
   }, [containerDimensions, mapX, mapY]);
+
+  // Continuous position validation to handle momentum after drag ends
+  useEffect(() => {
+    if (containerDimensions.width === 0) return;
+
+    let isValidating = false; // Prevent recursive validation calls
+
+    const validatePosition = () => {
+      if (isValidating) return; // Prevent infinite loops
+
+      const config = getUnifiedNavigationConfig(
+        containerDimensions.width,
+        containerDimensions.height,
+      );
+
+      const currentX = mapX.get();
+      const currentY = mapY.get();
+      const distance = Math.sqrt(currentX * currentX + currentY * currentY);
+
+      // Only clamp if significantly beyond boundary (add small tolerance)
+      const tolerance = 2; // pixels of tolerance to prevent jittering at boundary
+      if (distance > config.navigationRadius + tolerance) {
+        isValidating = true;
+        const angle = Math.atan2(currentY, currentX);
+        const clampedX = Math.cos(angle) * config.navigationRadius;
+        const clampedY = Math.sin(angle) * config.navigationRadius;
+
+        // Set position without animation to maintain responsiveness
+        mapX.set(clampedX);
+        mapY.set(clampedY);
+        isValidating = false;
+      }
+
+      // Check boundary proximity for visual feedback
+      const proximityRadius =
+        config.navigationRadius - config.boundaryThreshold;
+      setIsNearBoundary(distance >= proximityRadius);
+    };
+
+    // Monitor position continuously during momentum phase
+    const unsubscribeX = mapX.on("change", validatePosition);
+    const unsubscribeY = mapY.on("change", validatePosition);
+
+    return () => {
+      unsubscribeX();
+      unsubscribeY();
+    };
+  }, [mapX, mapY, containerDimensions]);
 
   // Save position continuously and on unmount
   useEffect(() => {
@@ -305,7 +347,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
     (event: any, info: any) => {
       if (!containerRef.current || containerDimensions.width === 0) return;
 
-      const limits = getNavigationLimits(
+      const config = getUnifiedNavigationConfig(
         containerDimensions.width,
         containerDimensions.height,
       );
@@ -316,22 +358,52 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
       const newX = mapX.get() + deltaX;
       const newY = mapY.get() + deltaY;
 
-      // Circular boundary constraint
-      const radius = Math.min(limits.horizontal, limits.vertical);
+      // Unified circular boundary constraint with smooth sliding along edge
       const distance = Math.sqrt(newX * newX + newY * newY);
 
       let clampedX = newX;
       let clampedY = newY;
 
-      // If outside circular boundary, clamp to circle edge
-      if (distance > radius) {
-        const angle = Math.atan2(newY, newX);
-        clampedX = Math.cos(angle) * radius;
-        clampedY = Math.sin(angle) * radius;
+      // If outside unified boundary, implement sliding along the edge
+      if (distance > config.navigationRadius) {
+        const currentDistance = Math.sqrt(
+          mapX.get() * mapX.get() + mapY.get() * mapY.get(),
+        );
+
+        // If already at boundary, allow tangential movement (sliding along edge)
+        if (currentDistance >= config.navigationRadius - 5) {
+          // Project movement onto tangent of circle for smooth sliding
+          const angle = Math.atan2(mapY.get(), mapX.get());
+          const tangentX = -Math.sin(angle);
+          const tangentY = Math.cos(angle);
+
+          // Calculate tangential component of movement
+          const tangentialMovement = deltaX * tangentX + deltaY * tangentY;
+
+          // Apply only tangential movement
+          clampedX = mapX.get() + tangentialMovement * tangentX;
+          clampedY = mapY.get() + tangentialMovement * tangentY;
+
+          // Ensure result is still within boundary
+          const finalDistance = Math.sqrt(
+            clampedX * clampedX + clampedY * clampedY,
+          );
+          if (finalDistance > config.navigationRadius) {
+            const finalAngle = Math.atan2(clampedY, clampedX);
+            clampedX = Math.cos(finalAngle) * config.navigationRadius;
+            clampedY = Math.sin(finalAngle) * config.navigationRadius;
+          }
+        } else {
+          // Standard clamping for movements from inside to outside
+          const angle = Math.atan2(newY, newX);
+          clampedX = Math.cos(angle) * config.navigationRadius;
+          clampedY = Math.sin(angle) * config.navigationRadius;
+        }
       }
 
-      // Check boundary proximity using circular distance
-      const proximityRadius = radius - limits.boundaryThreshold;
+      // Check boundary proximity using unified threshold
+      const proximityRadius =
+        config.navigationRadius - config.boundaryThreshold;
       const currentDistance = Math.sqrt(
         clampedX * clampedX + clampedY * clampedY,
       );
@@ -354,27 +426,8 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
 
   const handleDragEnd = () => {
     setIsDragging(false);
-    setIsNearBoundary(false); // Reset boundary warning when dragging stops
-
-    // Final validation to ensure position is within circular boundary
-    if (containerDimensions.width > 0) {
-      const limits = getNavigationLimits(
-        containerDimensions.width,
-        containerDimensions.height,
-      );
-      const currentX = mapX.get();
-      const currentY = mapY.get();
-      const radius = Math.min(limits.horizontal, limits.vertical);
-      const distance = Math.sqrt(currentX * currentX + currentY * currentY);
-
-      if (distance > radius) {
-        const angle = Math.atan2(currentY, currentX);
-        const clampedX = Math.cos(angle) * radius;
-        const clampedY = Math.sin(angle) * radius;
-        mapX.set(clampedX);
-        mapY.set(clampedY);
-      }
-    }
+    // Note: boundary validation is now handled by continuous monitoring
+    // This allows momentum to work naturally while staying within limits
 
     // Save current map position
     const mapPos = { x: mapX.get(), y: mapY.get() };
@@ -454,19 +507,24 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         style={{ x: mapX, y: mapY }}
         drag
         dragConstraints={false}
-        dragElastic={0.1}
+        dragElastic={0.05}
+        dragMomentum={true}
         onDragStart={handleDragStart}
         onDrag={handleDrag}
         onDragEnd={handleDragEnd}
         whileDrag={{ cursor: "grabbing" }}
       >
-        {/* Movement Boundary - circular boundary where the ship can reach */}
+        {/* Unified Navigation Boundary - visual boundary matches navigation limits exactly */}
         <motion.div
           className="absolute pointer-events-none z-10"
-          style={getBoundaryDimensions(
-            containerDimensions.width,
-            containerDimensions.height,
-          )}
+          style={
+            containerDimensions.width > 0
+              ? getUnifiedNavigationConfig(
+                  containerDimensions.width,
+                  containerDimensions.height,
+                ).boundaryStyle
+              : { display: "none" }
+          }
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5, duration: 1 }}
@@ -550,7 +608,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         />
       </div>
 
-      {/* Boundary label */}
+      {/* Unified boundary label */}
       <motion.div
         className={`absolute top-4 left-4 px-3 py-1 rounded-lg text-xs backdrop-blur-sm border transition-colors duration-300 ${
           isNearBoundary
@@ -565,7 +623,9 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         }}
         transition={{ delay: 1, duration: 0.5 }}
       >
-        {isNearBoundary ? "Limite de Navegação!" : "Área Circular de Navegação"}
+        {isNearBoundary
+          ? "Limite Unificado Atingido!"
+          : "Navegação Unificada Ativa"}
       </motion.div>
 
       {/* Nearby point indicator */}
