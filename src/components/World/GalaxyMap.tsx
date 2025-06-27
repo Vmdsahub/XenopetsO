@@ -274,7 +274,11 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
   useEffect(() => {
     if (containerDimensions.width === 0) return;
 
+    let isValidating = false; // Prevent recursive validation calls
+
     const validatePosition = () => {
+      if (isValidating) return; // Prevent infinite loops
+
       const config = getUnifiedNavigationConfig(
         containerDimensions.width,
         containerDimensions.height,
@@ -284,8 +288,10 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
       const currentY = mapY.get();
       const distance = Math.sqrt(currentX * currentX + currentY * currentY);
 
-      // If position exceeds unified boundary (including during momentum), clamp it
-      if (distance > config.navigationRadius) {
+      // Only clamp if significantly beyond boundary (add small tolerance)
+      const tolerance = 2; // pixels of tolerance to prevent jittering at boundary
+      if (distance > config.navigationRadius + tolerance) {
+        isValidating = true;
         const angle = Math.atan2(currentY, currentX);
         const clampedX = Math.cos(angle) * config.navigationRadius;
         const clampedY = Math.sin(angle) * config.navigationRadius;
@@ -293,15 +299,13 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         // Set position without animation to maintain responsiveness
         mapX.set(clampedX);
         mapY.set(clampedY);
+        isValidating = false;
       }
 
       // Check boundary proximity for visual feedback
       const proximityRadius =
         config.navigationRadius - config.boundaryThreshold;
-      const currentDistance = Math.sqrt(
-        currentX * currentX + currentY * currentY,
-      );
-      setIsNearBoundary(currentDistance >= proximityRadius);
+      setIsNearBoundary(distance >= proximityRadius);
     };
 
     // Monitor position continuously during momentum phase
