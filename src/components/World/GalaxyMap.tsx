@@ -23,6 +23,43 @@ interface MapPointData {
   image?: string;
 }
 
+// Navigation limits configuration - single source of truth
+const NAVIGATION_LIMITS = {
+  horizontal: 224, // pixels
+  vertical: 250, // pixels
+  boundaryThreshold: 5, // threshold for boundary proximity warning
+} as const;
+
+// Calculate boundary rectangle dimensions based on map size and constraints
+// Map is 200% (2x) of container size, positioned at -50% offset
+const getBoundaryDimensions = (
+  containerWidth: number,
+  containerHeight: number,
+) => {
+  // Map total dimensions
+  const mapWidth = containerWidth * 2;
+  const mapHeight = containerHeight * 2;
+
+  // Available movement range (constraint * 2)
+  const movementRangeX = NAVIGATION_LIMITS.horizontal * 2;
+  const movementRangeY = NAVIGATION_LIMITS.vertical * 2;
+
+  // Calculate boundary rectangle as percentage of map
+  const boundaryWidthPercent = (movementRangeX / mapWidth) * 100;
+  const boundaryHeightPercent = (movementRangeY / mapHeight) * 100;
+
+  // Center the boundary in the map
+  const boundaryLeftPercent = (100 - boundaryWidthPercent) / 2;
+  const boundaryTopPercent = (100 - boundaryHeightPercent) / 2;
+
+  return {
+    left: `${boundaryLeftPercent}%`,
+    top: `${boundaryTopPercent}%`,
+    width: `${boundaryWidthPercent}%`,
+    height: `${boundaryHeightPercent}%`,
+  };
+};
+
 const GALAXY_POINTS: MapPointData[] = [
   {
     id: "terra-nova",
