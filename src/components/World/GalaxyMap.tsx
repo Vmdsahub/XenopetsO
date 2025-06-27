@@ -489,9 +489,18 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         </motion.div>
       )}
 
+      {/* Reset button */}
+      <button
+        onClick={resetShipPosition}
+        className={`absolute top-4 right-4 text-white/80 text-xs bg-red-600/80 hover:bg-red-600 px-3 py-2 rounded-lg backdrop-blur-sm transition-colors ${isDragging ? "pointer-events-none" : ""}`}
+        title="Resetar posição da nave"
+      >
+        🏠 Voltar ao Centro
+      </button>
+
       {/* Navigation hint */}
       <div
-        className={`absolute top-4 right-4 text-white/60 text-xs bg-black/40 px-3 py-2 rounded-lg backdrop-blur-sm ${isDragging ? "pointer-events-none" : ""}`}
+        className={`absolute top-4 right-20 text-white/60 text-xs bg-black/40 px-3 py-2 rounded-lg backdrop-blur-sm ${isDragging ? "pointer-events-none" : ""}`}
       >
         Arraste para navegar
       </div>
