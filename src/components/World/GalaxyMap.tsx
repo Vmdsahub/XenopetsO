@@ -307,10 +307,10 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         style={{ x: mapX, y: mapY }}
         drag
         dragConstraints={{
-          left: -224,
-          right: 224,
-          top: -250,
-          bottom: 250,
+          left: -NAVIGATION_LIMITS.horizontal,
+          right: NAVIGATION_LIMITS.horizontal,
+          top: -NAVIGATION_LIMITS.vertical,
+          bottom: NAVIGATION_LIMITS.vertical,
         }}
         dragElastic={0.1}
         onDragStart={handleDragStart}
