@@ -167,10 +167,10 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
       const newX = mapX.get() + deltaX;
       const newY = mapY.get() + deltaY;
 
-      // Check boundary proximity
-      const boundaryThreshold = 50; // Distance from boundary to trigger warning
-      const isNearX = newX <= -350 || newX >= 350;
-      const isNearY = newY <= -350 || newY >= 350;
+      // Check boundary proximity - only trigger when very close to actual constraints
+      const boundaryThreshold = 5; // Very small threshold to be precise
+      const isNearX = newX <= -219 || newX >= 219; // 224 - 5 = 219
+      const isNearY = newY <= -245 || newY >= 245; // 250 - 5 = 245
       setIsNearBoundary(isNearX || isNearY);
 
       // Only calculate rotation if there's significant movement
@@ -267,10 +267,10 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         style={{ x: mapX, y: mapY }}
         drag
         dragConstraints={{
-          left: -400,
-          right: 400,
-          top: -400,
-          bottom: 400,
+          left: -224,
+          right: 224,
+          top: -250,
+          bottom: 250,
         }}
         dragElastic={0.1}
         onDragStart={handleDragStart}
@@ -282,15 +282,16 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         <motion.div
           className="absolute pointer-events-none z-10"
           style={{
-            // Container real: 448px width × 500px height
-            // Map: 896px width (448×2) × 1000px height (500×2)
-            // Constraints: ±400px both directions
-            // Vertical: 400px of 1000px = 40%, so 10% to 90% ✓
-            // Horizontal: 400px of 896px = 44.6%, so 5.4% to 94.6%
-            left: "5.4%", // 50% - 44.6% = 5.4%
-            top: "10%", // 50% - 40% = 10% ✓
-            width: "89.2%", // 44.6% × 2 = 89.2%
-            height: "80%", // 40% × 2 = 80% ✓
+            // Map: 200% width × 200% height (double the container)
+            // Constraints: ±224px horizontal, ±250px vertical
+            // For a map that's 200% of container, movement range should be:
+            // Horizontal: 224px of (container_width) = constraint/container ratio
+            // Vertical: 250px of 500px = 50%, so 25% to 75%
+            // Adjusting horizontal to match actual container proportions
+            left: "12.5%", // More narrow horizontal bounds
+            top: "25%",
+            width: "75%", // Wider area for horizontal movement
+            height: "50%",
           }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
