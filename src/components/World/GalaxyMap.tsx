@@ -270,6 +270,50 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
     }
   }, [containerDimensions, mapX, mapY]);
 
+  // Continuous position validation to handle momentum after drag ends
+  useEffect(() => {
+    if (containerDimensions.width === 0) return;
+
+    const validatePosition = () => {
+      const config = getUnifiedNavigationConfig(
+        containerDimensions.width,
+        containerDimensions.height,
+      );
+
+      const currentX = mapX.get();
+      const currentY = mapY.get();
+      const distance = Math.sqrt(currentX * currentX + currentY * currentY);
+
+      // If position exceeds unified boundary (including during momentum), clamp it
+      if (distance > config.navigationRadius) {
+        const angle = Math.atan2(currentY, currentX);
+        const clampedX = Math.cos(angle) * config.navigationRadius;
+        const clampedY = Math.sin(angle) * config.navigationRadius;
+
+        // Set position without animation to maintain responsiveness
+        mapX.set(clampedX);
+        mapY.set(clampedY);
+      }
+
+      // Check boundary proximity for visual feedback
+      const proximityRadius =
+        config.navigationRadius - config.boundaryThreshold;
+      const currentDistance = Math.sqrt(
+        currentX * currentX + currentY * currentY,
+      );
+      setIsNearBoundary(currentDistance >= proximityRadius);
+    };
+
+    // Monitor position continuously during momentum phase
+    const unsubscribeX = mapX.on("change", validatePosition);
+    const unsubscribeY = mapY.on("change", validatePosition);
+
+    return () => {
+      unsubscribeX();
+      unsubscribeY();
+    };
+  }, [mapX, mapY, containerDimensions]);
+
   // Save position continuously and on unmount
   useEffect(() => {
     const savePosition = () => {
