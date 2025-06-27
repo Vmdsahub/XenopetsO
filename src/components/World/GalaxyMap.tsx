@@ -66,15 +66,17 @@ const getBoundaryDimensions = (
   containerWidth: number,
   containerHeight: number,
 ) => {
+  const limits = getNavigationLimits(containerWidth, containerHeight);
+
   // Map total dimensions
   const mapWidth = containerWidth * 2;
   const mapHeight = containerHeight * 2;
 
-  // Available movement range (constraint * 2)
-  const movementRangeX = NAVIGATION_LIMITS.horizontal * 2;
-  const movementRangeY = NAVIGATION_LIMITS.vertical * 2;
+  // Available movement range (constraint * 2) - now always uniform
+  const movementRangeX = limits.horizontal * 2;
+  const movementRangeY = limits.vertical * 2;
 
-  // Calculate boundary rectangle as percentage of map
+  // Calculate boundary rectangle as percentage of map - using uniform values
   const boundaryWidthPercent = (movementRangeX / mapWidth) * 100;
   const boundaryHeightPercent = (movementRangeY / mapHeight) * 100;
 
