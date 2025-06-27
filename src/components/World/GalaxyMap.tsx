@@ -27,8 +27,8 @@ interface MapPointData {
 // Container-based navigation limits that scale with container size
 const NAVIGATION_CONFIG = {
   // Navigation area as percentage of container size - unified values
-  horizontalRatio: 0.9, // 90% of container width for navigation
-  verticalRatio: 0.9, // 90% of container height for navigation
+  horizontalRatio: 3.0, // 300% of container width for navigation (massively expanded)
+  verticalRatio: 3.0, // 300% of container height for navigation (massively expanded)
   boundaryThreshold: 5, // threshold for boundary proximity warning
   minContainerSize: 500, // minimum container size for calculations
 } as const;
@@ -61,16 +61,16 @@ const getNavigationLimits = (
   };
 };
 // Calculate boundary rectangle dimensions based on map size and constraints
-// Map is 200% (2x) of container size, positioned at -50% offset
+// Map is 400% (4x) of container size, positioned at -150% offset to accommodate massive expansion
 const getBoundaryDimensions = (
   containerWidth: number,
   containerHeight: number,
 ) => {
   const limits = getNavigationLimits(containerWidth, containerHeight);
 
-  // Map total dimensions
-  const mapWidth = containerWidth * 2;
-  const mapHeight = containerHeight * 2;
+  // Map total dimensions - increased to 400% to accommodate 300% navigation
+  const mapWidth = containerWidth * 4;
+  const mapHeight = containerHeight * 4;
 
   // Available movement range (constraint * 2) - now always uniform
   const movementRangeX = limits.horizontal * 2;
@@ -139,6 +139,145 @@ const GALAXY_POINTS: MapPointData[] = [
     description: "Planeta coberto de gelo eterno",
     image: "https://images.pexels.com/photos/220201/pexels-photo-220201.jpeg",
   },
+  // Novos pontos para área expandida
+  {
+    id: "estacao-fronteira",
+    x: 5,
+    y: 35,
+    name: "Estação Fronteira",
+    type: "station",
+    description: "Posto avançado nas bordas da galáxia",
+    image: "https://images.pexels.com/photos/2156/sky-earth-space-working.jpg",
+  },
+  {
+    id: "planeta-vulcanico",
+    x: 15,
+    y: 10,
+    name: "Planeta Vulcânico",
+    type: "planet",
+    description: "Mundo de fogo e lava ardente",
+    image:
+      "https://images.pexels.com/photos/87651/earth-blue-planet-globe-planet-87651.jpeg",
+  },
+  {
+    id: "nebulosa-azul",
+    x: 90,
+    y: 15,
+    name: "Nebulosa Azul",
+    type: "nebula",
+    description: "Formação cósmica de cores vibrantes",
+    image: "https://images.pexels.com/photos/1274260/pexels-photo-1274260.jpeg",
+  },
+  {
+    id: "cinturao-asteroides-sul",
+    x: 35,
+    y: 90,
+    name: "Cinturão Sul",
+    type: "asteroid",
+    description: "Vasto campo de asteroides ricos em metais",
+    image: "https://images.pexels.com/photos/2159/flight-sky-earth-space.jpg",
+  },
+  {
+    id: "mundo-oceanico",
+    x: 75,
+    y: 85,
+    name: "Mundo Oceânico",
+    type: "planet",
+    description: "Planeta coberto por oceanos infinitos",
+    image:
+      "https://images.pexels.com/photos/87651/earth-blue-planet-globe-planet-87651.jpeg",
+  },
+  {
+    id: "estacao-mineracao",
+    x: 95,
+    y: 45,
+    name: "Estação de Mineração",
+    type: "station",
+    description: "Complexo industrial no espaço profundo",
+    image: "https://images.pexels.com/photos/2156/sky-earth-space-working.jpg",
+  },
+  {
+    id: "nebulosa-vermelha",
+    x: 60,
+    y: 5,
+    name: "Nebulosa Vermelha",
+    type: "nebula",
+    description: "Nuvem cósmica de gases ionizados",
+    image: "https://images.pexels.com/photos/1274260/pexels-photo-1274260.jpeg",
+  },
+  {
+    id: "planeta-desertico",
+    x: 10,
+    y: 85,
+    name: "Planeta Desértico",
+    type: "planet",
+    description: "Mundo árido com tempestades de areia",
+    image: "https://images.pexels.com/photos/220201/pexels-photo-220201.jpeg",
+  },
+  {
+    id: "asteroides-cristalinos",
+    x: 85,
+    y: 35,
+    name: "Asteroides Cristalinos",
+    type: "asteroid",
+    description: "Formações rochosas com cristais raros",
+    image: "https://images.pexels.com/photos/2159/flight-sky-earth-space.jpg",
+  },
+  {
+    id: "estacao-pesquisa",
+    x: 25,
+    y: 55,
+    name: "Estação de Pesquisa",
+    type: "station",
+    description: "Laboratório científico espacial",
+    image: "https://images.pexels.com/photos/2156/sky-earth-space-working.jpg",
+  },
+  {
+    id: "planeta-gasoso",
+    x: 65,
+    y: 75,
+    name: "Gigante Gasoso",
+    type: "planet",
+    description: "Planeta massivo com anéis espetaculares",
+    image:
+      "https://images.pexels.com/photos/87651/earth-blue-planet-globe-planet-87651.jpeg",
+  },
+  {
+    id: "nebulosa-verde",
+    x: 40,
+    y: 8,
+    name: "Nebulosa Verde",
+    type: "nebula",
+    description: "Região espacial com radiação peculiar",
+    image: "https://images.pexels.com/photos/1274260/pexels-photo-1274260.jpeg",
+  },
+  {
+    id: "mundo-artificial",
+    x: 80,
+    y: 92,
+    name: "Mundo Artificial",
+    type: "planet",
+    description: "Planeta construído por civilização antiga",
+    image: "https://images.pexels.com/photos/220201/pexels-photo-220201.jpeg",
+  },
+  {
+    id: "estacao-comercial",
+    x: 55,
+    y: 95,
+    name: "Estação Comercial",
+    type: "station",
+    description: "Hub de comércio intergaláctico",
+    image: "https://images.pexels.com/photos/2156/sky-earth-space-working.jpg",
+  },
+  {
+    id: "campo-cometas",
+    x: 92,
+    y: 70,
+    name: "Campo de Cometas",
+    type: "asteroid",
+    description: "Região com cometas em órbita errática",
+    image: "https://images.pexels.com/photos/2159/flight-sky-earth-space.jpg",
+  },
 ];
 
 export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
@@ -163,9 +302,9 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Generate fixed star positions only once
+  // Generate fixed star positions only once - massively increased for expanded area
   const stars = useMemo(() => {
-    return Array.from({ length: 100 }, (_, i) => ({
+    return Array.from({ length: 400 }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
       y: Math.random() * 100,
@@ -377,7 +516,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
   return (
     <div
       ref={containerRef}
-      className={`relative w-full h-[600px] bg-gradient-to-br from-gray-950 via-slate-900 to-black rounded-2xl overflow-hidden ${
+      className={`relative w-full h-[80vh] min-h-[800px] bg-gradient-to-br from-gray-950 via-slate-900 to-black rounded-2xl overflow-hidden ${
         isDragging ? "cursor-grabbing" : "cursor-grab"
       }`}
       style={{ userSelect: "none" }}
@@ -399,7 +538,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         ))}
       </div>
 
-      {/* Galaxy background nebulae */}
+      {/* Galaxy background nebulae - expanded for larger area */}
       <div
         className={`absolute inset-0 ${isDragging ? "pointer-events-none" : ""}`}
       >
@@ -419,12 +558,60 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
             bottom: "20%",
           }}
         />
+        <div
+          className="absolute w-56 h-56 rounded-full opacity-12 blur-3xl"
+          style={{
+            background: "radial-gradient(circle, #4c1d95, #312e81)",
+            left: "10%",
+            top: "60%",
+          }}
+        />
+        <div
+          className="absolute w-40 h-40 rounded-full opacity-9 blur-2xl"
+          style={{
+            background: "radial-gradient(circle, #be123c, #881337)",
+            right: "15%",
+            top: "10%",
+          }}
+        />
+        <div
+          className="absolute w-72 h-72 rounded-full opacity-8 blur-3xl"
+          style={{
+            background: "radial-gradient(circle, #065f46, #064e3b)",
+            left: "60%",
+            top: "70%",
+          }}
+        />
+        <div
+          className="absolute w-52 h-52 rounded-full opacity-11 blur-2xl"
+          style={{
+            background: "radial-gradient(circle, #7c2d12, #92400e)",
+            left: "80%",
+            bottom: "15%",
+          }}
+        />
+        <div
+          className="absolute w-44 h-44 rounded-full opacity-10 blur-3xl"
+          style={{
+            background: "radial-gradient(circle, #1e40af, #1e3a8a)",
+            right: "5%",
+            top: "45%",
+          }}
+        />
+        <div
+          className="absolute w-60 h-60 rounded-full opacity-9 blur-2xl"
+          style={{
+            background: "radial-gradient(circle, #581c87, #6b21a8)",
+            left: "40%",
+            top: "5%",
+          }}
+        />
       </div>
 
       {/* Draggable galaxy map */}
       <motion.div
         ref={mapRef}
-        className="absolute inset-0 w-[200%] h-[200%] -left-1/2 -top-1/2"
+        className="absolute inset-0 w-[400%] h-[400%] -left-[150%] -top-[150%]"
         style={{ x: mapX, y: mapY }}
         drag
         dragConstraints={
