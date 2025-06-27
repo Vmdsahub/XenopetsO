@@ -109,6 +109,11 @@ const GALAXY_POINTS: MapPointData[] = [
 ];
 
 export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
+  // Force reset corrupted position data
+  useEffect(() => {
+    localStorage.removeItem("xenopets-map-position");
+  }, []);
+
   // Load saved position or default to center
   const [shipPosition] = useState(() => {
     const saved = localStorage.getItem("xenopets-player-position");
