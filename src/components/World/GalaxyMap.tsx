@@ -239,25 +239,24 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
   // Validate and adjust map position when container dimensions change
   useEffect(() => {
     if (containerDimensions.width > 0 && containerDimensions.height > 0) {
-      const limits = getNavigationLimits(
+      const config = getUnifiedNavigationConfig(
         containerDimensions.width,
         containerDimensions.height,
       );
 
-      // Validate current position against circular limits
+      // Validate current position against unified circular limits
       const currentX = mapX.get();
       const currentY = mapY.get();
-      const radius = Math.min(limits.horizontal, limits.vertical);
       const distance = Math.sqrt(currentX * currentX + currentY * currentY);
 
       let clampedX = currentX;
       let clampedY = currentY;
 
-      // If outside circular boundary, clamp to circle edge
-      if (distance > radius) {
+      // If outside unified boundary, clamp to circle edge
+      if (distance > config.navigationRadius) {
         const angle = Math.atan2(currentY, currentX);
-        clampedX = Math.cos(angle) * radius;
-        clampedY = Math.sin(angle) * radius;
+        clampedX = Math.cos(angle) * config.navigationRadius;
+        clampedY = Math.sin(angle) * config.navigationRadius;
       }
 
       // Only update if position needs adjustment
@@ -265,7 +264,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         mapX.set(clampedX);
         mapY.set(clampedY);
         console.log(
-          `Map position adjusted to fit circular limits: (${clampedX}, ${clampedY})`,
+          `Map position adjusted to unified limits: (${clampedX.toFixed(1)}, ${clampedY.toFixed(1)}) - radius: ${config.navigationRadius.toFixed(1)}`,
         );
       }
     }
