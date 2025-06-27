@@ -289,7 +289,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
               isNearBoundary ? "border-red-400/40" : "border-cyan-400/20"
             }`}
             animate={{
-              scale: [1, 1.02, 1],
+              scale: [1, 1.01, 1],
               opacity: isNearBoundary ? [0.6, 1, 0.6] : [0.3, 0.6, 0.3],
             }}
             transition={{
