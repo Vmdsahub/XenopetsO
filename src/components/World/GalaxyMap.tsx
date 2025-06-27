@@ -346,18 +346,10 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         {/* Movement Boundary - represents where the ship can actually reach */}
         <motion.div
           className="absolute pointer-events-none z-10"
-          style={{
-            // Map: 200% width × 200% height (double the container)
-            // Constraints: ±224px horizontal, ±250px vertical
-            // For a map that's 200% of container, movement range should be:
-            // Horizontal: 224px of (container_width) = constraint/container ratio
-            // Vertical: 250px of 500px = 50%, so 25% to 75%
-            // Adjusting horizontal to match actual container proportions
-            left: "12.5%", // More narrow horizontal bounds
-            top: "25%",
-            width: "75%", // Wider area for horizontal movement
-            height: "50%",
-          }}
+          style={getBoundaryDimensions(
+            containerDimensions.width,
+            containerDimensions.height,
+          )}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5, duration: 1 }}
