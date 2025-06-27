@@ -24,26 +24,59 @@ interface MapPointData {
 }
 
 // Navigation limits configuration - single source of truth
-const NAVIGATION_LIMITS = {
-  horizontal: 400, // pixels - valor aumentado mas seguro
-  vertical: 450, // pixels - valor aumentado mas seguro
+// Container-based navigation limits that scale with container size
+const NAVIGATION_CONFIG = {
+  // Navigation area as percentage of container size - unified values
+  horizontalRatio: 0.9, // 90% of container width for navigation
+  verticalRatio: 0.9, // 90% of container height for navigation
   boundaryThreshold: 5, // threshold for boundary proximity warning
+  minContainerSize: 500, // minimum container size for calculations
 } as const;
+
+// Calculate navigation limits based on container dimensions
+const getNavigationLimits = (
+  containerWidth: number,
+  containerHeight: number,
+) => {
+  // Ensure minimum sizes for calculations
+  const effectiveWidth = Math.max(
+    containerWidth,
+    NAVIGATION_CONFIG.minContainerSize,
+  );
+  const effectiveHeight = Math.max(
+    containerHeight,
+    NAVIGATION_CONFIG.minContainerSize,
+  );
+
+  // Calculate limits as percentage of container size - ensuring they're always equal for uniform navigation
+  const baseLimit = Math.min(
+    (effectiveWidth * NAVIGATION_CONFIG.horizontalRatio) / 2,
+    (effectiveHeight * NAVIGATION_CONFIG.verticalRatio) / 2,
+  );
+
+  return {
+    horizontal: baseLimit,
+    vertical: baseLimit, // Always equal to horizontal for uniform navigation
+    boundaryThreshold: NAVIGATION_CONFIG.boundaryThreshold,
+  };
+};
 // Calculate boundary rectangle dimensions based on map size and constraints
 // Map is 200% (2x) of container size, positioned at -50% offset
 const getBoundaryDimensions = (
   containerWidth: number,
   containerHeight: number,
 ) => {
+  const limits = getNavigationLimits(containerWidth, containerHeight);
+
   // Map total dimensions
   const mapWidth = containerWidth * 2;
   const mapHeight = containerHeight * 2;
 
-  // Available movement range (constraint * 2)
-  const movementRangeX = NAVIGATION_LIMITS.horizontal * 2;
-  const movementRangeY = NAVIGATION_LIMITS.vertical * 2;
+  // Available movement range (constraint * 2) - now always uniform
+  const movementRangeX = limits.horizontal * 2;
+  const movementRangeY = limits.vertical * 2;
 
-  // Calculate boundary rectangle as percentage of map
+  // Calculate boundary rectangle as percentage of map - using uniform values
   const boundaryWidthPercent = (movementRangeX / mapWidth) * 100;
   const boundaryHeightPercent = (movementRangeY / mapHeight) * 100;
 
@@ -124,7 +157,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
   const [isNearBoundary, setIsNearBoundary] = useState(false);
   const [containerDimensions, setContainerDimensions] = useState({
     width: 0,
-    height: 500,
+    height: 0,
   });
 
   const mapRef = useRef<HTMLDivElement>(null);
@@ -141,22 +174,14 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
     }));
   }, []);
 
-  // Load saved map position with validation
+  // Load saved map position with validation - will be re-validated when container loads
   const savedMapPosition = useRef(() => {
     try {
       const saved = localStorage.getItem("xenopets-map-position");
       if (saved) {
         const parsed = JSON.parse(saved);
-        // Validate that saved position is within current limits
-        const validX = Math.max(
-          -NAVIGATION_LIMITS.horizontal,
-          Math.min(NAVIGATION_LIMITS.horizontal, parsed.x || 0),
-        );
-        const validY = Math.max(
-          -NAVIGATION_LIMITS.vertical,
-          Math.min(NAVIGATION_LIMITS.vertical, parsed.y || 0),
-        );
-        return { x: validX, y: validY };
+        // Return raw saved position, will be validated when container dimensions are available
+        return { x: parsed.x || 0, y: parsed.y || 0 };
       }
     } catch (error) {
       console.warn("Invalid saved map position, resetting to center");
@@ -215,6 +240,38 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
     };
   }, []);
 
+  // Validate and adjust map position when container dimensions change
+  useEffect(() => {
+    if (containerDimensions.width > 0 && containerDimensions.height > 0) {
+      const limits = getNavigationLimits(
+        containerDimensions.width,
+        containerDimensions.height,
+      );
+
+      // Validate current position against new limits
+      const currentX = mapX.get();
+      const currentY = mapY.get();
+
+      const clampedX = Math.max(
+        -limits.horizontal,
+        Math.min(limits.horizontal, currentX),
+      );
+      const clampedY = Math.max(
+        -limits.vertical,
+        Math.min(limits.vertical, currentY),
+      );
+
+      // Only update if position needs adjustment
+      if (clampedX !== currentX || clampedY !== currentY) {
+        mapX.set(clampedX);
+        mapY.set(clampedY);
+        console.log(
+          `Map position adjusted to fit new limits: (${clampedX}, ${clampedY})`,
+        );
+      }
+    }
+  }, [containerDimensions, mapX, mapY]);
+
   // Save position continuously and on unmount
   useEffect(() => {
     const savePosition = () => {
@@ -242,8 +299,12 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
 
   const handleDrag = useCallback(
     (event: any, info: any) => {
-      if (!containerRef.current) return;
+      if (!containerRef.current || containerDimensions.width === 0) return;
 
+      const limits = getNavigationLimits(
+        containerDimensions.width,
+        containerDimensions.height,
+      );
       const deltaX = info.delta.x;
       const deltaY = info.delta.y;
 
@@ -251,21 +312,19 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
       const newX = mapX.get() + deltaX;
       const newY = mapY.get() + deltaY;
 
-      // Ensure we stay within bounds
+      // Ensure we stay within bounds using dynamic limits
       const clampedX = Math.max(
-        -NAVIGATION_LIMITS.horizontal,
-        Math.min(NAVIGATION_LIMITS.horizontal, newX),
+        -limits.horizontal,
+        Math.min(limits.horizontal, newX),
       );
       const clampedY = Math.max(
-        -NAVIGATION_LIMITS.vertical,
-        Math.min(NAVIGATION_LIMITS.vertical, newY),
+        -limits.vertical,
+        Math.min(limits.vertical, newY),
       );
 
-      // Check boundary proximity using centralized limits
-      const horizontalLimit =
-        NAVIGATION_LIMITS.horizontal - NAVIGATION_LIMITS.boundaryThreshold;
-      const verticalLimit =
-        NAVIGATION_LIMITS.vertical - NAVIGATION_LIMITS.boundaryThreshold;
+      // Check boundary proximity using dynamic limits
+      const horizontalLimit = limits.horizontal - limits.boundaryThreshold;
+      const verticalLimit = limits.vertical - limits.boundaryThreshold;
       const isNearX =
         clampedX <= -horizontalLimit || clampedX >= horizontalLimit;
       const isNearY = clampedY <= -verticalLimit || clampedY >= verticalLimit;
@@ -283,7 +342,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
       mapX.set(clampedX);
       mapY.set(clampedY);
     },
-    [mapX, mapY, shipRotation],
+    [mapX, mapY, shipRotation, containerDimensions],
   );
 
   const handleDragEnd = () => {
@@ -318,7 +377,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
   return (
     <div
       ref={containerRef}
-      className={`relative w-full h-[500px] bg-gradient-to-br from-gray-950 via-slate-900 to-black rounded-2xl overflow-hidden ${
+      className={`relative w-full h-[600px] bg-gradient-to-br from-gray-950 via-slate-900 to-black rounded-2xl overflow-hidden ${
         isDragging ? "cursor-grabbing" : "cursor-grab"
       }`}
       style={{ userSelect: "none" }}
@@ -368,12 +427,22 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         className="absolute inset-0 w-[200%] h-[200%] -left-1/2 -top-1/2"
         style={{ x: mapX, y: mapY }}
         drag
-        dragConstraints={{
-          left: -NAVIGATION_LIMITS.horizontal,
-          right: NAVIGATION_LIMITS.horizontal,
-          top: -NAVIGATION_LIMITS.vertical,
-          bottom: NAVIGATION_LIMITS.vertical,
-        }}
+        dragConstraints={
+          containerDimensions.width > 0
+            ? (() => {
+                const limits = getNavigationLimits(
+                  containerDimensions.width,
+                  containerDimensions.height,
+                );
+                return {
+                  left: -limits.horizontal,
+                  right: limits.horizontal,
+                  top: -limits.vertical,
+                  bottom: limits.vertical,
+                };
+              })()
+            : { left: 0, right: 0, top: 0, bottom: 0 }
+        }
         dragElastic={0.1}
         onDragStart={handleDragStart}
         onDrag={handleDrag}
