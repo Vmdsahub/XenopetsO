@@ -299,8 +299,12 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
 
   const handleDrag = useCallback(
     (event: any, info: any) => {
-      if (!containerRef.current) return;
+      if (!containerRef.current || containerDimensions.width === 0) return;
 
+      const limits = getNavigationLimits(
+        containerDimensions.width,
+        containerDimensions.height,
+      );
       const deltaX = info.delta.x;
       const deltaY = info.delta.y;
 
@@ -308,21 +312,19 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
       const newX = mapX.get() + deltaX;
       const newY = mapY.get() + deltaY;
 
-      // Ensure we stay within bounds
+      // Ensure we stay within bounds using dynamic limits
       const clampedX = Math.max(
-        -NAVIGATION_LIMITS.horizontal,
-        Math.min(NAVIGATION_LIMITS.horizontal, newX),
+        -limits.horizontal,
+        Math.min(limits.horizontal, newX),
       );
       const clampedY = Math.max(
-        -NAVIGATION_LIMITS.vertical,
-        Math.min(NAVIGATION_LIMITS.vertical, newY),
+        -limits.vertical,
+        Math.min(limits.vertical, newY),
       );
 
-      // Check boundary proximity using centralized limits
-      const horizontalLimit =
-        NAVIGATION_LIMITS.horizontal - NAVIGATION_LIMITS.boundaryThreshold;
-      const verticalLimit =
-        NAVIGATION_LIMITS.vertical - NAVIGATION_LIMITS.boundaryThreshold;
+      // Check boundary proximity using dynamic limits
+      const horizontalLimit = limits.horizontal - limits.boundaryThreshold;
+      const verticalLimit = limits.vertical - limits.boundaryThreshold;
       const isNearX =
         clampedX <= -horizontalLimit || clampedX >= horizontalLimit;
       const isNearY = clampedY <= -verticalLimit || clampedY >= verticalLimit;
@@ -340,7 +342,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
       mapX.set(clampedX);
       mapY.set(clampedY);
     },
-    [mapX, mapY, shipRotation],
+    [mapX, mapY, shipRotation, containerDimensions],
   );
 
   const handleDragEnd = () => {
