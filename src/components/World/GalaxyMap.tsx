@@ -282,16 +282,17 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         <motion.div
           className="absolute pointer-events-none z-10"
           style={{
-            // dragConstraints are ±400px in both directions relative to map center
-            // Map is w-[200%] h-[200%] of container (1000px height, 2×container width)
-            // For vertical (height): 400px of 1000px = 40%, boundary at 10% to 90% ✓
-            // For horizontal (width): 400px of (2×container width) = 400px/(2×container width)
-            // Since both constraints are ±400px, the visual boundary should be proportional
-            // The map's coordinate system is consistent for both X and Y
-            left: "10%", // Should match vertical: ±400px constraint = 40% range, so 10% to 90%
-            top: "10%",
-            width: "80%", // Should match vertical: 40% * 2 = 80%
-            height: "80%",
+            // Map position starts at -50% and is 200% size, so center is at 50%
+            // dragConstraints: left: -400, right: 400, top: -400, bottom: 400
+            // Map total size is 200% of container in both directions
+            // Constraint range: 800px total (400px each direction)
+            // For height: 800px out of 1000px map = 80% constraint area, centered = 10% to 90%
+            // For width: 800px out of map width = same proportion if map is square
+            // But map width = 200% of container width, so need to account for container aspect ratio
+            left: "20%", // More conservative horizontal boundary
+            top: "10%", // Verified correct for vertical
+            width: "60%", // More conservative horizontal width
+            height: "80%", // Verified correct for vertical
           }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
