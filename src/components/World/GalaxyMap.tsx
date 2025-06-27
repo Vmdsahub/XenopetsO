@@ -240,6 +240,38 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
     };
   }, []);
 
+  // Validate and adjust map position when container dimensions change
+  useEffect(() => {
+    if (containerDimensions.width > 0 && containerDimensions.height > 0) {
+      const limits = getNavigationLimits(
+        containerDimensions.width,
+        containerDimensions.height,
+      );
+
+      // Validate current position against new limits
+      const currentX = mapX.get();
+      const currentY = mapY.get();
+
+      const clampedX = Math.max(
+        -limits.horizontal,
+        Math.min(limits.horizontal, currentX),
+      );
+      const clampedY = Math.max(
+        -limits.vertical,
+        Math.min(limits.vertical, currentY),
+      );
+
+      // Only update if position needs adjustment
+      if (clampedX !== currentX || clampedY !== currentY) {
+        mapX.set(clampedX);
+        mapY.set(clampedY);
+        console.log(
+          `Map position adjusted to fit new limits: (${clampedX}, ${clampedY})`,
+        );
+      }
+    }
+  }, [containerDimensions, mapX, mapY]);
+
   // Save position continuously and on unmount
   useEffect(() => {
     const savePosition = () => {
