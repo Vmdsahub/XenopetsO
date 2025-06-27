@@ -457,13 +457,17 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         onDragEnd={handleDragEnd}
         whileDrag={{ cursor: "grabbing" }}
       >
-        {/* Movement Boundary - circular boundary where the ship can reach */}
+        {/* Unified Navigation Boundary - visual boundary matches navigation limits exactly */}
         <motion.div
           className="absolute pointer-events-none z-10"
-          style={getBoundaryDimensions(
-            containerDimensions.width,
-            containerDimensions.height,
-          )}
+          style={
+            containerDimensions.width > 0
+              ? getUnifiedNavigationConfig(
+                  containerDimensions.width,
+                  containerDimensions.height,
+                ).boundaryStyle
+              : { display: "none" }
+          }
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5, duration: 1 }}
