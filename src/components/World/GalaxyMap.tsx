@@ -157,7 +157,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
   const [isNearBoundary, setIsNearBoundary] = useState(false);
   const [containerDimensions, setContainerDimensions] = useState({
     width: 0,
-    height: 500,
+    height: 0,
   });
 
   const mapRef = useRef<HTMLDivElement>(null);
