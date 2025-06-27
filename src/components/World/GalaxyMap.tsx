@@ -282,14 +282,13 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         <motion.div
           className="absolute pointer-events-none z-10"
           style={{
-            // Container: max-w-md (448px) width, 500px height
-            // Map: 896px width (200%), 1000px height (200%)
-            // Ship constraints: ±400px
-            // Vertical: 400px of 1000px = 40%, boundary: 10% to 90% ✓
-            // Horizontal: 400px of 896px = 44.6%, boundary: 5.4% to 94.6%
-            left: "5.4%", // 50% - 44.6% = 5.4%
+            // Container: 500px height, width varies but should match aspect ratio
+            // Map: 200% width and height (1000px height, width scales)
+            // Ship constraints: ±400px both directions
+            // Both directions: 400px of 1000px = 40%, boundary: 10% to 90%
+            left: "10%", // Unified with vertical: 50% - 40% = 10%
             top: "10%",
-            width: "89.2%", // 44.6% * 2 = 89.2%
+            width: "80%", // Unified with vertical: 40% * 2 = 80%
             height: "80%",
           }}
           initial={{ opacity: 0 }}
