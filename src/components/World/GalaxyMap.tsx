@@ -358,13 +358,13 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
       const newX = mapX.get() + deltaX;
       const newY = mapY.get() + deltaY;
 
-      // Unified circular boundary constraint
+      // Unified circular boundary constraint with smooth edge handling
       const distance = Math.sqrt(newX * newX + newY * newY);
 
       let clampedX = newX;
       let clampedY = newY;
 
-      // If outside unified boundary, clamp to circle edge (hard constraint)
+      // If outside unified boundary, clamp to circle edge but allow natural movement along edge
       if (distance > config.navigationRadius) {
         const angle = Math.atan2(newY, newX);
         clampedX = Math.cos(angle) * config.navigationRadius;
