@@ -25,8 +25,8 @@ interface MapPointData {
 
 // Navigation limits configuration - single source of truth
 const NAVIGATION_LIMITS = {
-  horizontal: 500, // pixels - aumentado mas mais razoável
-  vertical: 600, // pixels - aumentado mas mais razoável
+  horizontal: 400, // pixels - valor aumentado mas seguro
+  vertical: 450, // pixels - valor aumentado mas seguro
   boundaryThreshold: 5, // threshold for boundary proximity warning
 } as const;
 // Calculate boundary rectangle dimensions based on map size and constraints
