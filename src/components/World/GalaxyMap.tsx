@@ -299,7 +299,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
     (event: any, info: any) => {
       if (!containerRef.current || containerDimensions.width === 0) return;
 
-      const limits = getNavigationLimits(
+      const config = getUnifiedNavigationConfig(
         containerDimensions.width,
         containerDimensions.height,
       );
@@ -310,22 +310,22 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
       const newX = mapX.get() + deltaX;
       const newY = mapY.get() + deltaY;
 
-      // Circular boundary constraint
-      const radius = Math.min(limits.horizontal, limits.vertical);
+      // Unified circular boundary constraint
       const distance = Math.sqrt(newX * newX + newY * newY);
 
       let clampedX = newX;
       let clampedY = newY;
 
-      // If outside circular boundary, clamp to circle edge
-      if (distance > radius) {
+      // If outside unified boundary, clamp to circle edge (hard constraint)
+      if (distance > config.navigationRadius) {
         const angle = Math.atan2(newY, newX);
-        clampedX = Math.cos(angle) * radius;
-        clampedY = Math.sin(angle) * radius;
+        clampedX = Math.cos(angle) * config.navigationRadius;
+        clampedY = Math.sin(angle) * config.navigationRadius;
       }
 
-      // Check boundary proximity using circular distance
-      const proximityRadius = radius - limits.boundaryThreshold;
+      // Check boundary proximity using unified threshold
+      const proximityRadius =
+        config.navigationRadius - config.boundaryThreshold;
       const currentDistance = Math.sqrt(
         clampedX * clampedX + clampedY * clampedY,
       );
