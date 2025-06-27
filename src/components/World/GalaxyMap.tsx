@@ -242,38 +242,41 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
       const deltaX = info.delta.x;
       const deltaY = info.delta.y;
 
-      // Update map position
+      // Update map position with validation
       const newX = mapX.get() + deltaX;
       const newY = mapY.get() + deltaY;
+
+      // Ensure we stay within bounds
+      const clampedX = Math.max(
+        -NAVIGATION_LIMITS.horizontal,
+        Math.min(NAVIGATION_LIMITS.horizontal, newX),
+      );
+      const clampedY = Math.max(
+        -NAVIGATION_LIMITS.vertical,
+        Math.min(NAVIGATION_LIMITS.vertical, newY),
+      );
 
       // Check boundary proximity using centralized limits
       const horizontalLimit =
         NAVIGATION_LIMITS.horizontal - NAVIGATION_LIMITS.boundaryThreshold;
       const verticalLimit =
         NAVIGATION_LIMITS.vertical - NAVIGATION_LIMITS.boundaryThreshold;
-      const isNearX = newX <= -horizontalLimit || newX >= horizontalLimit;
-      const isNearY = newY <= -verticalLimit || newY >= verticalLimit;
+      const isNearX =
+        clampedX <= -horizontalLimit || clampedX >= horizontalLimit;
+      const isNearY = clampedY <= -verticalLimit || clampedY >= verticalLimit;
       setIsNearBoundary(isNearX || isNearY);
 
       // Only calculate rotation if there's significant movement
-      // This prevents erratic rotation when mouse is held but not moving
       const movementThreshold = 2;
       const movementMagnitude = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
       if (movementMagnitude > movementThreshold) {
-        // Calculate ship rotation based on movement direction
-        // Ship should point in the direction it's moving
-        // When dragging up (deltaY negative), ship points up
-        // When dragging right (deltaX positive), ship points right, etc.
-        // Note: We negate deltaY because in screen coordinates, positive Y is down
-        // Negate deltaX to fix left/right inversion
-        // Add 90 degrees to correct the orientation (ship image seems to be rotated)
         const angle = Math.atan2(-deltaY, -deltaX) * (180 / Math.PI) + 90;
         animate(shipRotation, angle, { duration: 0.2 });
       }
 
-      mapX.set(newX);
-      mapY.set(newY);
+      mapX.set(clampedX);
+      mapY.set(clampedY);
     },
     [mapX, mapY, shipRotation],
   );
