@@ -23,18 +23,19 @@ interface MapPointData {
   image?: string;
 }
 
-// Navigation limits configuration - single source of truth
-// Container-based navigation limits that scale with container size
+// Unified navigation and boundary configuration - single source of truth
+// All values calculated from this single configuration to prevent inconsistencies
 const NAVIGATION_CONFIG = {
-  // Navigation area as percentage of container size - unified values (circular boundary)
-  horizontalRatio: 2.0, // 200% of container width for navigation (significantly increased)
-  verticalRatio: 2.0, // 200% of container height for navigation (significantly increased)
-  boundaryThreshold: 5, // threshold for boundary proximity warning
-  minContainerSize: 500, // minimum container size for calculations
+  // Container size multiplier for navigation area (1.0 = container size, 0.8 = 80% of container)
+  navigationRatio: 0.8, // 80% of container size provides good navigation area with clear boundaries
+  boundaryThreshold: 15, // pixels from boundary edge for proximity warning
+  minContainerSize: 400, // minimum container size for calculations
+  mapSizeMultiplier: 2.0, // map is 2x container size (200%)
 } as const;
 
-// Calculate navigation limits based on container dimensions
-const getNavigationLimits = (
+// Single function to calculate all navigation and boundary values uniformly
+// This ensures navigation limits and visual boundaries are ALWAYS identical
+const getUnifiedNavigationConfig = (
   containerWidth: number,
   containerHeight: number,
 ) => {
@@ -48,35 +49,18 @@ const getNavigationLimits = (
     NAVIGATION_CONFIG.minContainerSize,
   );
 
-  // Calculate limits as percentage of container size - ensuring they're always equal for uniform navigation
-  const baseLimit = Math.min(
-    (effectiveWidth * NAVIGATION_CONFIG.horizontalRatio) / 2,
-    (effectiveHeight * NAVIGATION_CONFIG.verticalRatio) / 2,
-  );
+  // Calculate navigation radius as percentage of smallest container dimension
+  // This ensures circular boundary that fits within container regardless of aspect ratio
+  const containerSize = Math.min(effectiveWidth, effectiveHeight);
+  const navigationRadius =
+    (containerSize * NAVIGATION_CONFIG.navigationRatio) / 2;
 
-  return {
-    horizontal: baseLimit,
-    vertical: baseLimit, // Always equal to horizontal for uniform navigation
-    boundaryThreshold: NAVIGATION_CONFIG.boundaryThreshold,
-  };
-};
-// Calculate boundary circle dimensions based on map size and constraints
-// Map is 200% (2x) of container size, positioned at -50% offset with circular boundary
-const getBoundaryDimensions = (
-  containerWidth: number,
-  containerHeight: number,
-) => {
-  const limits = getNavigationLimits(containerWidth, containerHeight);
+  // Map dimensions (always 2x container size)
+  const mapWidth = containerWidth * NAVIGATION_CONFIG.mapSizeMultiplier;
+  const mapHeight = containerHeight * NAVIGATION_CONFIG.mapSizeMultiplier;
 
-  // Map total dimensions
-  const mapWidth = containerWidth * 2;
-  const mapHeight = containerHeight * 2;
-
-  // Available movement range (constraint * 2) - circular boundary
-  const radius = Math.min(limits.horizontal, limits.vertical);
-  const circleDiameter = radius * 2;
-
-  // Calculate boundary circle as percentage of map
+  // Calculate boundary circle as percentage of map (for visual boundary)
+  const circleDiameter = navigationRadius * 2;
   const boundaryWidthPercent = (circleDiameter / mapWidth) * 100;
   const boundaryHeightPercent = (circleDiameter / mapHeight) * 100;
 
@@ -85,11 +69,22 @@ const getBoundaryDimensions = (
   const boundaryTopPercent = (100 - boundaryHeightPercent) / 2;
 
   return {
-    left: `${boundaryLeftPercent}%`,
-    top: `${boundaryTopPercent}%`,
-    width: `${boundaryWidthPercent}%`,
-    height: `${boundaryHeightPercent}%`,
-    radius: radius,
+    // Navigation limits (used for ship movement constraints)
+    navigationRadius,
+    boundaryThreshold: NAVIGATION_CONFIG.boundaryThreshold,
+
+    // Visual boundary dimensions (used for rendering boundary circle)
+    boundaryStyle: {
+      left: `${boundaryLeftPercent}%`,
+      top: `${boundaryTopPercent}%`,
+      width: `${boundaryWidthPercent}%`,
+      height: `${boundaryHeightPercent}%`,
+    },
+
+    // Debug info
+    containerSize,
+    mapWidth,
+    mapHeight,
   };
 };
 
