@@ -210,6 +210,47 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
       }`}
       style={{ userSelect: "none" }}
     >
+      {/* Movement Boundary Indicator */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none z-10"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5, duration: 1 }}
+      >
+        {/* Boundary rectangle */}
+        <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 border-2 border-cyan-400/30 rounded-lg">
+          {/* Corner indicators */}
+          <div className="absolute -top-1 -left-1 w-4 h-4 border-l-2 border-t-2 border-cyan-400"></div>
+          <div className="absolute -top-1 -right-1 w-4 h-4 border-r-2 border-t-2 border-cyan-400"></div>
+          <div className="absolute -bottom-1 -left-1 w-4 h-4 border-l-2 border-b-2 border-cyan-400"></div>
+          <div className="absolute -bottom-1 -right-1 w-4 h-4 border-r-2 border-b-2 border-cyan-400"></div>
+
+          {/* Pulsing boundary effect */}
+          <motion.div
+            className="absolute inset-0 border-2 border-cyan-400/20 rounded-lg"
+            animate={{
+              scale: [1, 1.02, 1],
+              opacity: [0.3, 0.6, 0.3],
+            }}
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+        </div>
+
+        {/* Boundary label */}
+        <motion.div
+          className="absolute top-4 left-4 bg-black/60 text-cyan-400 px-3 py-1 rounded-lg text-xs backdrop-blur-sm border border-cyan-400/30"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 1, duration: 0.5 }}
+        >
+          Área de Navegação
+        </motion.div>
+      </motion.div>
+
       {/* Stars background */}
       <div
         className={`absolute inset-0 opacity-80 ${isDragging ? "pointer-events-none" : ""}`}
