@@ -80,6 +80,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
   });
   const [nearbyPoint, setNearbyPoint] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isNearBoundary, setIsNearBoundary] = useState(false);
 
   const mapRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -162,6 +163,16 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
       const deltaX = info.delta.x;
       const deltaY = info.delta.y;
 
+      // Update map position
+      const newX = mapX.get() + deltaX;
+      const newY = mapY.get() + deltaY;
+
+      // Check boundary proximity
+      const boundaryThreshold = 50; // Distance from boundary to trigger warning
+      const isNearX = newX <= -350 || newX >= 350;
+      const isNearY = newY <= -350 || newY >= 350;
+      setIsNearBoundary(isNearX || isNearY);
+
       // Only calculate rotation if there's significant movement
       // This prevents erratic rotation when mouse is held but not moving
       const movementThreshold = 2;
@@ -179,15 +190,15 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         animate(shipRotation, angle, { duration: 0.2 });
       }
 
-      // Update map position
-      mapX.set(mapX.get() + deltaX);
-      mapY.set(mapY.get() + deltaY);
+      mapX.set(newX);
+      mapY.set(newY);
     },
     [mapX, mapY, shipRotation],
   );
 
   const handleDragEnd = () => {
     setIsDragging(false);
+    setIsNearBoundary(false); // Reset boundary warning when dragging stops
     // Keep current rotation - ship maintains the direction it was moving
 
     // Save current map position
@@ -267,6 +278,88 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         onDragEnd={handleDragEnd}
         whileDrag={{ cursor: "grabbing" }}
       >
+        {/* Movement Boundary - represents where the ship can actually reach */}
+        <motion.div
+          className="absolute pointer-events-none z-10"
+          style={{
+            // Container: max-w-md (448px) width, 500px height
+            // Map: 896px width (200%), 1000px height (200%)
+            // Ship constraints: ±400px
+            // Vertical: 400px of 1000px = 40%, boundary: 10% to 90% ✓
+            // Horizontal: 400px of 896px = 44.6%, boundary: 5.4% to 94.6%
+            left: "5.4%", // 50% - 44.6% = 5.4%
+            top: "10%",
+            width: "89.2%", // 44.6% * 2 = 89.2%
+            height: "80%",
+          }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5, duration: 1 }}
+        >
+          {/* Boundary rectangle */}
+          <motion.div
+            className={`absolute inset-0 border-2 rounded-lg transition-colors duration-300 ${
+              isNearBoundary
+                ? "border-red-400/60 shadow-lg shadow-red-400/20"
+                : "border-cyan-400/30"
+            }`}
+            animate={{
+              borderWidth: isNearBoundary ? 3 : 2,
+            }}
+            transition={{ duration: 0.3 }}
+          >
+            {/* Corner indicators */}
+            <motion.div
+              className={`absolute -top-1 -left-1 w-4 h-4 border-l-2 border-t-2 transition-colors duration-300 ${
+                isNearBoundary ? "border-red-400" : "border-cyan-400"
+              }`}
+              animate={{
+                scale: isNearBoundary ? 1.2 : 1,
+              }}
+            />
+            <motion.div
+              className={`absolute -top-1 -right-1 w-4 h-4 border-r-2 border-t-2 transition-colors duration-300 ${
+                isNearBoundary ? "border-red-400" : "border-cyan-400"
+              }`}
+              animate={{
+                scale: isNearBoundary ? 1.2 : 1,
+              }}
+            />
+            <motion.div
+              className={`absolute -bottom-1 -left-1 w-4 h-4 border-l-2 border-b-2 transition-colors duration-300 ${
+                isNearBoundary ? "border-red-400" : "border-cyan-400"
+              }`}
+              animate={{
+                scale: isNearBoundary ? 1.2 : 1,
+              }}
+            />
+            <motion.div
+              className={`absolute -bottom-1 -right-1 w-4 h-4 border-r-2 border-b-2 transition-colors duration-300 ${
+                isNearBoundary ? "border-red-400" : "border-cyan-400"
+              }`}
+              animate={{
+                scale: isNearBoundary ? 1.2 : 1,
+              }}
+            />
+
+            {/* Pulsing boundary effect */}
+            <motion.div
+              className={`absolute inset-0 border-2 rounded-lg transition-colors duration-300 ${
+                isNearBoundary ? "border-red-400/40" : "border-cyan-400/20"
+              }`}
+              animate={{
+                scale: [1, 1.01, 1],
+                opacity: isNearBoundary ? [0.6, 1, 0.6] : [0.3, 0.6, 0.3],
+              }}
+              transition={{
+                duration: isNearBoundary ? 1 : 3,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+          </motion.div>
+        </motion.div>
+
         {/* Galaxy points */}
         {GALAXY_POINTS.map((point) => (
           <MapPoint
@@ -293,6 +386,24 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
           isDragging={isDragging}
         />
       </div>
+
+      {/* Boundary label */}
+      <motion.div
+        className={`absolute top-4 left-4 px-3 py-1 rounded-lg text-xs backdrop-blur-sm border transition-colors duration-300 ${
+          isNearBoundary
+            ? "bg-red-900/60 text-red-400 border-red-400/30"
+            : "bg-black/60 text-cyan-400 border-cyan-400/30"
+        }`}
+        initial={{ opacity: 0, x: -20 }}
+        animate={{
+          opacity: 1,
+          x: 0,
+          scale: isNearBoundary ? 1.05 : 1,
+        }}
+        transition={{ delay: 1, duration: 0.5 }}
+      >
+        {isNearBoundary ? "Limite de Navegação!" : "Área de Navegação"}
+      </motion.div>
 
       {/* Nearby point indicator */}
       {nearbyPoint && (
