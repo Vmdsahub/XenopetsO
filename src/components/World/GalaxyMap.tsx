@@ -23,6 +23,42 @@ interface MapPointData {
   image?: string;
 }
 
+// Navigation limits configuration - single source of truth
+const NAVIGATION_LIMITS = {
+  horizontal: 400, // pixels - valor aumentado mas seguro
+  vertical: 450, // pixels - valor aumentado mas seguro
+  boundaryThreshold: 5, // threshold for boundary proximity warning
+} as const;
+// Calculate boundary rectangle dimensions based on map size and constraints
+// Map is 200% (2x) of container size, positioned at -50% offset
+const getBoundaryDimensions = (
+  containerWidth: number,
+  containerHeight: number,
+) => {
+  // Map total dimensions
+  const mapWidth = containerWidth * 2;
+  const mapHeight = containerHeight * 2;
+
+  // Available movement range (constraint * 2)
+  const movementRangeX = NAVIGATION_LIMITS.horizontal * 2;
+  const movementRangeY = NAVIGATION_LIMITS.vertical * 2;
+
+  // Calculate boundary rectangle as percentage of map
+  const boundaryWidthPercent = (movementRangeX / mapWidth) * 100;
+  const boundaryHeightPercent = (movementRangeY / mapHeight) * 100;
+
+  // Center the boundary in the map
+  const boundaryLeftPercent = (100 - boundaryWidthPercent) / 2;
+  const boundaryTopPercent = (100 - boundaryHeightPercent) / 2;
+
+  return {
+    left: `${boundaryLeftPercent}%`,
+    top: `${boundaryTopPercent}%`,
+    width: `${boundaryWidthPercent}%`,
+    height: `${boundaryHeightPercent}%`,
+  };
+};
+
 const GALAXY_POINTS: MapPointData[] = [
   {
     id: "terra-nova",
@@ -73,6 +109,11 @@ const GALAXY_POINTS: MapPointData[] = [
 ];
 
 export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
+  // Force reset corrupted position data
+  useEffect(() => {
+    localStorage.removeItem("xenopets-map-position");
+  }, []);
+
   // Load saved position or default to center
   const [shipPosition] = useState(() => {
     const saved = localStorage.getItem("xenopets-player-position");
@@ -81,6 +122,10 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
   const [nearbyPoint, setNearbyPoint] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isNearBoundary, setIsNearBoundary] = useState(false);
+  const [containerDimensions, setContainerDimensions] = useState({
+    width: 0,
+    height: 500,
+  });
 
   const mapRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -96,10 +141,28 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
     }));
   }, []);
 
-  // Load saved map position
+  // Load saved map position with validation
   const savedMapPosition = useRef(() => {
-    const saved = localStorage.getItem("xenopets-map-position");
-    return saved ? JSON.parse(saved) : { x: 0, y: 0 };
+    try {
+      const saved = localStorage.getItem("xenopets-map-position");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // Validate that saved position is within current limits
+        const validX = Math.max(
+          -NAVIGATION_LIMITS.horizontal,
+          Math.min(NAVIGATION_LIMITS.horizontal, parsed.x || 0),
+        );
+        const validY = Math.max(
+          -NAVIGATION_LIMITS.vertical,
+          Math.min(NAVIGATION_LIMITS.vertical, parsed.y || 0),
+        );
+        return { x: validX, y: validY };
+      }
+    } catch (error) {
+      console.warn("Invalid saved map position, resetting to center");
+      localStorage.removeItem("xenopets-map-position");
+    }
+    return { x: 0, y: 0 };
   });
 
   const mapX = useMotionValue(savedMapPosition.current().x);
@@ -130,6 +193,27 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
   useEffect(() => {
     checkProximity();
   }, [checkProximity]);
+
+  // Detect container dimensions for boundary calculation
+  useEffect(() => {
+    const updateDimensions = () => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        setContainerDimensions({ width: rect.width, height: rect.height });
+      }
+    };
+
+    updateDimensions();
+    const resizeObserver = new ResizeObserver(updateDimensions);
+
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
 
   // Save position continuously and on unmount
   useEffect(() => {
@@ -163,35 +247,41 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
       const deltaX = info.delta.x;
       const deltaY = info.delta.y;
 
-      // Update map position
+      // Update map position with validation
       const newX = mapX.get() + deltaX;
       const newY = mapY.get() + deltaY;
 
-      // Check boundary proximity - only trigger when very close to actual constraints
-      const boundaryThreshold = 5; // Very small threshold to be precise
-      const isNearX = newX <= -219 || newX >= 219; // 224 - 5 = 219
-      const isNearY = newY <= -245 || newY >= 245; // 250 - 5 = 245
+      // Ensure we stay within bounds
+      const clampedX = Math.max(
+        -NAVIGATION_LIMITS.horizontal,
+        Math.min(NAVIGATION_LIMITS.horizontal, newX),
+      );
+      const clampedY = Math.max(
+        -NAVIGATION_LIMITS.vertical,
+        Math.min(NAVIGATION_LIMITS.vertical, newY),
+      );
+
+      // Check boundary proximity using centralized limits
+      const horizontalLimit =
+        NAVIGATION_LIMITS.horizontal - NAVIGATION_LIMITS.boundaryThreshold;
+      const verticalLimit =
+        NAVIGATION_LIMITS.vertical - NAVIGATION_LIMITS.boundaryThreshold;
+      const isNearX =
+        clampedX <= -horizontalLimit || clampedX >= horizontalLimit;
+      const isNearY = clampedY <= -verticalLimit || clampedY >= verticalLimit;
       setIsNearBoundary(isNearX || isNearY);
 
       // Only calculate rotation if there's significant movement
-      // This prevents erratic rotation when mouse is held but not moving
       const movementThreshold = 2;
       const movementMagnitude = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
       if (movementMagnitude > movementThreshold) {
-        // Calculate ship rotation based on movement direction
-        // Ship should point in the direction it's moving
-        // When dragging up (deltaY negative), ship points up
-        // When dragging right (deltaX positive), ship points right, etc.
-        // Note: We negate deltaY because in screen coordinates, positive Y is down
-        // Negate deltaX to fix left/right inversion
-        // Add 90 degrees to correct the orientation (ship image seems to be rotated)
         const angle = Math.atan2(-deltaY, -deltaX) * (180 / Math.PI) + 90;
         animate(shipRotation, angle, { duration: 0.2 });
       }
 
-      mapX.set(newX);
-      mapY.set(newY);
+      mapX.set(clampedX);
+      mapY.set(clampedY);
     },
     [mapX, mapY, shipRotation],
   );
@@ -204,6 +294,18 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
     // Save current map position
     const mapPos = { x: mapX.get(), y: mapY.get() };
     localStorage.setItem("xenopets-map-position", JSON.stringify(mapPos));
+  };
+
+  const resetShipPosition = () => {
+    // Reset map to center position
+    animate(mapX, 0, { duration: 0.5 });
+    animate(mapY, 0, { duration: 0.5 });
+    animate(shipRotation, 0, { duration: 0.5 });
+
+    // Clear saved position
+    localStorage.removeItem("xenopets-map-position");
+    setIsNearBoundary(false);
+    setIsDragging(false);
   };
 
   const handlePointClick = (pointId: string) => {
@@ -267,10 +369,10 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         style={{ x: mapX, y: mapY }}
         drag
         dragConstraints={{
-          left: -224,
-          right: 224,
-          top: -250,
-          bottom: 250,
+          left: -NAVIGATION_LIMITS.horizontal,
+          right: NAVIGATION_LIMITS.horizontal,
+          top: -NAVIGATION_LIMITS.vertical,
+          bottom: NAVIGATION_LIMITS.vertical,
         }}
         dragElastic={0.1}
         onDragStart={handleDragStart}
@@ -281,18 +383,10 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         {/* Movement Boundary - represents where the ship can actually reach */}
         <motion.div
           className="absolute pointer-events-none z-10"
-          style={{
-            // Map: 200% width × 200% height (double the container)
-            // Constraints: ±224px horizontal, ±250px vertical
-            // For a map that's 200% of container, movement range should be:
-            // Horizontal: 224px of (container_width) = constraint/container ratio
-            // Vertical: 250px of 500px = 50%, so 25% to 75%
-            // Adjusting horizontal to match actual container proportions
-            left: "12.5%", // More narrow horizontal bounds
-            top: "25%",
-            width: "75%", // Wider area for horizontal movement
-            height: "50%",
-          }}
+          style={getBoundaryDimensions(
+            containerDimensions.width,
+            containerDimensions.height,
+          )}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5, duration: 1 }}
@@ -421,9 +515,18 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         </motion.div>
       )}
 
+      {/* Reset button */}
+      <button
+        onClick={resetShipPosition}
+        className={`absolute top-4 right-4 text-white/80 text-xs bg-red-600/80 hover:bg-red-600 px-3 py-2 rounded-lg backdrop-blur-sm transition-colors ${isDragging ? "pointer-events-none" : ""}`}
+        title="Resetar posição da nave"
+      >
+        🏠 Voltar ao Centro
+      </button>
+
       {/* Navigation hint */}
       <div
-        className={`absolute top-4 right-4 text-white/60 text-xs bg-black/40 px-3 py-2 rounded-lg backdrop-blur-sm ${isDragging ? "pointer-events-none" : ""}`}
+        className={`absolute top-4 right-20 text-white/60 text-xs bg-black/40 px-3 py-2 rounded-lg backdrop-blur-sm ${isDragging ? "pointer-events-none" : ""}`}
       >
         Arraste para navegar
       </div>
