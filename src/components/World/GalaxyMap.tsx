@@ -278,16 +278,18 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         onDragEnd={handleDragEnd}
         whileDrag={{ cursor: "grabbing" }}
       >
-        {/* Movement Boundary - positioned within the draggable map */}
+        {/* Movement Boundary - represents where the ship can actually reach */}
         <motion.div
           className="absolute pointer-events-none z-10"
           style={{
-            // Position boundary based on dragConstraints
-            // Map is 200% size, so 400px constraint = 20% of map
-            left: "30%", // 50% - 20% = 30%
-            top: "30%",
-            width: "40%", // 800px out of 2000px = 40%
-            height: "40%",
+            // Ship is always at center of viewport, map moves ±400px
+            // Container is 500px, map is 200% = 1000px
+            // Ship can reach 400px in each direction from map center
+            // Map center is at 50%, so ship can reach from 10% to 90% of map
+            left: "10%", // 50% - 40% = 10%
+            top: "10%",
+            width: "80%", // 80% of map area is reachable
+            height: "80%",
           }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
