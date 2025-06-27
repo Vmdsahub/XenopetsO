@@ -198,6 +198,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
 
   const handleDragEnd = () => {
     setIsDragging(false);
+    setIsNearBoundary(false); // Reset boundary warning when dragging stops
     // Keep current rotation - ship maintains the direction it was moving
 
     // Save current map position
