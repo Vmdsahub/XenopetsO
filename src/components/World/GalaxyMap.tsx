@@ -624,7 +624,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
 
       {/* Dica de navegação */}
       <div className="absolute top-4 right-24 text-white/60 text-xs bg-black/50 px-3 py-2 rounded-lg backdrop-blur-sm border border-white/20">
-        Arraste para navegar
+        Arraste para navegar • Mundo infinito
       </div>
     </div>
   );
