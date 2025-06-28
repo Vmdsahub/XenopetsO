@@ -23,68 +23,61 @@ interface MapPointData {
   image?: string;
 }
 
-// Unified navigation and boundary configuration - single source of truth
-// All values calculated from this single configuration to prevent inconsistencies
+// Sistema unificado de navegação - uma única fonte de verdade
 const NAVIGATION_CONFIG = {
-  // Container size multiplier for navigation area (1.0 = container size, 0.8 = 80% of container)
-  navigationRatio: 4.8, // 80% of container size provides good navigation area with clear boundaries
-  boundaryThreshold: 15, // pixels from boundary edge for proximity warning
-  minContainerSize: 400, // minimum container size for calculations
-  mapSizeMultiplier: 2.0, // map is 2x container size (200%)
+  // Fator do raio de navegação baseado no menor lado do container
+  radiusFactor: 0.35, // 35% do menor lado do container
+  warningZone: 30, // pixels antes do limite para alertas
+  minRadius: 140, // raio mínimo independente do tamanho do container
+  maxRadius: 280, // raio máximo para containers muito grandes
 } as const;
 
-// Single function to calculate all navigation and boundary values uniformly
-// This ensures navigation limits and visual boundaries are ALWAYS identical
-const getUnifiedNavigationConfig = (
+// Calcula todas as configurações de navegação e boundary de forma unificada
+const calculateNavigationBounds = (
   containerWidth: number,
   containerHeight: number,
 ) => {
-  // Ensure minimum sizes for calculations
-  const effectiveWidth = Math.max(
-    containerWidth,
-    NAVIGATION_CONFIG.minContainerSize,
+  if (containerWidth <= 0 || containerHeight <= 0) {
+    return {
+      radius: NAVIGATION_CONFIG.minRadius,
+      centerX: 0,
+      centerY: 0,
+      warningRadius:
+        NAVIGATION_CONFIG.minRadius - NAVIGATION_CONFIG.warningZone,
+      boundaryStyles: { display: "none" },
+    };
+  }
+
+  // Calcula o raio baseado no menor lado do container
+  const minDimension = Math.min(containerWidth, containerHeight);
+  let radius = minDimension * NAVIGATION_CONFIG.radiusFactor;
+
+  // Aplica limites mínimo e máximo
+  radius = Math.max(
+    NAVIGATION_CONFIG.minRadius,
+    Math.min(NAVIGATION_CONFIG.maxRadius, radius),
   );
-  const effectiveHeight = Math.max(
-    containerHeight,
-    NAVIGATION_CONFIG.minContainerSize,
-  );
 
-  // Calculate navigation radius as percentage of smallest container dimension
-  // This ensures circular boundary that fits within container regardless of aspect ratio
-  const containerSize = Math.min(effectiveWidth, effectiveHeight);
-  const navigationRadius =
-    (containerSize * NAVIGATION_CONFIG.navigationRatio) / 2;
+  const centerX = containerWidth / 2;
+  const centerY = containerHeight / 2;
+  const warningRadius = radius - NAVIGATION_CONFIG.warningZone;
 
-  // Map dimensions (always 2x container size)
-  const mapWidth = containerWidth * NAVIGATION_CONFIG.mapSizeMultiplier;
-  const mapHeight = containerHeight * NAVIGATION_CONFIG.mapSizeMultiplier;
-
-  // Calculate boundary circle as percentage of map (for visual boundary)
-  const circleDiameter = navigationRadius * 2;
-  const boundaryWidthPercent = (circleDiameter / mapWidth) * 100;
-  const boundaryHeightPercent = (circleDiameter / mapHeight) * 100;
-
-  // Center the boundary in the map
-  const boundaryLeftPercent = (100 - boundaryWidthPercent) / 2;
-  const boundaryTopPercent = (100 - boundaryHeightPercent) / 2;
+  // Estilos para a boundary visual que coincidem exatamente com os limites de navegação
+  const boundaryStyles = {
+    position: "absolute" as const,
+    left: centerX - radius,
+    top: centerY - radius,
+    width: radius * 2,
+    height: radius * 2,
+    borderRadius: "50%",
+  };
 
   return {
-    // Navigation limits (used for ship movement constraints)
-    navigationRadius,
-    boundaryThreshold: NAVIGATION_CONFIG.boundaryThreshold,
-
-    // Visual boundary dimensions (used for rendering boundary circle)
-    boundaryStyle: {
-      left: `${boundaryLeftPercent}%`,
-      top: `${boundaryTopPercent}%`,
-      width: `${boundaryWidthPercent}%`,
-      height: `${boundaryHeightPercent}%`,
-    },
-
-    // Debug info
-    containerSize,
-    mapWidth,
-    mapHeight,
+    radius,
+    centerX,
+    centerY,
+    warningRadius,
+    boundaryStyles,
   };
 };
 
@@ -124,7 +117,8 @@ const GALAXY_POINTS: MapPointData[] = [
     name: "Campo de Asteroides",
     type: "asteroid",
     description: "Rico em recursos minerais raros",
-    image: "https://images.pexels.com/photos/2159/flight-sky-earth-space.jpg",
+    image:
+      "https://images.pexels.com/photos/2159/flight-sky-earth-space-working.jpg",
   },
   {
     id: "mundo-gelado",
@@ -138,16 +132,11 @@ const GALAXY_POINTS: MapPointData[] = [
 ];
 
 export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
-  // Force reset corrupted position data
-  useEffect(() => {
-    localStorage.removeItem("xenopets-map-position");
-  }, []);
-
-  // Load saved position or default to center
   const [shipPosition] = useState(() => {
     const saved = localStorage.getItem("xenopets-player-position");
     return saved ? JSON.parse(saved) : { x: 50, y: 50 };
   });
+
   const [nearbyPoint, setNearbyPoint] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isNearBoundary, setIsNearBoundary] = useState(false);
@@ -159,7 +148,12 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Generate fixed star positions only once
+  // Posição da nave no espaço absoluto (center of container = 0,0)
+  const mapX = useMotionValue(0);
+  const mapY = useMotionValue(0);
+  const shipRotation = useMotionValue(0);
+
+  // Estrelas fixas geradas uma vez
   const stars = useMemo(() => {
     return Array.from({ length: 150 }, (_, i) => ({
       id: i,
@@ -170,29 +164,54 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
     }));
   }, []);
 
-  // Load saved map position with validation - will be re-validated when container loads
-  const savedMapPosition = useRef(() => {
-    try {
+  // Atualiza dimensões do container
+  useEffect(() => {
+    const updateDimensions = () => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        setContainerDimensions({ width: rect.width, height: rect.height });
+      }
+    };
+
+    updateDimensions();
+    const resizeObserver = new ResizeObserver(updateDimensions);
+
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
+    return () => resizeObserver.disconnect();
+  }, []);
+
+  // Carrega posição salva quando as dimensões estão disponíveis
+  useEffect(() => {
+    if (containerDimensions.width > 0 && containerDimensions.height > 0) {
       const saved = localStorage.getItem("xenopets-map-position");
       if (saved) {
-        const parsed = JSON.parse(saved);
-        // Return raw saved position, will be validated when container dimensions are available
-        return { x: parsed.x || 0, y: parsed.y || 0 };
+        try {
+          const { x, y } = JSON.parse(saved);
+          const bounds = calculateNavigationBounds(
+            containerDimensions.width,
+            containerDimensions.height,
+          );
+
+          // Valida se a posição salva está dentro dos limites atuais
+          const distance = Math.sqrt(x * x + y * y);
+          if (distance <= bounds.radius) {
+            mapX.set(x);
+            mapY.set(y);
+          }
+        } catch (error) {
+          console.warn("Posição salva inválida, resetando para centro");
+          localStorage.removeItem("xenopets-map-position");
+        }
       }
-    } catch (error) {
-      console.warn("Invalid saved map position, resetting to center");
-      localStorage.removeItem("xenopets-map-position");
     }
-    return { x: 0, y: 0 };
-  });
+  }, [containerDimensions, mapX, mapY]);
 
-  const mapX = useMotionValue(savedMapPosition.current().x);
-  const mapY = useMotionValue(savedMapPosition.current().y);
-  const shipRotation = useMotionValue(0); // Always start neutral
-
-  // Check proximity to points
+  // Verifica proximidade com pontos
   const checkProximity = useCallback(() => {
-    const threshold = 8; // Distance threshold for proximity
+    const threshold = 8;
     let closest: string | null = null;
     let closestDistance = Infinity;
 
@@ -215,100 +234,34 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
     checkProximity();
   }, [checkProximity]);
 
-  // Detect container dimensions for boundary calculation
-  useEffect(() => {
-    const updateDimensions = () => {
-      if (containerRef.current) {
-        const rect = containerRef.current.getBoundingClientRect();
-        setContainerDimensions({ width: rect.width, height: rect.height });
-      }
-    };
-
-    updateDimensions();
-    const resizeObserver = new ResizeObserver(updateDimensions);
-
-    if (containerRef.current) {
-      resizeObserver.observe(containerRef.current);
-    }
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, []);
-
-  // Validate and adjust map position when container dimensions change
-  useEffect(() => {
-    if (containerDimensions.width > 0 && containerDimensions.height > 0) {
-      const config = getUnifiedNavigationConfig(
-        containerDimensions.width,
-        containerDimensions.height,
-      );
-
-      // Validate current position against unified circular limits
-      const currentX = mapX.get();
-      const currentY = mapY.get();
-      const distance = Math.sqrt(currentX * currentX + currentY * currentY);
-
-      let clampedX = currentX;
-      let clampedY = currentY;
-
-      // If outside unified boundary, clamp to circle edge
-      if (distance > config.navigationRadius) {
-        const angle = Math.atan2(currentY, currentX);
-        clampedX = Math.cos(angle) * config.navigationRadius;
-        clampedY = Math.sin(angle) * config.navigationRadius;
-      }
-
-      // Only update if position needs adjustment
-      if (clampedX !== currentX || clampedY !== currentY) {
-        mapX.set(clampedX);
-        mapY.set(clampedY);
-        console.log(
-          `Map position adjusted to unified limits: (${clampedX.toFixed(1)}, ${clampedY.toFixed(1)}) - radius: ${config.navigationRadius.toFixed(1)}`,
-        );
-      }
-    }
-  }, [containerDimensions, mapX, mapY]);
-
-  // Continuous position validation to handle momentum after drag ends
+  // Validação contínua de posição com boundary unificado
   useEffect(() => {
     if (containerDimensions.width === 0) return;
 
-    let isValidating = false; // Prevent recursive validation calls
+    const bounds = calculateNavigationBounds(
+      containerDimensions.width,
+      containerDimensions.height,
+    );
 
     const validatePosition = () => {
-      if (isValidating) return; // Prevent infinite loops
-
-      const config = getUnifiedNavigationConfig(
-        containerDimensions.width,
-        containerDimensions.height,
-      );
-
       const currentX = mapX.get();
       const currentY = mapY.get();
       const distance = Math.sqrt(currentX * currentX + currentY * currentY);
 
-      // Only clamp if significantly beyond boundary (add small tolerance)
-      const tolerance = 2; // pixels of tolerance to prevent jittering at boundary
-      if (distance > config.navigationRadius + tolerance) {
-        isValidating = true;
+      // Restringe movimento dentro do círculo
+      if (distance > bounds.radius) {
         const angle = Math.atan2(currentY, currentX);
-        const clampedX = Math.cos(angle) * config.navigationRadius;
-        const clampedY = Math.sin(angle) * config.navigationRadius;
+        const clampedX = Math.cos(angle) * bounds.radius;
+        const clampedY = Math.sin(angle) * bounds.radius;
 
-        // Set position without animation to maintain responsiveness
         mapX.set(clampedX);
         mapY.set(clampedY);
-        isValidating = false;
       }
 
-      // Check boundary proximity for visual feedback
-      const proximityRadius =
-        config.navigationRadius - config.boundaryThreshold;
-      setIsNearBoundary(distance >= proximityRadius);
+      // Atualiza estado de proximidade com boundary
+      setIsNearBoundary(distance >= bounds.warningRadius);
     };
 
-    // Monitor position continuously during momentum phase
     const unsubscribeX = mapX.on("change", validatePosition);
     const unsubscribeY = mapY.on("change", validatePosition);
 
@@ -318,21 +271,21 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
     };
   }, [mapX, mapY, containerDimensions]);
 
-  // Save position continuously and on unmount
+  // Salva posição automaticamente
   useEffect(() => {
     const savePosition = () => {
-      const mapPos = { x: mapX.get(), y: mapY.get() };
-      localStorage.setItem("xenopets-map-position", JSON.stringify(mapPos));
+      const position = { x: mapX.get(), y: mapY.get() };
+      localStorage.setItem("xenopets-map-position", JSON.stringify(position));
     };
 
-    // Save position every 2 seconds when not dragging
+    // Salva a cada 2 segundos quando não está arrastando
     const interval = setInterval(() => {
       if (!isDragging) {
         savePosition();
       }
     }, 2000);
 
-    // Save position on unmount
+    // Salva ao desmontar o componente
     return () => {
       clearInterval(interval);
       savePosition();
@@ -345,105 +298,85 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
 
   const handleDrag = useCallback(
     (event: any, info: any) => {
-      if (!containerRef.current || containerDimensions.width === 0) return;
+      if (containerDimensions.width === 0) return;
 
-      const config = getUnifiedNavigationConfig(
+      const bounds = calculateNavigationBounds(
         containerDimensions.width,
         containerDimensions.height,
       );
       const deltaX = info.delta.x;
       const deltaY = info.delta.y;
 
-      // Update map position with validation
+      // Nova posição baseada no movimento
       const newX = mapX.get() + deltaX;
       const newY = mapY.get() + deltaY;
-
-      // Unified circular boundary constraint with smooth sliding along edge
       const distance = Math.sqrt(newX * newX + newY * newY);
 
-      let clampedX = newX;
-      let clampedY = newY;
+      let finalX = newX;
+      let finalY = newY;
 
-      // If outside unified boundary, implement sliding along the edge
-      if (distance > config.navigationRadius) {
+      // Se ultrapassar o limite, implementa deslizamento na borda
+      if (distance > bounds.radius) {
         const currentDistance = Math.sqrt(
           mapX.get() * mapX.get() + mapY.get() * mapY.get(),
         );
 
-        // If already at boundary, allow tangential movement (sliding along edge)
-        if (currentDistance >= config.navigationRadius - 5) {
-          // Project movement onto tangent of circle for smooth sliding
-          const angle = Math.atan2(mapY.get(), mapX.get());
-          const tangentX = -Math.sin(angle);
-          const tangentY = Math.cos(angle);
+        // Se já está na borda, permite movimento tangencial (deslizar na borda)
+        if (currentDistance >= bounds.radius - 3) {
+          const currentAngle = Math.atan2(mapY.get(), mapX.get());
+          const tangentX = -Math.sin(currentAngle);
+          const tangentY = Math.cos(currentAngle);
 
-          // Calculate tangential component of movement
-          const tangentialMovement = deltaX * tangentX + deltaY * tangentY;
+          // Calcula componente tangencial do movimento
+          const tangentialComponent = deltaX * tangentX + deltaY * tangentY;
 
-          // Apply only tangential movement
-          clampedX = mapX.get() + tangentialMovement * tangentX;
-          clampedY = mapY.get() + tangentialMovement * tangentY;
+          // Aplica apenas movimento tangencial
+          finalX = mapX.get() + tangentialComponent * tangentX;
+          finalY = mapY.get() + tangentialComponent * tangentY;
 
-          // Ensure result is still within boundary
-          const finalDistance = Math.sqrt(
-            clampedX * clampedX + clampedY * clampedY,
-          );
-          if (finalDistance > config.navigationRadius) {
-            const finalAngle = Math.atan2(clampedY, clampedX);
-            clampedX = Math.cos(finalAngle) * config.navigationRadius;
-            clampedY = Math.sin(finalAngle) * config.navigationRadius;
+          // Garante que ainda está dentro do limite
+          const finalDistance = Math.sqrt(finalX * finalX + finalY * finalY);
+          if (finalDistance > bounds.radius) {
+            const finalAngle = Math.atan2(finalY, finalX);
+            finalX = Math.cos(finalAngle) * bounds.radius;
+            finalY = Math.sin(finalAngle) * bounds.radius;
           }
         } else {
-          // Standard clamping for movements from inside to outside
+          // Movimento normal que ultrapassa limite - clamp na borda
           const angle = Math.atan2(newY, newX);
-          clampedX = Math.cos(angle) * config.navigationRadius;
-          clampedY = Math.sin(angle) * config.navigationRadius;
+          finalX = Math.cos(angle) * bounds.radius;
+          finalY = Math.sin(angle) * bounds.radius;
         }
       }
 
-      // Check boundary proximity using unified threshold
-      const proximityRadius =
-        config.navigationRadius - config.boundaryThreshold;
-      const currentDistance = Math.sqrt(
-        clampedX * clampedX + clampedY * clampedY,
-      );
-      setIsNearBoundary(currentDistance >= proximityRadius);
-
-      // Only calculate rotation if there's significant movement
-      const movementThreshold = 2;
+      // Atualiza rotação da nave baseada no movimento
       const movementMagnitude = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-
-      if (movementMagnitude > movementThreshold) {
+      if (movementMagnitude > 2) {
         const angle = Math.atan2(-deltaY, -deltaX) * (180 / Math.PI) + 90;
         animate(shipRotation, angle, { duration: 0.2 });
       }
 
-      mapX.set(clampedX);
-      mapY.set(clampedY);
+      mapX.set(finalX);
+      mapY.set(finalY);
     },
     [mapX, mapY, shipRotation, containerDimensions],
   );
 
   const handleDragEnd = () => {
     setIsDragging(false);
-    // Note: boundary validation is now handled by continuous monitoring
-    // This allows momentum to work naturally while staying within limits
 
-    // Save current map position
-    const mapPos = { x: mapX.get(), y: mapY.get() };
-    localStorage.setItem("xenopets-map-position", JSON.stringify(mapPos));
+    // Salva posição imediatamente após parar de arrastar
+    const position = { x: mapX.get(), y: mapY.get() };
+    localStorage.setItem("xenopets-map-position", JSON.stringify(position));
   };
 
   const resetShipPosition = () => {
-    // Reset map to center position
     animate(mapX, 0, { duration: 0.5 });
     animate(mapY, 0, { duration: 0.5 });
     animate(shipRotation, 0, { duration: 0.5 });
 
-    // Clear saved position
     localStorage.removeItem("xenopets-map-position");
     setIsNearBoundary(false);
-    setIsDragging(false);
   };
 
   const handlePointClick = (pointId: string) => {
@@ -453,18 +386,21 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
     }
   };
 
+  const bounds = calculateNavigationBounds(
+    containerDimensions.width,
+    containerDimensions.height,
+  );
+
   return (
     <div
       ref={containerRef}
       className={`relative w-full h-[650px] bg-gradient-to-br from-gray-950 via-slate-900 to-black rounded-2xl overflow-hidden ${
-        isDragging ? "cursor-grabbing" : "cursor-grab"
+        isDragging ? "cursor-grabbing select-none" : "cursor-grab"
       }`}
-      style={{ userSelect: "none" }}
+      style={{ userSelect: "none", touchAction: "none" }}
     >
-      {/* Stars background */}
-      <div
-        className={`absolute inset-0 opacity-80 ${isDragging ? "pointer-events-none" : ""}`}
-      >
+      {/* Estrelas de fundo */}
+      <div className="absolute inset-0 opacity-80 pointer-events-none">
         {stars.map((star) => (
           <div
             key={star.id}
@@ -478,10 +414,8 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         ))}
       </div>
 
-      {/* Galaxy background nebulae */}
-      <div
-        className={`absolute inset-0 ${isDragging ? "pointer-events-none" : ""}`}
-      >
+      {/* Nebulosas de fundo */}
+      <div className="absolute inset-0 pointer-events-none">
         <div
           className="absolute w-64 h-64 rounded-full opacity-10 blur-3xl"
           style={{
@@ -500,88 +434,75 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         />
       </div>
 
-      {/* Draggable galaxy map */}
+      {/* Boundary visual unificado - coincide exatamente com os limites de navegação */}
+      {containerDimensions.width > 0 && (
+        <motion.div
+          className="pointer-events-none z-10"
+          style={bounds.boundaryStyles}
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{
+            opacity: 1,
+            scale: 1,
+            borderWidth: isNearBoundary ? 3 : 2,
+          }}
+          transition={{ duration: 0.5 }}
+        >
+          {/* Borda principal */}
+          <div
+            className={`absolute inset-0 border-2 rounded-full transition-all duration-300 ${
+              isNearBoundary
+                ? "border-red-400/70 shadow-lg shadow-red-400/30"
+                : "border-cyan-400/40"
+            }`}
+          />
+
+          {/* Efeito pulsante */}
+          <motion.div
+            className={`absolute inset-0 border-2 rounded-full ${
+              isNearBoundary ? "border-red-400/50" : "border-cyan-400/30"
+            }`}
+            animate={{
+              scale: [1, 1.02, 1],
+              opacity: isNearBoundary ? [0.7, 1, 0.7] : [0.3, 0.6, 0.3],
+            }}
+            transition={{
+              duration: isNearBoundary ? 1 : 2.5,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+
+          {/* Gradiente interno */}
+          <motion.div
+            className={`absolute inset-0 rounded-full transition-opacity duration-300 ${
+              isNearBoundary ? "opacity-25" : "opacity-15"
+            }`}
+            style={{
+              background: `radial-gradient(circle, transparent 75%, ${
+                isNearBoundary
+                  ? "rgba(248, 113, 113, 0.4)"
+                  : "rgba(34, 211, 238, 0.3)"
+              } 100%)`,
+            }}
+          />
+        </motion.div>
+      )}
+
+      {/* Mapa arrastável */}
       <motion.div
         ref={mapRef}
         className="absolute inset-0 w-[200%] h-[200%] -left-1/2 -top-1/2"
         style={{ x: mapX, y: mapY }}
         drag
         dragConstraints={false}
-        dragElastic={0.05}
+        dragElastic={0.02}
         dragMomentum={true}
         onDragStart={handleDragStart}
         onDrag={handleDrag}
         onDragEnd={handleDragEnd}
         whileDrag={{ cursor: "grabbing" }}
       >
-        {/* Unified Navigation Boundary - visual boundary matches navigation limits exactly */}
-        <motion.div
-          className="absolute pointer-events-none z-10"
-          style={
-            containerDimensions.width > 0
-              ? getUnifiedNavigationConfig(
-                  containerDimensions.width,
-                  containerDimensions.height,
-                ).boundaryStyle
-              : { display: "none" }
-          }
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5, duration: 1 }}
-        >
-          {/* Circular boundary */}
-          <motion.div
-            className={`absolute inset-0 border-2 rounded-full transition-colors duration-300 ${
-              isNearBoundary
-                ? "border-red-400/60 shadow-lg shadow-red-400/20"
-                : "border-cyan-400/30"
-            }`}
-            animate={{
-              borderWidth: isNearBoundary ? 3 : 2,
-            }}
-            transition={{ duration: 0.3 }}
-          >
-            {/* Pulsing circular boundary effect */}
-            <motion.div
-              className={`absolute inset-0 border-2 rounded-full transition-colors duration-300 ${
-                isNearBoundary ? "border-red-400/40" : "border-cyan-400/20"
-              }`}
-              animate={{
-                scale: [1, 1.01, 1],
-                opacity: isNearBoundary ? [0.6, 1, 0.6] : [0.3, 0.6, 0.3],
-              }}
-              transition={{
-                duration: isNearBoundary ? 1 : 3,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            />
-
-            {/* Circular gradient overlay */}
-            <motion.div
-              className={`absolute inset-0 rounded-full transition-opacity duration-300 ${
-                isNearBoundary ? "opacity-20" : "opacity-10"
-              }`}
-              style={{
-                background: `radial-gradient(circle, transparent 70%, ${
-                  isNearBoundary
-                    ? "rgba(248, 113, 113, 0.3)"
-                    : "rgba(34, 211, 238, 0.2)"
-                } 100%)`,
-              }}
-              animate={{
-                opacity: isNearBoundary ? [0.2, 0.3, 0.2] : [0.1, 0.15, 0.1],
-              }}
-              transition={{
-                duration: isNearBoundary ? 1 : 3,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            />
-          </motion.div>
-        </motion.div>
-
-        {/* Galaxy points */}
+        {/* Pontos da galáxia */}
         {GALAXY_POINTS.map((point) => (
           <MapPoint
             key={point.id}
@@ -597,10 +518,8 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         ))}
       </motion.div>
 
-      {/* Player ship - fixed position in center */}
-      <div
-        className={`absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 ${isDragging ? "pointer-events-none" : ""}`}
-      >
+      {/* Nave do jogador - posição fixa no centro */}
+      <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none">
         <PlayerShip
           rotation={shipRotation}
           isNearPoint={nearbyPoint !== null}
@@ -608,12 +527,12 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         />
       </div>
 
-      {/* Unified boundary label */}
+      {/* Indicador de status */}
       <motion.div
-        className={`absolute top-4 left-4 px-3 py-1 rounded-lg text-xs backdrop-blur-sm border transition-colors duration-300 ${
+        className={`absolute top-4 left-4 px-3 py-1 rounded-lg text-xs backdrop-blur-sm border transition-all duration-300 ${
           isNearBoundary
-            ? "bg-red-900/60 text-red-400 border-red-400/30"
-            : "bg-black/60 text-cyan-400 border-cyan-400/30"
+            ? "bg-red-900/70 text-red-300 border-red-400/40 shadow-lg shadow-red-400/20"
+            : "bg-black/70 text-cyan-300 border-cyan-400/40"
         }`}
         initial={{ opacity: 0, x: -20 }}
         animate={{
@@ -621,20 +540,18 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
           x: 0,
           scale: isNearBoundary ? 1.05 : 1,
         }}
-        transition={{ delay: 1, duration: 0.5 }}
+        transition={{ duration: 0.3 }}
       >
-        {isNearBoundary
-          ? "Limite Unificado Atingido!"
-          : "Navegação Unificada Ativa"}
+        {isNearBoundary ? "⚠️ Limite da Área Segura" : "🚀 Navegação Ativa"}
       </motion.div>
 
-      {/* Nearby point indicator */}
+      {/* Indicador de ponto próximo */}
       {nearbyPoint && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 20 }}
-          className={`absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/80 text-white px-4 py-2 rounded-lg text-sm backdrop-blur-sm border border-green-400/30 ${isDragging ? "pointer-events-none" : ""}`}
+          className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/80 text-white px-4 py-2 rounded-lg text-sm backdrop-blur-sm border border-green-400/40 pointer-events-none"
         >
           <div className="text-green-400 font-medium">
             {GALAXY_POINTS.find((p) => p.id === nearbyPoint)?.name}
@@ -643,19 +560,17 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         </motion.div>
       )}
 
-      {/* Reset button */}
+      {/* Botão reset */}
       <button
         onClick={resetShipPosition}
-        className={`absolute top-4 right-4 text-white/80 text-xs bg-red-600/80 hover:bg-red-600 px-3 py-2 rounded-lg backdrop-blur-sm transition-colors ${isDragging ? "pointer-events-none" : ""}`}
-        title="Resetar posição da nave"
+        className="absolute top-4 right-4 text-white/90 text-xs bg-red-600/80 hover:bg-red-600/90 px-3 py-2 rounded-lg backdrop-blur-sm transition-all duration-200 border border-red-400/30"
+        title="Voltar ao centro"
       >
-        🏠 Voltar ao Centro
+        🏠 Centro
       </button>
 
-      {/* Navigation hint */}
-      <div
-        className={`absolute top-4 right-20 text-white/60 text-xs bg-black/40 px-3 py-2 rounded-lg backdrop-blur-sm ${isDragging ? "pointer-events-none" : ""}`}
-      >
+      {/* Dica de navegação */}
+      <div className="absolute top-4 right-24 text-white/60 text-xs bg-black/50 px-3 py-2 rounded-lg backdrop-blur-sm border border-white/20">
         Arraste para navegar
       </div>
     </div>
