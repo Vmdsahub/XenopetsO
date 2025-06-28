@@ -255,17 +255,18 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
     GALAXY_POINTS.forEach((point) => {
       // Posição principal
       points.push(
-        <MapPoint
-          key={point.id}
-          point={point}
-          isNearby={nearbyPoint === point.id}
-          onClick={() => handlePointClick(point.id)}
-          isDragging={isDragging}
-          style={{
-            left: `${point.x}%`,
-            top: `${point.y}%`,
-          }}
-        />,
+        <div key={point.id} className="pointer-events-auto">
+          <MapPoint
+            point={point}
+            isNearby={nearbyPoint === point.id}
+            onClick={() => handlePointClick(point.id)}
+            isDragging={isDragging}
+            style={{
+              left: `${point.x}%`,
+              top: `${point.y}%`,
+            }}
+          />
+        </div>,
       );
 
       // Cópias para efeito toroidal (simplificado)
