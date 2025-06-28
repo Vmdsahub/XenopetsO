@@ -138,98 +138,87 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
     }));
   }, []);
 
-  // Verifica proximidade
-  const checkProximity = useCallback(() => {
-    const threshold = 8;
-    let closest: string | null = null;
-    let closestDistance = Infinity;
+  // Posição da nave em ref para evitar re-renders
+  const shipPosRef = useRef(shipPosition);
 
-    GALAXY_POINTS.forEach((point) => {
-      // Calcula distância considerando wrap toroidal simples
-      const dx = Math.min(
-        Math.abs(shipPosition.x - point.x),
-        Math.abs(shipPosition.x - point.x + WORLD_CONFIG.width),
-        Math.abs(shipPosition.x - point.x - WORLD_CONFIG.width),
-      );
-      const dy = Math.min(
-        Math.abs(shipPosition.y - point.y),
-        Math.abs(shipPosition.y - point.y + WORLD_CONFIG.height),
-        Math.abs(shipPosition.y - point.y - WORLD_CONFIG.height),
-      );
-      const distance = Math.sqrt(dx * dx + dy * dy);
-
-      if (distance < threshold && distance < closestDistance) {
-        closest = point.id;
-        closestDistance = distance;
-      }
-    });
-
-    setNearbyPoint(closest);
+  // Atualiza ref quando state muda
+  useEffect(() => {
+    shipPosRef.current = shipPosition;
   }, [shipPosition]);
 
+  // Verifica proximidade - simples e direto
   useEffect(() => {
-    checkProximity();
-  }, [checkProximity]);
+    const interval = setInterval(() => {
+      const threshold = 8;
+      let closest: string | null = null;
+      let closestDistance = Infinity;
 
-  // Salva posição
+      GALAXY_POINTS.forEach((point) => {
+        const dx = Math.abs(shipPosRef.current.x - point.x);
+        const dy = Math.abs(shipPosRef.current.y - point.y);
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance < threshold && distance < closestDistance) {
+          closest = point.id;
+          closestDistance = distance;
+        }
+      });
+
+      setNearbyPoint(closest);
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Salva posição - simples
   useEffect(() => {
-    const savePosition = () => {
-      localStorage.setItem(
-        "xenopets-player-position",
-        JSON.stringify(shipPosition),
-      );
-    };
-
     const interval = setInterval(() => {
       if (!isDragging) {
-        savePosition();
+        localStorage.setItem(
+          "xenopets-player-position",
+          JSON.stringify(shipPosRef.current),
+        );
       }
     }, 2000);
 
-    return () => {
-      clearInterval(interval);
-      savePosition();
-    };
-  }, [shipPosition, isDragging]);
+    return () => clearInterval(interval);
+  }, [isDragging]);
 
+  // Handlers simples sem useCallback
   const handleDragStart = () => {
     setIsDragging(true);
   };
 
-  const handleDrag = useCallback(
-    (event: any, info: any) => {
-      const deltaX = info.delta.x;
-      const deltaY = info.delta.y;
+  const handleDrag = (event: any, info: any) => {
+    const deltaX = info.delta.x;
+    const deltaY = info.delta.y;
 
-      // Converte pixels para % do mundo
-      const worldDeltaX = deltaX / 8;
-      const worldDeltaY = deltaY / 8;
+    // Atualiza posição da nave
+    const newX = wrap(shipPosRef.current.x - deltaX / 8, 0, WORLD_CONFIG.width);
+    const newY = wrap(
+      shipPosRef.current.y - deltaY / 8,
+      0,
+      WORLD_CONFIG.height,
+    );
 
-      // Atualiza posição da nave com wrap toroidal
-      setShipPosition((prev) => ({
-        x: wrap(prev.x - worldDeltaX, 0, WORLD_CONFIG.width),
-        y: wrap(prev.y - worldDeltaY, 0, WORLD_CONFIG.height),
-      }));
+    setShipPosition({ x: newX, y: newY });
 
-      // Atualiza movimento do mapa (visual)
-      mapX.set(mapX.get() + deltaX);
-      mapY.set(mapY.get() + deltaY);
+    // Atualiza mapa visual
+    mapX.set(mapX.get() + deltaX);
+    mapY.set(mapY.get() + deltaY);
 
-      // Rotação da nave
-      const movementMagnitude = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-      if (movementMagnitude > 2) {
-        const angle = Math.atan2(-deltaY, -deltaX) * (180 / Math.PI) + 90;
-        animate(shipRotation, angle, { duration: 0.2 });
-      }
-    },
-    [mapX, mapY, shipRotation],
-  );
+    // Rotação
+    if (Math.sqrt(deltaX * deltaX + deltaY * deltaY) > 2) {
+      const angle = Math.atan2(-deltaY, -deltaX) * (180 / Math.PI) + 90;
+      animate(shipRotation, angle, { duration: 0.2 });
+    }
+  };
 
   const handleDragEnd = () => {
     setIsDragging(false);
     localStorage.setItem(
       "xenopets-player-position",
-      JSON.stringify(shipPosition),
+      JSON.stringify(shipPosRef.current),
     );
   };
 
