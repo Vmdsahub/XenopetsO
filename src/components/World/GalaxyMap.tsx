@@ -441,17 +441,12 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
       </div>
 
       {/* Área de drag fixa - sempre cobre toda a tela */}
-      <motion.div
-        className="absolute inset-0 z-10"
-        drag
-        dragConstraints={false}
-        dragElastic={0.02}
-        dragMomentum={true}
-        onDragStart={handleDragStart}
-        onDrag={handleDrag}
-        onDragEnd={handleDragEnd}
-        whileDrag={{ cursor: "grabbing" }}
-        style={{ backgroundColor: "transparent" }}
+      <div
+        className={`absolute inset-0 z-10 ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        style={{ backgroundColor: "transparent", userSelect: "none" }}
       />
 
       {/* Mapa visual - movido pelo drag acima */}
