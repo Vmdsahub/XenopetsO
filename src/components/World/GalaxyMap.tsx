@@ -521,9 +521,12 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
   }, [triggerUpdate]);
 
   const resetShipPosition = () => {
-    const centerPos = { x: WORLD_CONFIG.width / 2, y: WORLD_CONFIG.height / 2 };
-    setShipPosition(centerPos);
+    shipPositionRef.current = {
+      x: WORLD_CONFIG.width / 2,
+      y: WORLD_CONFIG.height / 2,
+    };
     animate(shipRotation, 0, { duration: 0.5 });
+    triggerUpdate();
 
     localStorage.removeItem("xenopets-player-position");
   };
