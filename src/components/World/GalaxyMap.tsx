@@ -436,12 +436,9 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
   };
 
   const resetShipPosition = () => {
-    shipPositionRef.current = {
-      x: WORLD_CONFIG.width / 2,
-      y: WORLD_CONFIG.height / 2,
-    };
+    shipX.set(WORLD_CONFIG.width / 2);
+    shipY.set(WORLD_CONFIG.height / 2);
     animate(shipRotation, 0, { duration: 0.5 });
-    triggerUpdate();
 
     localStorage.removeItem("xenopets-player-position");
   };
@@ -453,13 +450,21 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
     }
   };
 
-  // Centro da tela para renderização
+  // Centro da tela e posição atual da nave
   const screenCenter = useMemo(
     () => ({
       x: containerDimensions.width / 2,
       y: containerDimensions.height / 2,
     }),
     [containerDimensions],
+  );
+
+  const currentShipPosition = useMemo(
+    () => ({
+      x: shipX.get(),
+      y: shipY.get(),
+    }),
+    [shipX, shipY],
   );
 
   return (
