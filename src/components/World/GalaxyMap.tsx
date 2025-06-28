@@ -30,7 +30,7 @@ const WORLD_CONFIG = {
   viewportSize: 1000, // Tamanho da viewport em unidades lógicas (área visível)
 } as const;
 
-// Função wrap para manter coordenadas dentro dos limites do mundo
+// Funç��o wrap para manter coordenadas dentro dos limites do mundo
 const wrap = (value: number, min: number, max: number): number => {
   const range = max - min;
   if (range <= 0) return min;
@@ -609,7 +609,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         GALAXY_POINTS.map((point) => {
           const positions = getWrappedPositions(
             { x: point.x, y: point.y },
-            shipPosition,
+            shipPositionRef.current,
             screenCenter,
             scale,
             containerDimensions.width,
