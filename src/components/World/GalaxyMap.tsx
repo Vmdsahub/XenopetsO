@@ -388,11 +388,9 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         />
       </div>
 
-      {/* Mapa arrastável */}
+      {/* Área de drag fixa - sempre cobre toda a tela */}
       <motion.div
-        ref={mapRef}
-        className="absolute inset-0 w-[300%] h-[300%] -left-full -top-full"
-        style={{ x: mapX, y: mapY }}
+        className="absolute inset-0 z-10"
         drag
         dragConstraints={false}
         dragElastic={0.02}
@@ -401,6 +399,14 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         onDrag={handleDrag}
         onDragEnd={handleDragEnd}
         whileDrag={{ cursor: "grabbing" }}
+        style={{ backgroundColor: "transparent" }}
+      />
+
+      {/* Mapa visual - movido pelo drag acima */}
+      <motion.div
+        ref={mapRef}
+        className="absolute inset-0 w-[300%] h-[300%] -left-full -top-full pointer-events-none"
+        style={{ x: mapX, y: mapY }}
       >
         {/* Pontos da galáxia */}
         {renderPoints()}
