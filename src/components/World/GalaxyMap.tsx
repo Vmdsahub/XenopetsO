@@ -365,7 +365,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
 
     GALAXY_POINTS.forEach((point) => {
       const distance = toroidalDistance(
-        shipPosition,
+        shipPositionRef.current,
         { x: point.x, y: point.y },
         WORLD_CONFIG.width,
         WORLD_CONFIG.height,
@@ -378,10 +378,12 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
     });
 
     setNearbyPoint(closest);
-  }, [shipPosition]);
+  }, []);
 
+  // Verifica proximidade a cada 500ms
   useEffect(() => {
-    checkProximity();
+    const interval = setInterval(checkProximity, 500);
+    return () => clearInterval(interval);
   }, [checkProximity]);
 
   // Salva posição da nave automaticamente
