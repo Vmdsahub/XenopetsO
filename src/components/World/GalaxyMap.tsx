@@ -580,20 +580,22 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
 
       {/* Indicador de status */}
       <motion.div
-        className={`absolute top-4 left-4 px-3 py-1 rounded-lg text-xs backdrop-blur-sm border transition-all duration-300 ${
-          isNearBoundary
-            ? "bg-red-900/70 text-red-300 border-red-400/40 shadow-lg shadow-red-400/20"
-            : "bg-black/70 text-cyan-300 border-cyan-400/40"
-        }`}
+        className="absolute top-4 left-4 px-3 py-1 rounded-lg text-xs backdrop-blur-sm border bg-black/70 text-cyan-300 border-cyan-400/40"
         initial={{ opacity: 0, x: -20 }}
-        animate={{
-          opacity: 1,
-          x: 0,
-          scale: isNearBoundary ? 1.05 : 1,
-        }}
+        animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.3 }}
       >
-        {isNearBoundary ? "⚠️ Limite da Área Segura" : "🚀 Navegação Ativa"}
+        🌌 Navegação Toroidal Ativa
+      </motion.div>
+
+      {/* Indicador de coordenadas */}
+      <motion.div
+        className="absolute top-12 left-4 px-3 py-1 rounded-lg text-xs backdrop-blur-sm border bg-black/70 text-gray-300 border-gray-400/40"
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.3, delay: 0.1 }}
+      >
+        X: {Math.round(shipPosition.x)} Y: {Math.round(shipPosition.y)}
       </motion.div>
 
       {/* Indicador de ponto próximo */}
