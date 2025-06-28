@@ -391,7 +391,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
     const savePosition = () => {
       localStorage.setItem(
         "xenopets-player-position",
-        JSON.stringify(shipPosition),
+        JSON.stringify(shipPositionRef.current),
       );
     };
 
@@ -407,7 +407,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
       clearInterval(interval);
       savePosition();
     };
-  }, [shipPosition, isDragging]);
+  }, [isDragging]);
 
   // Velocidade para momentum
   const velocityRef = useRef({ x: 0, y: 0 });
@@ -427,112 +427,98 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
       const deltaY = info.delta.y;
 
       // Converte movimento da tela para coordenadas do mundo
-      // Movimento inverso: mover o mapa para a direita move a nave para a esquerda
       const worldDeltaX = -deltaX / scale;
       const worldDeltaY = -deltaY / scale;
 
       // Atualiza posição da nave no mundo com wrap toroidal
-      setShipPosition((currentPos) => {
-        const newShipX = wrap(
-          currentPos.x + worldDeltaX,
-          0,
-          WORLD_CONFIG.width,
-        );
-        const newShipY = wrap(
-          currentPos.y + worldDeltaY,
+      shipPositionRef.current = {
+        x: wrap(shipPositionRef.current.x + worldDeltaX, 0, WORLD_CONFIG.width),
+        y: wrap(
+          shipPositionRef.current.y + worldDeltaY,
           0,
           WORLD_CONFIG.height,
-        );
+        ),
+      };
 
-        return { x: newShipX, y: newShipY };
-      });
+      // Força re-render
+      triggerUpdate();
 
       // Calcula velocidade para momentum
       const currentTime = Date.now();
       const deltaTime = Math.max(currentTime - lastDragTimeRef.current, 1);
       velocityRef.current = {
-        x: (worldDeltaX / deltaTime) * 1000, // velocidade por segundo
+        x: (worldDeltaX / deltaTime) * 1000,
         y: (worldDeltaY / deltaTime) * 1000,
       };
       lastDragTimeRef.current = currentTime;
 
-      // Atualiza rotação da nave baseada no movimento
+      // Atualiza rotação da nave
       const movementMagnitude = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
       if (movementMagnitude > 2) {
         const angle = Math.atan2(-deltaY, -deltaX) * (180 / Math.PI) + 90;
         animate(shipRotation, angle, { duration: 0.2 });
       }
     },
-    [scale, shipRotation],
+    [scale, triggerUpdate],
   );
 
   const handleDragEnd = useCallback(() => {
     setIsDragging(false);
 
-    // Aplica momentum (deslizamento)
+    // Aplica momentum
     const velocity = velocityRef.current;
     const speed = Math.sqrt(velocity.x * velocity.x + velocity.y * velocity.y);
 
     if (speed > 50) {
-      // Só aplica momentum se houve movimento significativo
-      const momentumDuration = Math.min(speed / 100, 2); // Máximo 2 segundos
-      const decay = 0.95; // Fator de desaceleração
-
+      const decay = 0.95;
       let currentVelocity = { ...velocity };
-      const startTime = Date.now();
 
       const applyMomentum = () => {
-        const elapsed = (Date.now() - startTime) / 1000;
+        const velocityMagnitude = Math.sqrt(
+          currentVelocity.x * currentVelocity.x +
+            currentVelocity.y * currentVelocity.y,
+        );
 
-        if (
-          elapsed < momentumDuration &&
-          Math.sqrt(
-            currentVelocity.x * currentVelocity.x +
-              currentVelocity.y * currentVelocity.y,
-          ) > 10
-        ) {
-          // Aplica desaceleração
+        if (velocityMagnitude > 10) {
           currentVelocity.x *= decay;
           currentVelocity.y *= decay;
 
-          // Atualiza posição
-          setShipPosition((currentPos) => {
-            const deltaTime = 0.016; // ~60fps
-            const worldDeltaX = currentVelocity.x * deltaTime;
-            const worldDeltaY = currentVelocity.y * deltaTime;
+          const deltaTime = 0.016;
+          const worldDeltaX = currentVelocity.x * deltaTime;
+          const worldDeltaY = currentVelocity.y * deltaTime;
 
-            const newShipX = wrap(
-              currentPos.x + worldDeltaX,
+          shipPositionRef.current = {
+            x: wrap(
+              shipPositionRef.current.x + worldDeltaX,
               0,
               WORLD_CONFIG.width,
-            );
-            const newShipY = wrap(
-              currentPos.y + worldDeltaY,
+            ),
+            y: wrap(
+              shipPositionRef.current.y + worldDeltaY,
               0,
               WORLD_CONFIG.height,
-            );
+            ),
+          };
 
-            return { x: newShipX, y: newShipY };
-          });
-
+          triggerUpdate();
           requestAnimationFrame(applyMomentum);
+        } else {
+          // Salva posição final
+          localStorage.setItem(
+            "xenopets-player-position",
+            JSON.stringify(shipPositionRef.current),
+          );
         }
       };
 
       requestAnimationFrame(applyMomentum);
+    } else {
+      localStorage.setItem(
+        "xenopets-player-position",
+        JSON.stringify(shipPositionRef.current),
+      );
     }
-
-    // Salva posição após um pequeno delay para capturar o final do momentum
-    setTimeout(() => {
-      setShipPosition((currentPos) => {
-        localStorage.setItem(
-          "xenopets-player-position",
-          JSON.stringify(currentPos),
-        );
-        return currentPos;
-      });
-    }, 100);
-  }, []);
+  }, [triggerUpdate]);
 
   const resetShipPosition = () => {
     const centerPos = { x: WORLD_CONFIG.width / 2, y: WORLD_CONFIG.height / 2 };
