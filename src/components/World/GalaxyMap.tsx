@@ -278,30 +278,9 @@ const GALAXY_POINTS: MapPointData[] = [
 ];
 
 export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
-  // Usar useRef para evitar problemas de re-renderização
-  const shipPositionRef = useRef({
-    x: WORLD_CONFIG.width / 2,
-    y: WORLD_CONFIG.height / 2,
-  });
-
-  // Inicializar posição salva
-  useEffect(() => {
-    const saved = localStorage.getItem("xenopets-player-position");
-    if (saved) {
-      try {
-        const pos = JSON.parse(saved);
-        shipPositionRef.current = {
-          x: wrap(pos.x || WORLD_CONFIG.width / 2, 0, WORLD_CONFIG.width),
-          y: wrap(pos.y || WORLD_CONFIG.height / 2, 0, WORLD_CONFIG.height),
-        };
-      } catch {
-        shipPositionRef.current = {
-          x: WORLD_CONFIG.width / 2,
-          y: WORLD_CONFIG.height / 2,
-        };
-      }
-    }
-  }, []);
+  // Usar motion values simples para posição da nave (em coordenadas do mundo)
+  const shipX = useMotionValue(WORLD_CONFIG.width / 2);
+  const shipY = useMotionValue(WORLD_CONFIG.height / 2);
 
   const [nearbyPoint, setNearbyPoint] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -309,7 +288,6 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
     width: 0,
     height: 0,
   });
-  const [, forceUpdate] = useState({}); // Para forçar re-render quando necessário
 
   const mapRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -324,8 +302,22 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
     );
   }, [containerDimensions]);
 
-  // Função para forçar re-render
-  const triggerUpdate = () => forceUpdate({});
+  // Carrega posição salva
+  useEffect(() => {
+    const saved = localStorage.getItem("xenopets-player-position");
+    if (saved) {
+      try {
+        const pos = JSON.parse(saved);
+        shipX.set(wrap(pos.x || WORLD_CONFIG.width / 2, 0, WORLD_CONFIG.width));
+        shipY.set(
+          wrap(pos.y || WORLD_CONFIG.height / 2, 0, WORLD_CONFIG.height),
+        );
+      } catch {
+        shipX.set(WORLD_CONFIG.width / 2);
+        shipY.set(WORLD_CONFIG.height / 2);
+      }
+    }
+  }, [shipX, shipY]);
 
   // Estrelas fixas geradas uma vez
   const stars = useMemo(() => {
