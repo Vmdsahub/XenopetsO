@@ -474,10 +474,14 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
       {/* Mapa visual - movido pelo drag acima */}
       <motion.div
         ref={mapRef}
-        className="absolute inset-0 w-[500%] h-[500%] -left-[200%] -top-[200%] pointer-events-none"
-        style={{ x: mapX, y: mapY }}
+        className="absolute inset-0 w-[300%] h-[300%] -left-full -top-full pointer-events-none"
+        style={{
+          x: mapX,
+          y: mapY,
+          willChange: "transform", // otimização para GPU
+        }}
       >
-        {/* Renderiza múltiplas cópias do conteúdo para efeito toroidal */}
+        {/* Renderiza apenas 3 cópias para melhor performance */}
         <div className="absolute inset-0">{renderPoints()}</div>
         <div
           className="absolute inset-0"
@@ -488,42 +492,6 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         <div
           className="absolute inset-0"
           style={{ transform: "translateX(-100%)" }}
-        >
-          {renderPoints()}
-        </div>
-        <div
-          className="absolute inset-0"
-          style={{ transform: "translateY(100%)" }}
-        >
-          {renderPoints()}
-        </div>
-        <div
-          className="absolute inset-0"
-          style={{ transform: "translateY(-100%)" }}
-        >
-          {renderPoints()}
-        </div>
-        <div
-          className="absolute inset-0"
-          style={{ transform: "translate(100%, 100%)" }}
-        >
-          {renderPoints()}
-        </div>
-        <div
-          className="absolute inset-0"
-          style={{ transform: "translate(-100%, -100%)" }}
-        >
-          {renderPoints()}
-        </div>
-        <div
-          className="absolute inset-0"
-          style={{ transform: "translate(100%, -100%)" }}
-        >
-          {renderPoints()}
-        </div>
-        <div
-          className="absolute inset-0"
-          style={{ transform: "translate(-100%, 100%)" }}
         >
           {renderPoints()}
         </div>
