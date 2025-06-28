@@ -447,12 +447,11 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
   };
 
   const resetShipPosition = () => {
-    animate(mapX, 0, { duration: 0.5 });
-    animate(mapY, 0, { duration: 0.5 });
+    const centerPos = { x: WORLD_CONFIG.width / 2, y: WORLD_CONFIG.height / 2 };
+    setShipPosition(centerPos);
     animate(shipRotation, 0, { duration: 0.5 });
 
-    localStorage.removeItem("xenopets-map-position");
-    setIsNearBoundary(false);
+    localStorage.removeItem("xenopets-player-position");
   };
 
   const handlePointClick = (pointId: string) => {
@@ -462,9 +461,13 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
     }
   };
 
-  const bounds = calculateNavigationBounds(
-    containerDimensions.width,
-    containerDimensions.height,
+  // Centro da tela para renderização
+  const screenCenter = useMemo(
+    () => ({
+      x: containerDimensions.width / 2,
+      y: containerDimensions.height / 2,
+    }),
+    [containerDimensions],
   );
 
   return (
