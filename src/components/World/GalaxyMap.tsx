@@ -302,7 +302,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
     );
   }, [containerDimensions]);
 
-  // Carrega posição salva
+  // Carrega posi��ão salva
   useEffect(() => {
     const saved = localStorage.getItem("xenopets-player-position");
     if (saved) {
@@ -529,7 +529,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         GALAXY_POINTS.map((point) => {
           const positions = getWrappedPositions(
             { x: point.x, y: point.y },
-            shipPositionRef.current,
+            currentShipPosition,
             screenCenter,
             scale,
             containerDimensions.width,
