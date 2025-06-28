@@ -273,72 +273,76 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
       // Cópia à direita
       if (point.x > 80) {
         points.push(
-          <MapPoint
-            key={`${point.id}-right`}
-            point={point}
-            isNearby={nearbyPoint === point.id}
-            onClick={() => handlePointClick(point.id)}
-            isDragging={isDragging}
-            style={{
-              left: `${point.x - WORLD_CONFIG.width}%`,
-              top: `${point.y}%`,
-              opacity: 0.7,
-            }}
-          />,
+          <div key={`${point.id}-right`} className="pointer-events-auto">
+            <MapPoint
+              point={point}
+              isNearby={nearbyPoint === point.id}
+              onClick={() => handlePointClick(point.id)}
+              isDragging={isDragging}
+              style={{
+                left: `${point.x - WORLD_CONFIG.width}%`,
+                top: `${point.y}%`,
+                opacity: 0.7,
+              }}
+            />
+          </div>,
         );
       }
 
       // Cópia à esquerda
       if (point.x < 20) {
         points.push(
-          <MapPoint
-            key={`${point.id}-left`}
-            point={point}
-            isNearby={nearbyPoint === point.id}
-            onClick={() => handlePointClick(point.id)}
-            isDragging={isDragging}
-            style={{
-              left: `${point.x + WORLD_CONFIG.width}%`,
-              top: `${point.y}%`,
-              opacity: 0.7,
-            }}
-          />,
+          <div key={`${point.id}-left`} className="pointer-events-auto">
+            <MapPoint
+              point={point}
+              isNearby={nearbyPoint === point.id}
+              onClick={() => handlePointClick(point.id)}
+              isDragging={isDragging}
+              style={{
+                left: `${point.x + WORLD_CONFIG.width}%`,
+                top: `${point.y}%`,
+                opacity: 0.7,
+              }}
+            />
+          </div>,
         );
       }
 
       // Cópia embaixo
       if (point.y > 80) {
         points.push(
-          <MapPoint
-            key={`${point.id}-bottom`}
-            point={point}
-            isNearby={nearbyPoint === point.id}
-            onClick={() => handlePointClick(point.id)}
-            isDragging={isDragging}
-            style={{
-              left: `${point.x}%`,
-              top: `${point.y - WORLD_CONFIG.height}%`,
-              opacity: 0.7,
-            }}
-          />,
+          <div key={`${point.id}-bottom`} className="pointer-events-auto">
+            <MapPoint
+              point={point}
+              isNearby={nearbyPoint === point.id}
+              onClick={() => handlePointClick(point.id)}
+              isDragging={isDragging}
+              style={{
+                left: `${point.x}%`,
+                top: `${point.y - WORLD_CONFIG.height}%`,
+                opacity: 0.7,
+              }}
+            />
+          </div>,
         );
       }
 
       // Cópia em cima
       if (point.y < 20) {
         points.push(
-          <MapPoint
-            key={`${point.id}-top`}
-            point={point}
-            isNearby={nearbyPoint === point.id}
-            onClick={() => handlePointClick(point.id)}
-            isDragging={isDragging}
-            style={{
-              left: `${point.x}%`,
-              top: `${point.y + WORLD_CONFIG.height}%`,
-              opacity: 0.7,
-            }}
-          />,
+          <div key={`${point.id}-top`} className="pointer-events-auto">
+            <MapPoint
+              point={point}
+              isNearby={nearbyPoint === point.id}
+              onClick={() => handlePointClick(point.id)}
+              isDragging={isDragging}
+              style={{
+                left: `${point.x}%`,
+                top: `${point.y + WORLD_CONFIG.height}%`,
+                opacity: 0.7,
+              }}
+            />
+          </div>,
         );
       }
     });
