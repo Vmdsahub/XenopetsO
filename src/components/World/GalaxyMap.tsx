@@ -402,56 +402,29 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
 
   const handleDrag = useCallback(
     (event: any, info: any) => {
-      if (containerDimensions.width === 0) return;
+      if (containerDimensions.width === 0 || scale === 0) return;
 
-      const bounds = calculateNavigationBounds(
-        containerDimensions.width,
-        containerDimensions.height,
-      );
       const deltaX = info.delta.x;
       const deltaY = info.delta.y;
 
-      // Nova posição baseada no movimento
-      const newX = mapX.get() + deltaX;
-      const newY = mapY.get() + deltaY;
-      const distance = Math.sqrt(newX * newX + newY * newY);
+      // Converte movimento da tela para coordenadas do mundo
+      // Movimento inverso: mover o mapa para a direita move a nave para a esquerda
+      const worldDeltaX = -deltaX / scale;
+      const worldDeltaY = -deltaY / scale;
 
-      let finalX = newX;
-      let finalY = newY;
+      // Atualiza posição da nave no mundo com wrap toroidal
+      const newShipX = wrap(
+        shipPosition.x + worldDeltaX,
+        0,
+        WORLD_CONFIG.width,
+      );
+      const newShipY = wrap(
+        shipPosition.y + worldDeltaY,
+        0,
+        WORLD_CONFIG.height,
+      );
 
-      // Se ultrapassar o limite, implementa deslizamento na borda
-      if (distance > bounds.radius) {
-        const currentDistance = Math.sqrt(
-          mapX.get() * mapX.get() + mapY.get() * mapY.get(),
-        );
-
-        // Se já está na borda, permite movimento tangencial (deslizar na borda)
-        if (currentDistance >= bounds.radius - 3) {
-          const currentAngle = Math.atan2(mapY.get(), mapX.get());
-          const tangentX = -Math.sin(currentAngle);
-          const tangentY = Math.cos(currentAngle);
-
-          // Calcula componente tangencial do movimento
-          const tangentialComponent = deltaX * tangentX + deltaY * tangentY;
-
-          // Aplica apenas movimento tangencial
-          finalX = mapX.get() + tangentialComponent * tangentX;
-          finalY = mapY.get() + tangentialComponent * tangentY;
-
-          // Garante que ainda está dentro do limite
-          const finalDistance = Math.sqrt(finalX * finalX + finalY * finalY);
-          if (finalDistance > bounds.radius) {
-            const finalAngle = Math.atan2(finalY, finalX);
-            finalX = Math.cos(finalAngle) * bounds.radius;
-            finalY = Math.sin(finalAngle) * bounds.radius;
-          }
-        } else {
-          // Movimento normal que ultrapassa limite - clamp na borda
-          const angle = Math.atan2(newY, newX);
-          finalX = Math.cos(angle) * bounds.radius;
-          finalY = Math.sin(angle) * bounds.radius;
-        }
-      }
+      setShipPosition({ x: newShipX, y: newShipY });
 
       // Atualiza rotação da nave baseada no movimento
       const movementMagnitude = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
@@ -459,19 +432,18 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         const angle = Math.atan2(-deltaY, -deltaX) * (180 / Math.PI) + 90;
         animate(shipRotation, angle, { duration: 0.2 });
       }
-
-      mapX.set(finalX);
-      mapY.set(finalY);
     },
-    [mapX, mapY, shipRotation, containerDimensions],
+    [shipPosition, scale, shipRotation],
   );
 
   const handleDragEnd = () => {
     setIsDragging(false);
 
     // Salva posição imediatamente após parar de arrastar
-    const position = { x: mapX.get(), y: mapY.get() };
-    localStorage.setItem("xenopets-map-position", JSON.stringify(position));
+    localStorage.setItem(
+      "xenopets-player-position",
+      JSON.stringify(shipPosition),
+    );
   };
 
   const resetShipPosition = () => {
