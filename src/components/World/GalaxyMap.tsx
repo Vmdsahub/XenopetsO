@@ -206,11 +206,12 @@ const getWrappedPositions = (
   return positions;
 };
 
+// Pontos da galáxia em coordenadas absolutas do mundo (0 a WORLD_CONFIG.width/height)
 const GALAXY_POINTS: MapPointData[] = [
   {
     id: "terra-nova",
-    x: 40,
-    y: 45,
+    x: WORLD_CONFIG.width * 0.4, // 40% da largura do mundo
+    y: WORLD_CONFIG.height * 0.45, // 45% da altura do mundo
     name: "Terra Nova",
     type: "planet",
     description: "Um planeta verdejante cheio de vida",
@@ -219,8 +220,8 @@ const GALAXY_POINTS: MapPointData[] = [
   },
   {
     id: "estacao-omega",
-    x: 60,
-    y: 35,
+    x: WORLD_CONFIG.width * 0.6,
+    y: WORLD_CONFIG.height * 0.35,
     name: "Estação Omega",
     type: "station",
     description: "Centro comercial da galáxia",
@@ -228,8 +229,8 @@ const GALAXY_POINTS: MapPointData[] = [
   },
   {
     id: "nebulosa-crimson",
-    x: 30,
-    y: 65,
+    x: WORLD_CONFIG.width * 0.3,
+    y: WORLD_CONFIG.height * 0.65,
     name: "Nebulosa Crimson",
     type: "nebula",
     description: "Uma nebulosa misteriosa com energia estranha",
@@ -237,8 +238,8 @@ const GALAXY_POINTS: MapPointData[] = [
   },
   {
     id: "campo-asteroides",
-    x: 70,
-    y: 55,
+    x: WORLD_CONFIG.width * 0.7,
+    y: WORLD_CONFIG.height * 0.55,
     name: "Campo de Asteroides",
     type: "asteroid",
     description: "Rico em recursos minerais raros",
@@ -247,12 +248,32 @@ const GALAXY_POINTS: MapPointData[] = [
   },
   {
     id: "mundo-gelado",
-    x: 50,
-    y: 25,
+    x: WORLD_CONFIG.width * 0.5,
+    y: WORLD_CONFIG.height * 0.25,
     name: "Mundo Gelado",
     type: "planet",
     description: "Planeta coberto de gelo eterno",
     image: "https://images.pexels.com/photos/220201/pexels-photo-220201.jpeg",
+  },
+  // Pontos adicionais para demonstrar o wrap toroidal
+  {
+    id: "estacao-borda",
+    x: WORLD_CONFIG.width * 0.95, // Próximo da borda direita
+    y: WORLD_CONFIG.height * 0.1, // Próximo da borda superior
+    name: "Estação da Borda",
+    type: "station",
+    description: "Estação próxima aos limites do espaço conhecido",
+    image: "https://images.pexels.com/photos/2156/sky-earth-space-working.jpg",
+  },
+  {
+    id: "planeta-limite",
+    x: WORLD_CONFIG.width * 0.05, // Próximo da borda esquerda
+    y: WORLD_CONFIG.height * 0.9, // Próximo da borda inferior
+    name: "Planeta Limite",
+    type: "planet",
+    description: "Mundo nos confins da galáxia",
+    image:
+      "https://images.pexels.com/photos/87651/earth-blue-planet-globe-planet-87651.jpeg",
   },
 ];
 
