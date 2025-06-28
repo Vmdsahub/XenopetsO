@@ -513,65 +513,10 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         />
       </div>
 
-      {/* Boundary visual unificado - coincide exatamente com os limites de navegação */}
-      {containerDimensions.width > 0 && (
-        <motion.div
-          className="pointer-events-none z-10"
-          style={bounds.boundaryStyles}
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{
-            opacity: 1,
-            scale: 1,
-            borderWidth: isNearBoundary ? 3 : 2,
-          }}
-          transition={{ duration: 0.5 }}
-        >
-          {/* Borda principal */}
-          <div
-            className={`absolute inset-0 border-2 rounded-full transition-all duration-300 ${
-              isNearBoundary
-                ? "border-red-400/70 shadow-lg shadow-red-400/30"
-                : "border-cyan-400/40"
-            }`}
-          />
-
-          {/* Efeito pulsante */}
-          <motion.div
-            className={`absolute inset-0 border-2 rounded-full ${
-              isNearBoundary ? "border-red-400/50" : "border-cyan-400/30"
-            }`}
-            animate={{
-              scale: [1, 1.02, 1],
-              opacity: isNearBoundary ? [0.7, 1, 0.7] : [0.3, 0.6, 0.3],
-            }}
-            transition={{
-              duration: isNearBoundary ? 1 : 2.5,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          />
-
-          {/* Gradiente interno */}
-          <motion.div
-            className={`absolute inset-0 rounded-full transition-opacity duration-300 ${
-              isNearBoundary ? "opacity-25" : "opacity-15"
-            }`}
-            style={{
-              background: `radial-gradient(circle, transparent 75%, ${
-                isNearBoundary
-                  ? "rgba(248, 113, 113, 0.4)"
-                  : "rgba(34, 211, 238, 0.3)"
-              } 100%)`,
-            }}
-          />
-        </motion.div>
-      )}
-
-      {/* Mapa arrastável */}
+      {/* Área arrastável invisível para capturar eventos de drag */}
       <motion.div
         ref={mapRef}
-        className="absolute inset-0 w-[200%] h-[200%] -left-1/2 -top-1/2"
-        style={{ x: mapX, y: mapY }}
+        className="absolute inset-0 z-5"
         drag
         dragConstraints={false}
         dragElastic={0.02}
@@ -580,22 +525,49 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         onDrag={handleDrag}
         onDragEnd={handleDragEnd}
         whileDrag={{ cursor: "grabbing" }}
-      >
-        {/* Pontos da galáxia */}
-        {GALAXY_POINTS.map((point) => (
-          <MapPoint
-            key={point.id}
-            point={point}
-            isNearby={nearbyPoint === point.id}
-            onClick={() => handlePointClick(point.id)}
-            isDragging={isDragging}
-            style={{
-              left: `${point.x}%`,
-              top: `${point.y}%`,
-            }}
-          />
-        ))}
-      </motion.div>
+      />
+
+      {/* Pontos da galáxia com renderização toroidal */}
+      {containerDimensions.width > 0 &&
+        GALAXY_POINTS.map((point) => {
+          const positions = getWrappedPositions(
+            { x: point.x, y: point.y },
+            shipPosition,
+            screenCenter,
+            scale,
+            containerDimensions.width,
+            containerDimensions.height,
+          );
+
+          return positions.map((pos, index) => {
+            // Verifica se a posição está visível na tela
+            const margin = 50;
+            const isVisible =
+              pos.x >= -margin &&
+              pos.x <= containerDimensions.width + margin &&
+              pos.y >= -margin &&
+              pos.y <= containerDimensions.height + margin;
+
+            if (!isVisible) return null;
+
+            return (
+              <MapPoint
+                key={`${point.id}-${pos.id}`}
+                point={point}
+                isNearby={nearbyPoint === point.id}
+                onClick={() => handlePointClick(point.id)}
+                isDragging={isDragging}
+                style={{
+                  position: "absolute",
+                  left: pos.x,
+                  top: pos.y,
+                  transform: "translate(-50%, -50%)",
+                  opacity: pos.id === "main" ? 1 : 0.8, // Cópias ligeiramente transparentes
+                }}
+              />
+            );
+          });
+        })}
 
       {/* Nave do jogador - posição fixa no centro */}
       <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none">
