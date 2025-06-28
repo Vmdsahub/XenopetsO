@@ -346,42 +346,18 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
     return () => resizeObserver.disconnect();
   }, []);
 
-  // Carrega posição salva quando as dimensões estão disponíveis
-  useEffect(() => {
-    if (containerDimensions.width > 0 && containerDimensions.height > 0) {
-      const saved = localStorage.getItem("xenopets-map-position");
-      if (saved) {
-        try {
-          const { x, y } = JSON.parse(saved);
-          const bounds = calculateNavigationBounds(
-            containerDimensions.width,
-            containerDimensions.height,
-          );
-
-          // Valida se a posição salva está dentro dos limites atuais
-          const distance = Math.sqrt(x * x + y * y);
-          if (distance <= bounds.radius) {
-            mapX.set(x);
-            mapY.set(y);
-          }
-        } catch (error) {
-          console.warn("Posição salva inválida, resetando para centro");
-          localStorage.removeItem("xenopets-map-position");
-        }
-      }
-    }
-  }, [containerDimensions, mapX, mapY]);
-
-  // Verifica proximidade com pontos
+  // Verifica proximidade com pontos usando distância toroidal
   const checkProximity = useCallback(() => {
-    const threshold = 8;
+    const threshold = 200; // Threshold em unidades do mundo
     let closest: string | null = null;
     let closestDistance = Infinity;
 
     GALAXY_POINTS.forEach((point) => {
-      const distance = Math.sqrt(
-        Math.pow(shipPosition.x - point.x, 2) +
-          Math.pow(shipPosition.y - point.y, 2),
+      const distance = toroidalDistance(
+        shipPosition,
+        { x: point.x, y: point.y },
+        WORLD_CONFIG.width,
+        WORLD_CONFIG.height,
       );
 
       if (distance < threshold && distance < closestDistance) {
