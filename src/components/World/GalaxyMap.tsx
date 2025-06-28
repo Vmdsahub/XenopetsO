@@ -209,9 +209,19 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
 
     setShipPosition({ x: newX, y: newY });
 
-    // Atualiza mapa visual
-    mapX.set(mapX.get() + deltaX);
-    mapY.set(mapY.get() + deltaY);
+    // Atualiza mapa visual com wrap
+    let newMapX = mapX.get() + deltaX;
+    let newMapY = mapY.get() + deltaY;
+
+    // Wrap visual do mapa
+    const wrapThreshold = 500;
+    if (newMapX > wrapThreshold) newMapX -= wrapThreshold * 2;
+    if (newMapX < -wrapThreshold) newMapX += wrapThreshold * 2;
+    if (newMapY > wrapThreshold) newMapY -= wrapThreshold * 2;
+    if (newMapY < -wrapThreshold) newMapY += wrapThreshold * 2;
+
+    mapX.set(newMapX);
+    mapY.set(newMapY);
 
     // Rotação
     if (Math.sqrt(deltaX * deltaX + deltaY * deltaY) > 2) {
