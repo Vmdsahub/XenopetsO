@@ -23,62 +23,187 @@ interface MapPointData {
   image?: string;
 }
 
-// Sistema unificado de navegação - uma única fonte de verdade
-const NAVIGATION_CONFIG = {
-  // Fator do raio de navegação baseado no menor lado do container
-  radiusFactor: 0.35, // 35% do menor lado do container
-  warningZone: 30, // pixels antes do limite para alertas
-  minRadius: 140, // raio mínimo independente do tamanho do container
-  maxRadius: 280, // raio máximo para containers muito grandes
+// Configuração do mundo toroidal
+const WORLD_CONFIG = {
+  width: 5000, // Largura do mundo em unidades lógicas
+  height: 5000, // Altura do mundo em unidades lógicas
+  viewportSize: 1000, // Tamanho da viewport em unidades lógicas (área visível)
 } as const;
 
-// Calcula todas as configurações de navegação e boundary de forma unificada
-const calculateNavigationBounds = (
-  containerWidth: number,
-  containerHeight: number,
-) => {
-  if (containerWidth <= 0 || containerHeight <= 0) {
-    return {
-      radius: NAVIGATION_CONFIG.minRadius,
-      centerX: 0,
-      centerY: 0,
-      warningRadius:
-        NAVIGATION_CONFIG.minRadius - NAVIGATION_CONFIG.warningZone,
-      boundaryStyles: { display: "none" },
-    };
+// Função wrap para manter coordenadas dentro dos limites do mundo
+const wrap = (value: number, min: number, max: number): number => {
+  const range = max - min;
+  if (range <= 0) return min;
+
+  let result = value;
+  while (result < min) result += range;
+  while (result >= max) result -= range;
+  return result;
+};
+
+// Calcula o menor deslocamento entre dois pontos considerando wrap
+const getWrappedDelta = (a: number, b: number, size: number): number => {
+  const delta = b - a;
+  const halfSize = size / 2;
+
+  if (delta > halfSize) {
+    return delta - size;
+  } else if (delta < -halfSize) {
+    return delta + size;
   }
+  return delta;
+};
 
-  // Calcula o raio baseado no menor lado do container
-  const minDimension = Math.min(containerWidth, containerHeight);
-  let radius = minDimension * NAVIGATION_CONFIG.radiusFactor;
+// Calcula a menor distância entre dois pontos no mundo toroidal
+const toroidalDistance = (
+  a: { x: number; y: number },
+  b: { x: number; y: number },
+  worldWidth: number,
+  worldHeight: number,
+): number => {
+  const dx = getWrappedDelta(a.x, b.x, worldWidth);
+  const dy = getWrappedDelta(a.y, b.y, worldHeight);
+  return Math.sqrt(dx * dx + dy * dy);
+};
 
-  // Aplica limites mínimo e máximo
-  radius = Math.max(
-    NAVIGATION_CONFIG.minRadius,
-    Math.min(NAVIGATION_CONFIG.maxRadius, radius),
-  );
-
-  const centerX = containerWidth / 2;
-  const centerY = containerHeight / 2;
-  const warningRadius = radius - NAVIGATION_CONFIG.warningZone;
-
-  // Estilos para a boundary visual que coincidem exatamente com os limites de navegação
-  const boundaryStyles = {
-    position: "absolute" as const,
-    left: centerX - radius,
-    top: centerY - radius,
-    width: radius * 2,
-    height: radius * 2,
-    borderRadius: "50%",
-  };
+// Converte coordenadas do mundo para coordenadas da tela
+const worldToScreen = (
+  worldPos: { x: number; y: number },
+  playerPos: { x: number; y: number },
+  screenCenter: { x: number; y: number },
+  scale: number,
+): { x: number; y: number } => {
+  const dx = getWrappedDelta(playerPos.x, worldPos.x, WORLD_CONFIG.width);
+  const dy = getWrappedDelta(playerPos.y, worldPos.y, WORLD_CONFIG.height);
 
   return {
-    radius,
-    centerX,
-    centerY,
-    warningRadius,
-    boundaryStyles,
+    x: screenCenter.x + dx * scale,
+    y: screenCenter.y + dy * scale,
   };
+};
+
+// Gera múltiplas posições para objetos próximos das bordas (efeito toroidal visual)
+const getWrappedPositions = (
+  worldPos: { x: number; y: number },
+  playerPos: { x: number; y: number },
+  screenCenter: { x: number; y: number },
+  scale: number,
+  screenWidth: number,
+  screenHeight: number,
+): Array<{ x: number; y: number; id: string }> => {
+  const positions: Array<{ x: number; y: number; id: string }> = [];
+
+  // Posição principal
+  const mainPos = worldToScreen(worldPos, playerPos, screenCenter, scale);
+  positions.push({ ...mainPos, id: "main" });
+
+  // Verifica se precisa renderizar cópias nas bordas
+  const margin = 100; // margem para começar a renderizar cópias
+
+  // Cópias horizontais
+  if (mainPos.x < margin) {
+    const rightCopy = worldToScreen(
+      { x: worldPos.x + WORLD_CONFIG.width, y: worldPos.y },
+      playerPos,
+      screenCenter,
+      scale,
+    );
+    if (rightCopy.x <= screenWidth + margin) {
+      positions.push({ ...rightCopy, id: "right" });
+    }
+  }
+
+  if (mainPos.x > screenWidth - margin) {
+    const leftCopy = worldToScreen(
+      { x: worldPos.x - WORLD_CONFIG.width, y: worldPos.y },
+      playerPos,
+      screenCenter,
+      scale,
+    );
+    if (leftCopy.x >= -margin) {
+      positions.push({ ...leftCopy, id: "left" });
+    }
+  }
+
+  // Cópias verticais
+  if (mainPos.y < margin) {
+    const bottomCopy = worldToScreen(
+      { x: worldPos.x, y: worldPos.y + WORLD_CONFIG.height },
+      playerPos,
+      screenCenter,
+      scale,
+    );
+    if (bottomCopy.y <= screenHeight + margin) {
+      positions.push({ ...bottomCopy, id: "bottom" });
+    }
+  }
+
+  if (mainPos.y > screenHeight - margin) {
+    const topCopy = worldToScreen(
+      { x: worldPos.x, y: worldPos.y - WORLD_CONFIG.height },
+      playerPos,
+      screenCenter,
+      scale,
+    );
+    if (topCopy.y >= -margin) {
+      positions.push({ ...topCopy, id: "top" });
+    }
+  }
+
+  // Cópias diagonais (cantos)
+  if (mainPos.x < margin && mainPos.y < margin) {
+    const cornerCopy = worldToScreen(
+      {
+        x: worldPos.x + WORLD_CONFIG.width,
+        y: worldPos.y + WORLD_CONFIG.height,
+      },
+      playerPos,
+      screenCenter,
+      scale,
+    );
+    positions.push({ ...cornerCopy, id: "corner-br" });
+  }
+
+  if (mainPos.x > screenWidth - margin && mainPos.y < margin) {
+    const cornerCopy = worldToScreen(
+      {
+        x: worldPos.x - WORLD_CONFIG.width,
+        y: worldPos.y + WORLD_CONFIG.height,
+      },
+      playerPos,
+      screenCenter,
+      scale,
+    );
+    positions.push({ ...cornerCopy, id: "corner-bl" });
+  }
+
+  if (mainPos.x < margin && mainPos.y > screenHeight - margin) {
+    const cornerCopy = worldToScreen(
+      {
+        x: worldPos.x + WORLD_CONFIG.width,
+        y: worldPos.y - WORLD_CONFIG.height,
+      },
+      playerPos,
+      screenCenter,
+      scale,
+    );
+    positions.push({ ...cornerCopy, id: "corner-tr" });
+  }
+
+  if (mainPos.x > screenWidth - margin && mainPos.y > screenHeight - margin) {
+    const cornerCopy = worldToScreen(
+      {
+        x: worldPos.x - WORLD_CONFIG.width,
+        y: worldPos.y - WORLD_CONFIG.height,
+      },
+      playerPos,
+      screenCenter,
+      scale,
+    );
+    positions.push({ ...cornerCopy, id: "corner-tl" });
+  }
+
+  return positions;
 };
 
 const GALAXY_POINTS: MapPointData[] = [
