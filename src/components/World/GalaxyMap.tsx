@@ -184,14 +184,20 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
     return () => clearInterval(interval);
   }, [isDragging]);
 
-  // Handlers simples sem useCallback
-  const handleDragStart = () => {
+  // Sistema de mouse nativo mais confiável
+  const lastMousePos = useRef({ x: 0, y: 0 });
+
+  const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
+    lastMousePos.current = { x: e.clientX, y: e.clientY };
+    e.preventDefault();
   };
 
-  const handleDrag = (event: any, info: any) => {
-    const deltaX = info.delta.x;
-    const deltaY = info.delta.y;
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+
+    const deltaX = e.clientX - lastMousePos.current.x;
+    const deltaY = e.clientY - lastMousePos.current.y;
 
     // Atualiza posição da nave
     const newX = wrap(shipPosRef.current.x - deltaX / 8, 0, WORLD_CONFIG.width);
@@ -212,15 +218,67 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
       const angle = Math.atan2(-deltaY, -deltaX) * (180 / Math.PI) + 90;
       animate(shipRotation, angle, { duration: 0.2 });
     }
+
+    lastMousePos.current = { x: e.clientX, y: e.clientY };
   };
 
-  const handleDragEnd = () => {
+  const handleMouseUp = () => {
     setIsDragging(false);
     localStorage.setItem(
       "xenopets-player-position",
       JSON.stringify(shipPosRef.current),
     );
   };
+
+  // Mouse events globais para capturar movimento fora do elemento
+  useEffect(() => {
+    const handleGlobalMouseMove = (e: MouseEvent) => {
+      if (!isDragging) return;
+
+      const deltaX = e.clientX - lastMousePos.current.x;
+      const deltaY = e.clientY - lastMousePos.current.y;
+
+      const newX = wrap(
+        shipPosRef.current.x - deltaX / 8,
+        0,
+        WORLD_CONFIG.width,
+      );
+      const newY = wrap(
+        shipPosRef.current.y - deltaY / 8,
+        0,
+        WORLD_CONFIG.height,
+      );
+
+      setShipPosition({ x: newX, y: newY });
+      mapX.set(mapX.get() + deltaX);
+      mapY.set(mapY.get() + deltaY);
+
+      if (Math.sqrt(deltaX * deltaX + deltaY * deltaY) > 2) {
+        const angle = Math.atan2(-deltaY, -deltaX) * (180 / Math.PI) + 90;
+        animate(shipRotation, angle, { duration: 0.2 });
+      }
+
+      lastMousePos.current = { x: e.clientX, y: e.clientY };
+    };
+
+    const handleGlobalMouseUp = () => {
+      setIsDragging(false);
+      localStorage.setItem(
+        "xenopets-player-position",
+        JSON.stringify(shipPosRef.current),
+      );
+    };
+
+    if (isDragging) {
+      document.addEventListener("mousemove", handleGlobalMouseMove);
+      document.addEventListener("mouseup", handleGlobalMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener("mousemove", handleGlobalMouseMove);
+      document.removeEventListener("mouseup", handleGlobalMouseUp);
+    };
+  }, [isDragging, mapX, mapY, shipRotation]);
 
   const resetShipPosition = () => {
     setShipPosition({ x: 50, y: 50 });
