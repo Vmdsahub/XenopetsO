@@ -59,7 +59,7 @@ const toroidalDistance = (
   a: { x: number; y: number },
   b: { x: number; y: number },
   worldWidth: number,
-  worldHeight: number,
+  worldHeight: number
 ): number => {
   const dx = getWrappedDelta(a.x, b.x, worldWidth);
   const dy = getWrappedDelta(a.y, b.y, worldHeight);
@@ -71,7 +71,7 @@ const worldToScreen = (
   worldPos: { x: number; y: number },
   playerPos: { x: number; y: number },
   screenCenter: { x: number; y: number },
-  scale: number,
+  scale: number
 ): { x: number; y: number } => {
   const dx = getWrappedDelta(playerPos.x, worldPos.x, WORLD_CONFIG.width);
   const dy = getWrappedDelta(playerPos.y, worldPos.y, WORLD_CONFIG.height);
@@ -89,7 +89,7 @@ const getWrappedPositions = (
   screenCenter: { x: number; y: number },
   scale: number,
   screenWidth: number,
-  screenHeight: number,
+  screenHeight: number
 ): Array<{ x: number; y: number; id: string }> => {
   const positions: Array<{ x: number; y: number; id: string }> = [];
 
@@ -106,7 +106,7 @@ const getWrappedPositions = (
       { x: worldPos.x + WORLD_CONFIG.width, y: worldPos.y },
       playerPos,
       screenCenter,
-      scale,
+      scale
     );
     if (rightCopy.x <= screenWidth + margin) {
       positions.push({ ...rightCopy, id: "right" });
@@ -118,7 +118,7 @@ const getWrappedPositions = (
       { x: worldPos.x - WORLD_CONFIG.width, y: worldPos.y },
       playerPos,
       screenCenter,
-      scale,
+      scale
     );
     if (leftCopy.x >= -margin) {
       positions.push({ ...leftCopy, id: "left" });
@@ -131,7 +131,7 @@ const getWrappedPositions = (
       { x: worldPos.x, y: worldPos.y + WORLD_CONFIG.height },
       playerPos,
       screenCenter,
-      scale,
+      scale
     );
     if (bottomCopy.y <= screenHeight + margin) {
       positions.push({ ...bottomCopy, id: "bottom" });
@@ -143,7 +143,7 @@ const getWrappedPositions = (
       { x: worldPos.x, y: worldPos.y - WORLD_CONFIG.height },
       playerPos,
       screenCenter,
-      scale,
+      scale
     );
     if (topCopy.y >= -margin) {
       positions.push({ ...topCopy, id: "top" });
@@ -153,52 +153,40 @@ const getWrappedPositions = (
   // Cópias diagonais (cantos)
   if (mainPos.x < margin && mainPos.y < margin) {
     const cornerCopy = worldToScreen(
-      {
-        x: worldPos.x + WORLD_CONFIG.width,
-        y: worldPos.y + WORLD_CONFIG.height,
-      },
+      { x: worldPos.x + WORLD_CONFIG.width, y: worldPos.y + WORLD_CONFIG.height },
       playerPos,
       screenCenter,
-      scale,
+      scale
     );
     positions.push({ ...cornerCopy, id: "corner-br" });
   }
 
   if (mainPos.x > screenWidth - margin && mainPos.y < margin) {
     const cornerCopy = worldToScreen(
-      {
-        x: worldPos.x - WORLD_CONFIG.width,
-        y: worldPos.y + WORLD_CONFIG.height,
-      },
+      { x: worldPos.x - WORLD_CONFIG.width, y: worldPos.y + WORLD_CONFIG.height },
       playerPos,
       screenCenter,
-      scale,
+      scale
     );
     positions.push({ ...cornerCopy, id: "corner-bl" });
   }
 
   if (mainPos.x < margin && mainPos.y > screenHeight - margin) {
     const cornerCopy = worldToScreen(
-      {
-        x: worldPos.x + WORLD_CONFIG.width,
-        y: worldPos.y - WORLD_CONFIG.height,
-      },
+      { x: worldPos.x + WORLD_CONFIG.width, y: worldPos.y - WORLD_CONFIG.height },
       playerPos,
       screenCenter,
-      scale,
+      scale
     );
     positions.push({ ...cornerCopy, id: "corner-tr" });
   }
 
   if (mainPos.x > screenWidth - margin && mainPos.y > screenHeight - margin) {
     const cornerCopy = worldToScreen(
-      {
-        x: worldPos.x - WORLD_CONFIG.width,
-        y: worldPos.y - WORLD_CONFIG.height,
-      },
+      { x: worldPos.x - WORLD_CONFIG.width, y: worldPos.y - WORLD_CONFIG.height },
       playerPos,
       screenCenter,
-      scale,
+      scale
     );
     positions.push({ ...cornerCopy, id: "corner-tl" });
   }
@@ -243,8 +231,7 @@ const GALAXY_POINTS: MapPointData[] = [
     name: "Campo de Asteroides",
     type: "asteroid",
     description: "Rico em recursos minerais raros",
-    image:
-      "https://images.pexels.com/photos/2159/flight-sky-earth-space-working.jpg",
+    image: "https://images.pexels.com/photos/2159/flight-sky-earth-space-working.jpg",
   },
   {
     id: "mundo-gelado",
@@ -278,23 +265,22 @@ const GALAXY_POINTS: MapPointData[] = [
 ];
 
 export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
-  // Posição da nave em coordenadas absolutas do mundo
-  const [shipPosition, setShipPosition] = useState(() => {
+  // Usar useRef para evitar problemas de re-renderização
+  const shipPositionRef = useRef(() => {
     const saved = localStorage.getItem("xenopets-player-position");
     if (saved) {
       try {
         const pos = JSON.parse(saved);
         return {
           x: wrap(pos.x || WORLD_CONFIG.width / 2, 0, WORLD_CONFIG.width),
-          y: wrap(pos.y || WORLD_CONFIG.height / 2, 0, WORLD_CONFIG.height),
+          y: wrap(pos.y || WORLD_CONFIG.height / 2, 0, WORLD_CONFIG.height)
         };
       } catch {
-        // Posição padrão no centro do mundo
         return { x: WORLD_CONFIG.width / 2, y: WORLD_CONFIG.height / 2 };
       }
     }
     return { x: WORLD_CONFIG.width / 2, y: WORLD_CONFIG.height / 2 };
-  });
+  }());
 
   const [nearbyPoint, setNearbyPoint] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -302,6 +288,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
     width: 0,
     height: 0,
   });
+  const [, forceUpdate] = useState({}); // Para forçar re-render quando necessário
 
   const mapRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -310,11 +297,11 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
   // Escala para conversão de coordenadas do mundo para pixels da tela
   const scale = useMemo(() => {
     if (containerDimensions.width === 0) return 1;
-    return (
-      Math.min(containerDimensions.width, containerDimensions.height) /
-      WORLD_CONFIG.viewportSize
-    );
+    return Math.min(containerDimensions.width, containerDimensions.height) / WORLD_CONFIG.viewportSize;
   }, [containerDimensions]);
+
+  // Função para forçar re-render
+  const triggerUpdate = () => forceUpdate({});
 
   // Estrelas fixas geradas uma vez
   const stars = useMemo(() => {
@@ -357,7 +344,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
         shipPosition,
         { x: point.x, y: point.y },
         WORLD_CONFIG.width,
-        WORLD_CONFIG.height,
+        WORLD_CONFIG.height
       );
 
       if (distance < threshold && distance < closestDistance) {
@@ -376,10 +363,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
   // Salva posição da nave automaticamente
   useEffect(() => {
     const savePosition = () => {
-      localStorage.setItem(
-        "xenopets-player-position",
-        JSON.stringify(shipPosition),
-      );
+      localStorage.setItem("xenopets-player-position", JSON.stringify(shipPosition));
     };
 
     // Salva a cada 2 segundos quando não está arrastando
@@ -419,16 +403,16 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
       const worldDeltaY = -deltaY / scale;
 
       // Atualiza posição da nave no mundo com wrap toroidal
-      setShipPosition((currentPos) => {
+      setShipPosition(currentPos => {
         const newShipX = wrap(
           currentPos.x + worldDeltaX,
           0,
-          WORLD_CONFIG.width,
+          WORLD_CONFIG.width
         );
         const newShipY = wrap(
           currentPos.y + worldDeltaY,
           0,
-          WORLD_CONFIG.height,
+          WORLD_CONFIG.height
         );
 
         return { x: newShipX, y: newShipY };
@@ -438,8 +422,8 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
       const currentTime = Date.now();
       const deltaTime = Math.max(currentTime - lastDragTimeRef.current, 1);
       velocityRef.current = {
-        x: (worldDeltaX / deltaTime) * 1000, // velocidade por segundo
-        y: (worldDeltaY / deltaTime) * 1000,
+        x: worldDeltaX / deltaTime * 1000, // velocidade por segundo
+        y: worldDeltaY / deltaTime * 1000,
       };
       lastDragTimeRef.current = currentTime;
 
@@ -460,8 +444,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
     const velocity = velocityRef.current;
     const speed = Math.sqrt(velocity.x * velocity.x + velocity.y * velocity.y);
 
-    if (speed > 50) {
-      // Só aplica momentum se houve movimento significativo
+    if (speed > 50) { // Só aplica momentum se houve movimento significativo
       const momentumDuration = Math.min(speed / 100, 2); // Máximo 2 segundos
       const decay = 0.95; // Fator de desaceleração
 
@@ -471,19 +454,13 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
       const applyMomentum = () => {
         const elapsed = (Date.now() - startTime) / 1000;
 
-        if (
-          elapsed < momentumDuration &&
-          Math.sqrt(
-            currentVelocity.x * currentVelocity.x +
-              currentVelocity.y * currentVelocity.y,
-          ) > 10
-        ) {
+        if (elapsed < momentumDuration && Math.sqrt(currentVelocity.x * currentVelocity.x + currentVelocity.y * currentVelocity.y) > 10) {
           // Aplica desaceleração
           currentVelocity.x *= decay;
           currentVelocity.y *= decay;
 
           // Atualiza posição
-          setShipPosition((currentPos) => {
+          setShipPosition(currentPos => {
             const deltaTime = 0.016; // ~60fps
             const worldDeltaX = currentVelocity.x * deltaTime;
             const worldDeltaY = currentVelocity.y * deltaTime;
@@ -491,12 +468,12 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
             const newShipX = wrap(
               currentPos.x + worldDeltaX,
               0,
-              WORLD_CONFIG.width,
+              WORLD_CONFIG.width
             );
             const newShipY = wrap(
               currentPos.y + worldDeltaY,
               0,
-              WORLD_CONFIG.height,
+              WORLD_CONFIG.height
             );
 
             return { x: newShipX, y: newShipY };
@@ -511,11 +488,8 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
 
     // Salva posição após um pequeno delay para capturar o final do momentum
     setTimeout(() => {
-      setShipPosition((currentPos) => {
-        localStorage.setItem(
-          "xenopets-player-position",
-          JSON.stringify(currentPos),
-        );
+      setShipPosition(currentPos => {
+        localStorage.setItem("xenopets-player-position", JSON.stringify(currentPos));
         return currentPos;
       });
     }, 100);
@@ -537,13 +511,10 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
   };
 
   // Centro da tela para renderização
-  const screenCenter = useMemo(
-    () => ({
-      x: containerDimensions.width / 2,
-      y: containerDimensions.height / 2,
-    }),
-    [containerDimensions],
-  );
+  const screenCenter = useMemo(() => ({
+    x: containerDimensions.width / 2,
+    y: containerDimensions.height / 2,
+  }), [containerDimensions]);
 
   return (
     <div
@@ -603,46 +574,45 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
       />
 
       {/* Pontos da galáxia com renderização toroidal */}
-      {containerDimensions.width > 0 &&
-        GALAXY_POINTS.map((point) => {
-          const positions = getWrappedPositions(
-            { x: point.x, y: point.y },
-            shipPosition,
-            screenCenter,
-            scale,
-            containerDimensions.width,
-            containerDimensions.height,
+      {containerDimensions.width > 0 && GALAXY_POINTS.map((point) => {
+        const positions = getWrappedPositions(
+          { x: point.x, y: point.y },
+          shipPosition,
+          screenCenter,
+          scale,
+          containerDimensions.width,
+          containerDimensions.height
+        );
+
+        return positions.map((pos, index) => {
+          // Verifica se a posição está visível na tela
+          const margin = 50;
+          const isVisible =
+            pos.x >= -margin &&
+            pos.x <= containerDimensions.width + margin &&
+            pos.y >= -margin &&
+            pos.y <= containerDimensions.height + margin;
+
+          if (!isVisible) return null;
+
+          return (
+            <MapPoint
+              key={`${point.id}-${pos.id}`}
+              point={point}
+              isNearby={nearbyPoint === point.id}
+              onClick={() => handlePointClick(point.id)}
+              isDragging={isDragging}
+              style={{
+                position: "absolute",
+                left: pos.x,
+                top: pos.y,
+                transform: "translate(-50%, -50%)",
+                opacity: pos.id === "main" ? 1 : 0.8, // Cópias ligeiramente transparentes
+              }}
+            />
           );
-
-          return positions.map((pos, index) => {
-            // Verifica se a posição está visível na tela
-            const margin = 50;
-            const isVisible =
-              pos.x >= -margin &&
-              pos.x <= containerDimensions.width + margin &&
-              pos.y >= -margin &&
-              pos.y <= containerDimensions.height + margin;
-
-            if (!isVisible) return null;
-
-            return (
-              <MapPoint
-                key={`${point.id}-${pos.id}`}
-                point={point}
-                isNearby={nearbyPoint === point.id}
-                onClick={() => handlePointClick(point.id)}
-                isDragging={isDragging}
-                style={{
-                  position: "absolute",
-                  left: pos.x,
-                  top: pos.y,
-                  transform: "translate(-50%, -50%)",
-                  opacity: pos.id === "main" ? 1 : 0.8, // Cópias ligeiramente transparentes
-                }}
-              />
-            );
-          });
-        })}
+        });
+      })}
 
       {/* Nave do jogador - posição fixa no centro */}
       <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none">
