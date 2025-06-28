@@ -278,14 +278,26 @@ const GALAXY_POINTS: MapPointData[] = [
 ];
 
 export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
-  const [shipPosition] = useState(() => {
+  // Posição da nave em coordenadas absolutas do mundo
+  const [shipPosition, setShipPosition] = useState(() => {
     const saved = localStorage.getItem("xenopets-player-position");
-    return saved ? JSON.parse(saved) : { x: 50, y: 50 };
+    if (saved) {
+      try {
+        const pos = JSON.parse(saved);
+        return {
+          x: wrap(pos.x || WORLD_CONFIG.width / 2, 0, WORLD_CONFIG.width),
+          y: wrap(pos.y || WORLD_CONFIG.height / 2, 0, WORLD_CONFIG.height),
+        };
+      } catch {
+        // Posição padrão no centro do mundo
+        return { x: WORLD_CONFIG.width / 2, y: WORLD_CONFIG.height / 2 };
+      }
+    }
+    return { x: WORLD_CONFIG.width / 2, y: WORLD_CONFIG.height / 2 };
   });
 
   const [nearbyPoint, setNearbyPoint] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [isNearBoundary, setIsNearBoundary] = useState(false);
   const [containerDimensions, setContainerDimensions] = useState({
     width: 0,
     height: 0,
@@ -293,11 +305,16 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
 
   const mapRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-
-  // Posição da nave no espaço absoluto (center of container = 0,0)
-  const mapX = useMotionValue(0);
-  const mapY = useMotionValue(0);
   const shipRotation = useMotionValue(0);
+
+  // Escala para conversão de coordenadas do mundo para pixels da tela
+  const scale = useMemo(() => {
+    if (containerDimensions.width === 0) return 1;
+    return (
+      Math.min(containerDimensions.width, containerDimensions.height) /
+      WORLD_CONFIG.viewportSize
+    );
+  }, [containerDimensions]);
 
   // Estrelas fixas geradas uma vez
   const stars = useMemo(() => {
