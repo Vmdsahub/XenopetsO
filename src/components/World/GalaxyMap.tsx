@@ -373,48 +373,13 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
     checkProximity();
   }, [checkProximity]);
 
-  // Validação contínua de posição com boundary unificado
-  useEffect(() => {
-    if (containerDimensions.width === 0) return;
-
-    const bounds = calculateNavigationBounds(
-      containerDimensions.width,
-      containerDimensions.height,
-    );
-
-    const validatePosition = () => {
-      const currentX = mapX.get();
-      const currentY = mapY.get();
-      const distance = Math.sqrt(currentX * currentX + currentY * currentY);
-
-      // Restringe movimento dentro do círculo
-      if (distance > bounds.radius) {
-        const angle = Math.atan2(currentY, currentX);
-        const clampedX = Math.cos(angle) * bounds.radius;
-        const clampedY = Math.sin(angle) * bounds.radius;
-
-        mapX.set(clampedX);
-        mapY.set(clampedY);
-      }
-
-      // Atualiza estado de proximidade com boundary
-      setIsNearBoundary(distance >= bounds.warningRadius);
-    };
-
-    const unsubscribeX = mapX.on("change", validatePosition);
-    const unsubscribeY = mapY.on("change", validatePosition);
-
-    return () => {
-      unsubscribeX();
-      unsubscribeY();
-    };
-  }, [mapX, mapY, containerDimensions]);
-
-  // Salva posição automaticamente
+  // Salva posição da nave automaticamente
   useEffect(() => {
     const savePosition = () => {
-      const position = { x: mapX.get(), y: mapY.get() };
-      localStorage.setItem("xenopets-map-position", JSON.stringify(position));
+      localStorage.setItem(
+        "xenopets-player-position",
+        JSON.stringify(shipPosition),
+      );
     };
 
     // Salva a cada 2 segundos quando não está arrastando
@@ -429,7 +394,7 @@ export const GalaxyMap: React.FC<GalaxyMapProps> = ({ onPointClick }) => {
       clearInterval(interval);
       savePosition();
     };
-  }, [mapX, mapY, isDragging]);
+  }, [shipPosition, isDragging]);
 
   const handleDragStart = () => {
     setIsDragging(true);
